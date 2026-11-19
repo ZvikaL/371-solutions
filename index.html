@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>שאלון 371 – פתרונות</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f6f8; --card:#fff; --ink:#1d2330; --muted:#5d6577; --line:#e2e5ec; --blue:#2f6fde; --blue-soft:#eaf1fd; --orange:#e8590c}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--bg:#14171d; --card:#1d222b; --ink:#e8ebf1; --muted:#a3abbb; --line:#2f3644; --blue:#6f9ef0; --blue-soft:#1f2b40; --orange:#ff8a4c}
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:'Assistant',system-ui,sans-serif; font-size:17px; line-height:1.6}
+.wrap{max-width:720px; margin:0 auto; padding:0 16px}
+nav.topics{background:#1f4fa8}
+nav.topics .wrap{display:flex; gap:6px; overflow-x:auto; padding:8px 16px; scrollbar-width:none}
+nav.topics .wrap::-webkit-scrollbar{display:none}
+.tp{flex:none; color:#fff; text-decoration:none; font-weight:700; font-size:.9rem; padding:5px 12px; border-radius:999px; border:1.5px solid rgba(255,255,255,.45); white-space:nowrap}
+.tp.cur{background:#fff; color:#1f4fa8; border-color:#fff}
+.tp.off{opacity:.45; border-style:dashed}
+.tp.home{border-color:transparent; text-decoration:underline; text-underline-offset:3px}
+header.top{background:#2f6fde; color:#fff; padding:18px 0 16px}
+header.top h1{margin:0; font-size:1.5rem; font-weight:800; line-height:1.25}
+header.top p{margin:4px 0 0; opacity:.92}
+.grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:16px 0}
+.t{display:flex; flex-direction:column; gap:2px; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px 14px; text-decoration:none; color:var(--ink); min-height:92px}
+a.t{border-color:var(--blue); box-shadow:0 1px 3px rgba(0,0,0,.05)}
+a.t:active{background:var(--blue-soft)}
+.t b{font-size:1.15rem; font-weight:800}
+.t span{color:var(--muted); font-size:.9rem}
+a.t span{color:var(--blue); font-weight:700}
+.t.off{opacity:.55}
+.note{color:var(--muted); font-size:.92rem; margin:0 0 24px}
+</style>
+</head>
+<body>
+<nav class="topics" aria-label="נושאים"><div class="wrap" id="topics"></div></nav>
+<header class="top"><div class="wrap">
+  <h1>שאלון 371 – פתרונות מפורטים</h1>
+  <p>מקבצי שאלות בגרות לפי נושאים · שלב אחרי שלב</p>
+</div></header>
+<main class="wrap">
+  <div class="grid" id="grid"></div>
+  <p class="note">בכל נושא: השאלה מהבגרות, תשובה סופית לבדיקה, פתרון מפורט שנפתח שלב אחרי שלב, טעויות נפוצות, ועזרה מ-AI שמנחה בלי לפתור במקומכם.</p>
+</main>
+<script src="topics.js"></script>
+<script>
+renderTopics('');
+document.getElementById('grid').innerHTML = TOPICS.map(t => t.ready
+  ? `<a class="t" href="${t.slug}/"><b>${t.name}</b><span>לפתרונות ←</span></a>`
+  : `<div class="t off"><b>${t.name}</b><span>בקרוב</span></div>`).join('');
+</script>
+</body>
+</html>

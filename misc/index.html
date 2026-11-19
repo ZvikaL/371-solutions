@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>בעיות שונות – פתרונות 371</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f6f8; --card:#fff; --ink:#1d2330; --muted:#5d6577; --line:#e2e5ec;
+  --blue:#2f6fde; --blue-soft:#eaf1fd; --orange:#e8590c; --orange-soft:#fff1e8;
+  --pos:#1f5fd0; --neg:#d32f2f; --zero:#7b3fb8; --ok:#1e8e4e; --ok-soft:#e8f6ee;
+  --hint:#9a6b00; --hint-soft:#fff8dc; --err:#b42318; --err-soft:#fdeceb; --hl:#fff1a8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14171d; --card:#1d222b; --ink:#e8ebf1; --muted:#a3abbb; --line:#2f3644;
+    --blue:#6f9ef0; --blue-soft:#1f2b40; --orange:#ff8a4c; --orange-soft:#3a271c;
+    --pos:#79a8ff; --neg:#ff7b7b; --zero:#c79bf2; --ok:#5fd08f; --ok-soft:#1b3326;
+    --hint:#f3d36b; --hint-soft:#2f2a16; --err:#ff9a9a; --err-soft:#3b1d1d; --hl:#5a4d12;
+  }
+  :root:not([data-theme="light"]) .qimg, :root:not([data-theme="light"]) .lb img{ filter: invert(.9) hue-rotate(180deg); }
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:'Assistant',system-ui,sans-serif; font-size:17px; line-height:1.6; padding-bottom:84px}
+.wrap{max-width:720px; margin:0 auto; padding:0 16px}
+
+/* ---------- math */
+.m{font-family:'Times New Roman',Times,serif; direction:ltr; unicode-bidi:isolate; font-size:1.12em}
+.or{unicode-bidi:isolate; direction:rtl; font-family:'Assistant',sans-serif; font-size:.85em; margin:0 .45em; color:var(--muted)}
+.fr{display:inline-flex; flex-direction:column; vertical-align:middle; text-align:center; margin:0 .12em; line-height:1.15}
+.fr>span:first-child{border-bottom:1.3px solid currentColor; padding:0 .2em .05em}
+.fr>span:last-child{padding:.05em .2em 0}
+.hl{background:var(--hl); border-radius:4px; padding:0 .15em}
+.eq{direction:ltr; text-align:center; font-family:'Times New Roman',Times,serif; font-size:1.18em; margin:6px 0; line-height:1.9; white-space:nowrap; overflow-x:auto; scrollbar-width:none}
+.eq .m{white-space:nowrap}
+.eq.lab{display:flex; justify-content:center; align-items:center; gap:10px; direction:rtl; flex-wrap:wrap}
+.eq.lab b{font-family:'Assistant',sans-serif; font-size:.82em}
+.eq.heb{direction:rtl; font-family:'Assistant',sans-serif; font-weight:800; font-size:1em}
+.eq .ok{color:var(--ok); font-family:'Assistant',sans-serif; font-weight:800; margin-inline-start:.4em}
+
+/* ---------- top */
+header.top{background:var(--blue); color:#fff; padding:16px 16px 14px}
+header.top h1{margin:0; font-size:1.35rem; font-weight:800; line-height:1.25}
+header.top p{margin:4px 0 0; opacity:.92; font-size:.95rem}
+nav.jump{position:sticky; top:0; z-index:5; background:var(--card); border-bottom:1px solid var(--line); box-shadow:0 2px 6px rgba(0,0,0,.05)}
+nav.jump .wrap{display:flex; gap:6px; overflow-x:auto; padding:8px 16px; scrollbar-width:none}
+nav.jump .wrap::-webkit-scrollbar{display:none}
+nav.jump button{flex:none; min-width:38px; min-height:38px; padding:0; border-radius:10px; background:var(--blue-soft); color:var(--blue); font-weight:800; border:2px solid transparent}
+nav.jump button.cur{background:var(--blue); color:#fff}
+nav.jump .sep{flex:none; width:1px; background:var(--line); margin:4px 2px}
+details.intro{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:10px 14px; margin:14px 0 0}
+details.intro summary{font-weight:800; cursor:pointer}
+details.intro ol{margin:6px 0 0; padding-inline-start:22px}
+details.intro.ai{border-color:var(--orange); background:var(--orange-soft)}
+.small-note{color:var(--muted); font-size:.9rem}
+
+/* ---------- carousel */
+.where{display:flex; justify-content:space-between; align-items:baseline; margin:16px 2px 6px; color:var(--muted); font-weight:700; font-size:.95rem}
+.stage{position:relative; overflow:hidden; touch-action:pan-y pinch-zoom}
+.card{display:none; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px; box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card.on{display:block}
+.card.in-next{animation:inNext .25s ease}
+.card.in-prev{animation:inPrev .25s ease}
+@keyframes inNext{from{opacity:0; transform:translateX(-40px)} to{opacity:1; transform:none}}
+@keyframes inPrev{from{opacity:0; transform:translateX(40px)} to{opacity:1; transform:none}}
+.card .head{display:flex; align-items:center; gap:10px; margin-bottom:10px}
+.card .num{background:var(--blue); color:#fff; font-weight:800; border-radius:10px; min-width:38px; height:38px; display:grid; place-items:center; font-size:1.1rem}
+.card .ttl{font-weight:800}
+.imgbox{position:relative; cursor:zoom-in; border-radius:8px; overflow:hidden; background:#fff; border:1px solid var(--line)}
+.qimg{display:block; width:100%; height:auto}
+.imgbox.small .qimg{max-width:380px; margin-inline-start:auto}
+.zoom-ic{position:absolute; bottom:6px; left:6px; width:34px; height:34px; border-radius:50%; background:rgba(29,35,48,.75); display:grid; place-items:center}
+.instr{margin-top:6px; color:var(--muted)}
+
+/* ---------- toggle buttons */
+.btns{display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:10px}
+.tg{font:inherit; font-weight:800; border-radius:12px; padding:8px 10px; cursor:pointer; min-height:40px; font-size:.88rem; line-height:1.2; padding:6px 4px; background:var(--card); border:2px solid currentColor; display:flex; align-items:center; justify-content:center; gap:8px; transition:background .15s, color .15s, box-shadow .15s}
+.tg .st{font-size:.75rem; font-weight:700; opacity:.75}
+.tg[aria-pressed="true"]{color:#fff !important; box-shadow:inset 0 3px 6px rgba(0,0,0,.25)}
+.t-hint{color:var(--hint)} .t-hint[aria-pressed="true"]{background:#b58300}
+.t-steps{color:var(--blue)} .t-steps[aria-pressed="true"]{background:var(--blue)}
+.t-final{color:var(--ok)} .t-final[aria-pressed="true"]{background:var(--ok)}
+.t-err{color:var(--err)} .t-err[aria-pressed="true"]{background:var(--err)}
+.t-ai{color:var(--orange)} .t-ai[aria-pressed="true"]{background:var(--orange)}
+
+/* ---------- panels */
+.panel{display:none; margin-top:12px; border-radius:12px; padding:12px 14px}
+.panel.open{display:block; animation:fade .2s ease}
+.panel h4{margin:0 0 6px; font-size:1rem}
+.p-hint{background:var(--hint-soft); border:2px solid #e6c65c}
+.p-steps{background:var(--blue-soft); border:2px solid var(--blue)}
+.p-final{background:var(--ok-soft); border:2px solid var(--ok)}
+.p-err{background:var(--err-soft); border:2px solid var(--err)}
+.p-ai{background:var(--orange-soft); border:2px solid var(--orange)}
+.step{display:none; background:var(--card); border-radius:10px; padding:10px 12px; margin:8px 0; border-inline-start:4px solid var(--blue)}
+.step.show{display:block; animation:fade .25s ease}
+.step .say{font-weight:600}
+.step.hint-step{border-inline-start-color:#c99a00; background:var(--hint-soft)}
+.step.hint-step .sn{color:var(--hint)}
+.final-box{margin-top:6px; color:var(--ok); font-size:.88rem; line-height:1.4}
+.final-box h4{margin:0; font-size:.85rem; font-weight:800}
+.final-box .fin{gap:0 8px}
+.final-box .eq{font-size:1.05em; margin:0; line-height:1.5}
+.final-box .fl{font-weight:700}
+.final-box .eq.heb{font-size:.95em; font-weight:700}
+.ai-note{margin:0 0 4px}
+.step .sn{font-weight:800; color:var(--blue); margin-inline-end:6px}
+.part{display:none; font-weight:800; margin:14px 0 2px; color:var(--orange)}
+.part.show{display:block}
+.step-ctl{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
+.b-next,.b-all{font:inherit; font-weight:800; border-radius:12px; padding:8px 14px; min-height:44px; cursor:pointer}
+.b-next{background:var(--blue); color:#fff; border:0; flex:1}
+.b-all{background:transparent; color:var(--blue); border:2px solid var(--blue)}
+.done-msg{display:none; font-weight:800; color:var(--ok); margin-top:6px}
+.fin{display:grid; grid-template-columns:auto 1fr; gap:4px 12px; align-items:center}
+.fin .fl{font-weight:800}
+.fin .eq{text-align:left; margin:2px 0}
+.err-item{background:var(--card); border-radius:10px; padding:8px 12px; margin:8px 0}
+.err-item .eq{text-align:right; direction:rtl; display:flex; gap:8px; align-items:center; justify-content:flex-start; flex-wrap:wrap; margin:2px 0}
+.err-item .mk{font-family:'Assistant',sans-serif; font-weight:800; font-size:.8em; min-width:3.6em}
+.err-item .w .mk{color:var(--err)} .err-item .w .m{color:var(--err); background:var(--err-soft); border-radius:6px; padding:0 .35em}
+.err-item .r .mk{color:var(--ok)}
+@keyframes fade{from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none}}
+
+/* ---------- tables, sketch */
+.tbl-wrap{overflow-x:auto; margin:6px 0}
+table.s{direction:ltr; border-collapse:collapse; margin:0 auto; font-size:.86rem; font-family:'Times New Roman',serif}
+table.s th, table.s td{border:1px solid var(--line); padding:4px 4px; text-align:center; background:var(--card); line-height:1.3}
+table.s th{background:var(--bg); white-space:nowrap}
+table.s td.h{font-weight:700; background:var(--bg); font-family:'Assistant',sans-serif; direction:rtl; font-size:.95em}
+table.s .tv{color:var(--muted); font-size:.85em}
+.pos{color:var(--pos); font-weight:800} .neg{color:var(--neg); font-weight:800} .zr{color:var(--zero); font-weight:800}
+.sketch{display:block; margin:6px auto; max-width:260px; width:100%; direction:ltr}
+
+/* ---------- AI */
+.prompt{white-space:pre-wrap; background:var(--card); border:1px dashed var(--orange); border-radius:10px; padding:10px 12px; font-size:.9rem; max-height:200px; overflow:auto}
+.ai-btns{display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:6px}
+.ai-btns a, .ai-btns button{font:inherit; font-weight:800; text-decoration:none; border-radius:12px; padding:6px 8px; min-height:40px; font-size:.9rem; display:flex; align-items:center; justify-content:center; background:var(--card); color:var(--orange); border:2px solid var(--orange); cursor:pointer}
+
+/* ---------- bottom bar */
+.bar{position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--line); box-shadow:0 -2px 8px rgba(0,0,0,.06); z-index:6}
+.bar .wrap{display:flex; align-items:center; gap:10px; padding:10px 16px}
+.bar button{font:inherit; font-weight:800; flex:1; min-height:48px; border-radius:12px; border:2px solid var(--blue); background:var(--card); color:var(--blue); cursor:pointer}
+.bar button.nx{background:var(--blue); color:#fff}
+.bar button:disabled{opacity:.35; cursor:default}
+.bar .cnt{flex:none; font-weight:800; color:var(--muted); min-width:56px; text-align:center}
+
+/* ---------- lightbox */
+.lb{position:fixed; inset:0; z-index:30; background:rgba(10,12,16,.92); display:none; overflow:auto; touch-action:pan-x pan-y pinch-zoom}
+.lb.on{display:block}
+.lb .inner{min-height:100%; display:flex; align-items:center; justify-content:center; padding:56px 8px 24px}
+.lb img{display:block; width:100%; max-width:1300px; height:auto; background:#fff; border-radius:6px; cursor:zoom-in}
+.lb.big img{width:200%; max-width:none; cursor:zoom-out}
+.lb.big .inner{justify-content:flex-start}
+.lb .x{position:fixed; top:10px; left:10px; width:44px; height:44px; border-radius:50%; border:0; background:#fff; color:#111; font-size:1.4rem; font-weight:800; cursor:pointer}
+.lb .tip{position:fixed; top:16px; right:14px; color:#fff; font-weight:700; font-size:.9rem}
+
+.toast{position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:#1d2330; color:#fff; padding:10px 18px; border-radius:12px; font-weight:700; opacity:0; transition:opacity .2s; pointer-events:none; z-index:40}
+.toast.on{opacity:1}
+
+/* ---------- topics nav */
+nav.topics{background:#1f4fa8}
+nav.topics .wrap{display:flex; gap:6px; overflow-x:auto; padding:8px 16px; scrollbar-width:none}
+nav.topics .wrap::-webkit-scrollbar{display:none}
+.tp{flex:none; color:#fff; text-decoration:none; font-weight:700; font-size:.9rem; padding:5px 12px; border-radius:999px; border:1.5px solid rgba(255,255,255,.45); white-space:nowrap}
+.tp.cur{background:#fff; color:#1f4fa8; border-color:#fff}
+.tp.off{opacity:.45; border-style:dashed}
+.tp.home{border-color:transparent; text-decoration:underline; text-underline-offset:3px}
+</style>
+</head>
+<body>
+<nav class="topics" aria-label="נושאים"><div class="wrap" id="topics"></div></nav>
+<header class="top"><div class="wrap">
+  <h1>פתרונות</h1>
+  <p>שלב אחרי שלב, עם הסברים וטעויות נפוצות</p>
+</div></header>
+<nav class="jump"><div class="wrap" id="jump"></div></nav>
+
+<main class="wrap">
+  <details class="intro">
+    <summary>איך משתמשים בדף הזה</summary>
+    <ol>
+      <li>קודם פותרים לבד במחברת, ובודקים מול ה<b>תשובה הסופית</b> שמתחת לשאלה.</li>
+      <li>נתקעתם או יצא לא נכון? <b>פתרון מפורט</b>: קודם רמז, ואחר כך שלב אחד בכל פעם. אחרי כל שלב – ממשיכים לבד.</li>
+      <li>כדאי לקרוא גם את <b>טעויות נפוצות</b> – אולי אחת מהן אצלכם.</li>
+      <li>מעבר בין שאלות: החצים למטה, המספרים למעלה, או החלקה הצידה.</li>
+    </ol>
+  </details>
+  <details class="intro ai">
+    <summary>רוצים עזרה מ-AI? שיעזור, לא יפתור במקומכם</summary>
+    <p style="margin:6px 0">אם תכתבו לצ'אט "תפתור לי", תקבלו פתרון – ולא תלמדו כלום. במבחן לא יהיה AI.<br>
+    בכל שאלה יש כפתור <b>עזרה מ-AI</b> עם הוראה מוכנה. מעתיקים לצ'אט, והוא ישאל אתכם שאלות מנחות, צעד אחד בכל פעם.</p>
+    <p class="small-note" style="margin:0">גם AI טועה לפעמים. אם יצא לכם משהו שונה מה"תשובה הסופית" כאן – תאמינו לתשובה הסופית ושאלו את המורה.</p>
+  </details>
+
+  <div class="where"><span id="secName"></span><span id="secCount"></span></div>
+  <div class="stage" id="stage"></div>
+</main>
+
+<div class="bar"><div class="wrap">
+  <button id="prev" aria-label="השאלה הקודמת">→ הקודמת</button>
+  <span class="cnt" id="cnt"></span>
+  <button id="next" class="nx" aria-label="השאלה הבאה">הבאה ←</button>
+</div></div>
+
+<div class="lb" id="lb" role="dialog" aria-label="השאלה בהגדלה">
+  <button class="x" id="lbx" aria-label="סגירה">✕</button>
+  <span class="tip">לחיצה על התמונה – הגדלה נוספת</span>
+  <div class="inner"><img id="lbimg" alt=""></div>
+</div>
+<div class="toast" id="toast">הועתק! עכשיו מדביקים בצ'אט</div>
+
+<script src="../topics.js"></script>
+<script>
+renderTopics('misc');
+/* ===== notation in math strings =====
+   [a/b]  fraction with horizontal bar      {..}  highlight
+   _AB    subscript (1-2 capitals)          ' או '  Hebrew "or"
+   step equation lines:  'math'  |  'label|math'  |  '!Hebrew line'  |  {html:'...'}          */
+// ================================================== CONFIG (edit)
+const CONFIG = {
+  pageTitle: 'בעיות שונות – פתרונות 371',
+  title:     'בעיות שונות – פתרונות',
+  subtitle:  'שאלון 371 · מקבץ שאלות בגרות · שלב אחרי שלב',
+  level:     'הכנה לבגרות בשאלון 371 (3 יחידות)',
+  methods:   'בניית ביטוי אלגברי (סכום קבוע ועוד תשלום ליחידה כפול x), הצבה בביטוי, פתרון משוואה ממעלה ראשונה (העברת אגף, כינוס איברים דומים, פתיחת סוגריים), השוואה בין שני ביטויים, קריאת גרף של קו ישר: נקודת ההתחלה על הציר האנכי, תלילות הקו ונקודת החיתוך של שני גרפים',
+  source:    'ממקבץ בעיות שונות',
+};
+document.title = CONFIG.pageTitle;
+document.querySelector('header.top h1').textContent = CONFIG.title;
+document.querySelector('header.top p').textContent = CONFIG.subtitle;
+
+const SECTIONS = [
+  {name:'בגרות 2026', from:1, to:3},
+  {name:'בגרות 2025', from:4, to:6},
+];
+
+function signTable(zeros, tests, vals){
+  let head='<tr><th>x</th>', sub='<tr><td class="h">מציבים<br><span class="tv">יוצא</span></td>', sg='<tr><td class="h">סימן</td>';
+  tests.forEach((t,i)=>{
+    head += `<th>${i===0?'x &lt;':(i===tests.length-1?'&lt; x':'&lt; x &lt;')}</th>`;
+    const [tx,tv]=t.split(':');
+    sub += `<td>${tx}<br><span class="tv">${tv}</span></td>`;
+    sg  += `<td>${vals[i]==='+'?'<span class="pos">+</span>':'<span class="neg">−</span>'}</td>`;
+    if(i<zeros.length){ head+=`<th class="zr">${zeros[i]}</th>`; sub+='<td></td>'; sg+='<td class="zr">0</td>'; }
+  });
+  return {html:`<div class="tbl-wrap"><table class="s">${head}</tr>${sub}</tr>${sg}</tr></table></div>`};
+}
+const S=(p,say,...eq)=>({p,say,eq});
+const E=(t,w,r)=>({t,w,r});
+
+const Q = [
+{n:1, img:'q1', title:'קיץ 26, מועד א – מתן ורועי',
+ text:'בסוף חופשת הקיץ היו למתן 1,440 שקלים, ולרועי היו 540 שקלים. בסוף חופשת הקיץ החליט מתן להשתמש בכסף שיש לו כדי להשתתף בחוג כדורסל שמחירו 120 שקלים בחודש. רועי החליט שלא להשתמש בכסף שיש לו, והוא החל לעבוד. בכל אחד מן החודשים מסוף חופשת הקיץ והלאה הוא חסך 60 שקלים. א. (1) כמה כסף היה למתן כעבור 4 חודשים שבהם הוא השתתף בחוג הכדורסל? (2) כמה חודשים יכול מתן להשתתף בחוג הכדורסל? נסמן ב-x את מספר החודשים שעברו מסוף חופשת הקיץ. ב. לפניכם ארבעה ביטויים: I. 1,440 + 120x  II. 540x + 60  III. 540 + 60x  IV. 1,440 − 120x. (1) קבעו איזה ביטוי מתאר את הסכום שהיה למתן כעבור x חודשים. (2) קבעו איזה ביטוי מתאר את הסכום שהיה לרועי כעבור x חודשים. ג. כעבור כמה חודשים מסוף חופשת הקיץ היה למתן ולרועי אותו הסכום? ד. לפניכם סרטוט ובו שני גרפים המתארים את הסכום שהיה למתן ואת הסכום שהיה לרועי, לפי הזמן, מסוף חופשת הקיץ. היעזרו בסעיפים קודמים והשלימו במלבנים הריקים את הערכים המתאימים. (בסרטוט: ציר אנכי "הסכום בשקלים" עם הערכים 1,440 ו-540, ציר אופקי "הזמן בחודשים". קו יורד מ-1,440 עד ציר הזמן, וקו עולה מ-540. מנקודת החיתוך של הקווים יש קווים מקווקווים אל שני הצירים. יש שלושה מלבנים ריקים: על ציר הסכום בגובה נקודת החיתוך, על ציר הזמן מתחת לנקודת החיתוך, ועל ציר הזמן במקום שבו הקו היורד פוגש אותו.)',
+ hint:['כל חודש הכסף של מתן קטן ב-120 שקלים – כמה ירד בארבעה חודשים?'],
+ steps:[
+  S('א(1)','בכל חודש מתן משלם 120 שקלים. בארבעה חודשים הוא משלם פי 4.','4 · 120 = 480'),
+  S('א(1)','מורידים את מה ששילם מהסכום שהיה לו בהתחלה.','1,440 − 480 = 960'),
+  S('א(2)','מתן יכול להשתתף כל עוד נשאר לו כסף. בודקים כמה פעמים 120 נכנס ב-1,440.','1,440 : 120 = 12'),
+  S('ב(1)','מתן מתחיל עם 1,440, ובכל חודש הסכום יורד ב-120. אחרי x חודשים הוא ירד x פעמים 120, לכן מחסרים.','1,440 − 120x','!ביטוי IV'),
+  S('ב(1)','בדיקה: מציבים 4 במקום x ומקבלים את התשובה של סעיף א(1).','1,440 − 120 · 4 = 960 ✓'),
+  S('ב(2)','רועי מתחיל עם 540, ובכל חודש הסכום עולה ב-60. לכן מוסיפים 60 כפול x.','540 + 60x','!ביטוי III'),
+  S('ג','אותו סכום: משווים את שני הביטויים.','1,440 − 120x = 540 + 60x'),
+  S('ג','מעבירים את 120x לאגף ימין (הסימן מתחלף לפלוס), ואת 540 לאגף שמאל (הסימן מתחלף למינוס).','1,440 {− 540} = 60x {+ 120x}'),
+  S('ג','מכנסים איברים דומים בכל אגף.','900 = 180x'),
+  S('ג','מחלקים את שני האגפים ב-180.','x = [900/180] = 5'),
+  S('ג','בדיקה: מציבים 5 במקום x בשני הביטויים. צריך לצאת אותו סכום.','1,440 − 120 · 5 = 840','540 + 60 · 5 = 840 ✓'),
+  S('ד','נקודת החיתוך של שני הגרפים היא הרגע שבו הסכומים שווים. מסעיף ג: אחרי 5 חודשים, והסכום הוא 840.','(5 , 840)'),
+  S('ד','הקו היורד (של מתן) פוגש את ציר הזמן כשנגמר לו הכסף. מסעיף א(2): אחרי 12 חודשים.','1,440 − 120 · 12 = 0'),
+  S('ד','משלימים את המלבנים.','!ציר הסכום: 840','!ציר הזמן: 5 (מתחת לחיתוך) ו-12 (סוף הקו היורד)'),
+ ],
+ final:[['א.','!(1)  960 ₪'],['','!(2)  12 חודשים'],['ב.','(1) ביטוי IV:|1,440 − 120x'],['','(2) ביטוי III:|540 + 60x'],['ג.','!כעבור 5 חודשים'],['ד.','!ציר הסכום: 840. ציר הזמן: 5 ו-12']],
+ errs:[E('בוחרים 1,440 + 120x. הכסף של מתן הולך ונגמר – הסכום יורד, לכן מינוס.','1,440 + 120x','1,440 − 120x'),
+       E('מחליפים בין המספר הקבוע למספר שמוכפל ב-x. מה שקורה "בכל חודש" הוא מה שמוכפל ב-x.','540x + 60','540 + 60x'),
+       E('מעבירים אגף בלי להחליף סימן.','1,440 + 540 = 60x + 120x','1,440 − 540 = 60x + 120x'),
+       E('בסעיף ג עונים את הסכום 840 במקום מספר החודשים. שואלים "כעבור כמה חודשים" – התשובה היא x.','840','x = 5'),
+       E('בסעיף ד כותבים 4 חודשים (מסעיף א) במלבן שמתחת לחיתוך. החיתוך הוא נקודת השוויון מסעיף ג – 5 חודשים.')]},
+
+{n:2, img:'q2', title:'קיץ 26, מועד ב – ועד הבית',
+ text:'בשני בנייני מגורים זהים – בניין א׳ ובניין ב׳ – הוחלט לתקן את המעלית. בקופת הוועד של בניין א׳ היו 24,000 שקלים, ונוסף על כך הוחלט לגבות 3,000 שקלים מכל דירה בבניין. בקופת הוועד של בניין ב׳ היו 9,600 שקלים, ונוסף על כך הוחלט לגבות 4,600 שקלים מכל דירה בבניין. לפניכם שני גרפים I–II המתארים את הסכום הכולל בקופת הוועד של כל בניין, לפי מספר הדירות ששילמו. (בסרטוט: שני קווים ישרים עולים. גרף II מתחיל גבוה יותר על הציר האנכי ופחות תלול; גרף I מתחיל נמוך יותר ותלול יותר; הם נחתכים.) א. קבעו איזה מן הגרפים, I או II, מתאר את הסכום הכולל בקופת הוועד של בניין א׳. נסמן ב-x את מספר הדירות ששילמו בכל בניין. ב. (1) כתבו ביטוי אלגברי המתאר את הסכום הכולל בקופת הוועד של בניין א׳ לפי מספר הדירות ששילמו. (2) כתבו ביטוי אלגברי המתאר את הסכום הכולל בקופת הוועד של בניין ב׳ לפי מספר הדירות ששילמו. ג. מצאו את הערך של x שבעבורו הסכום הכולל שבקופת הוועד של בניין א׳ שווה לסכום הכולל שבקופת הוועד של בניין ב׳. בזמן מסוים היו בקופת הוועד של בניין ב׳ 60,200 שקלים. ד. מצאו כמה דירות בבניין ב׳ שילמו עד לאותו הזמן. העלות של תיקון מעלית אחת היא 80,000 שקלים. בכל אחד מן הבניינים א׳, ב׳ יש 16 דירות, ובכל בניין שילמו כל הדירות בעבור תיקון המעלית. ה. לפניכם שלוש טענות I–III. קבעו איזו טענה נכונה, ונמקו את קביעתכם. I. בכל אחת מקופות הוועד של בניין א׳ ובניין ב׳ הצטבר סכום שמספיק לתיקון המעלית. II. רק בקופת הוועד של בניין א׳ הצטבר סכום שמספיק לתיקון המעלית. III. רק בקופת הוועד של בניין ב׳ הצטבר סכום שמספיק לתיקון המעלית.',
+ hint:['בדקו איזה גרף מתחיל גבוה יותר על הציר האנכי, ואיזה בניין התחיל עם יותר כסף בקופה.'],
+ steps:[
+  S('א','כשאף דירה עוד לא שילמה, בקופה יש רק מה שהיה בהתחלה. זו הנקודה שבה הגרף פוגש את הציר האנכי.','!בניין א׳: 24,000.   בניין ב׳: 9,600.'),
+  S('א','גרף II פוגש את הציר האנכי גבוה יותר מגרף I. לבניין א׳ היה יותר כסף בהתחלה, לכן הוא גרף II.','!בניין א׳ – גרף II'),
+  S('ב(1)','בקופה היו 24,000, וכל דירה מוסיפה 3,000. x דירות מוסיפות x פעמים 3,000.','24,000 + 3,000x'),
+  S('ב(2)','באותו אופן לבניין ב׳: 9,600 בהתחלה, ו-4,600 מכל דירה.','9,600 + 4,600x'),
+  S('ג','סכום שווה: משווים את שני הביטויים.','24,000 + 3,000x = 9,600 + 4,600x'),
+  S('ג','מעבירים את 3,000x לאגף ימין ואת 9,600 לאגף שמאל. כל איבר שעובר אגף מחליף סימן.','24,000 {− 9,600} = 4,600x {− 3,000x}'),
+  S('ג','מכנסים איברים דומים בכל אגף.','14,400 = 1,600x'),
+  S('ג','מחלקים את שני האגפים ב-1,600.','x = [14,400/1,600] = 9'),
+  S('ג','בדיקה: מציבים 9 במקום x בשני הביטויים.','24,000 + 3,000 · 9 = 51,000','9,600 + 4,600 · 9 = 51,000 ✓'),
+  S('ד','בקופה של בניין ב׳ היו 60,200. משווים את הביטוי של בניין ב׳ ל-60,200.','9,600 + 4,600x = 60,200'),
+  S('ד','מעבירים 9,600 אגף (הסימן מתחלף למינוס).','4,600x = 60,200 {− 9,600}','4,600x = 50,600'),
+  S('ד','מחלקים את שני האגפים ב-4,600.','x = [50,600/4,600] = 11'),
+  S('ה','כל 16 הדירות שילמו. מציבים 16 במקום x בביטוי של בניין א׳.','24,000 + 3,000 · {16} = 72,000'),
+  S('ה','מציבים 16 גם בביטוי של בניין ב׳.','9,600 + 4,600 · {16} = 83,200'),
+  S('ה','משווים לעלות התיקון, 80,000. בבניין א׳ חסר כסף, ובבניין ב׳ יש מספיק.','72,000 < 80,000','83,200 > 80,000','!טענה III נכונה'),
+ ],
+ final:[['א.','!גרף II'],['ב.','(1)  24,000 + 3,000x'],['','(2)  9,600 + 4,600x'],['ג.','x = 9'],['ד.','!11 דירות'],['ה.','!טענה III: בבניין ב׳ 83,200 ₪ (מספיק), בבניין א׳ רק 72,000 ₪']],
+ errs:[E('בוחרים לבניין א׳ את הגרף התלול יותר. מזהים את בניין א׳ לפי הסכום ההתחלתי הגדול – הנקודה הגבוהה יותר על הציר האנכי.'),
+       E('מחליפים בין הסכום ההתחלתי לתשלום של כל דירה. מה שמשלמים "מכל דירה" מוכפל ב-x.','3,000 + 24,000x','24,000 + 3,000x'),
+       E('מעבירים אגף בלי להחליף סימן.','24,000 + 9,600 = 4,600x + 3,000x','24,000 − 9,600 = 4,600x − 3,000x'),
+       E('בסעיף ד מחלקים את 60,200 ב-4,600 בלי להוריד קודם את 9,600 שהיו בקופה.','x = [60,200/4,600] ≈ 13.09','x = [50,600/4,600] = 11'),
+       E('בסעיף ה בודקים רק בניין אחד, או בוחרים טענה בלי חישוב. צריך להציב 16 בשני הביטויים ולהשוות כל תוצאה ל-80,000.')]},
+
+{n:3, img:'q3', title:'חורף 26 – אולמות אירועים',
+ text:'בעיר מסוימת יש שני אולמות אירועים, אולם א׳ ואולם ב׳. אופן חישוב התשלום למלצר שעובד באירוע שונה בין שני האולמות. באולם א׳ משלמים שכר בסיס של 80 שקלים ונוסף על כך 70 שקלים בעבור כל שולחן שהמלצר אחראי לו. באולם ב׳ משלמים שכר בסיס של 150 שקלים ונוסף על כך 56 שקלים בעבור כל שולחן שהמלצר אחראי לו. לפניכם שני גרפים I–II, המתארים את אופן חישוב התשלום לאירוע בכל אחד מן האולמות. (בסרטוט: ציר אנכי "התשלום בשקלים", ציר אופקי "מספר השולחנות". שני קווים ישרים עולים: גרף I מתחיל גבוה יותר על הציר האנכי ופחות תלול, גרף II מתחיל נמוך יותר ותלול יותר, והם נחתכים.) א. קבעו איזה גרף, I או II, מתאר את אופן חישוב התשלום באולם א׳. ב. לפניכם שני היגדים (1)–(2). קבעו בעבור כל אחד מן ההיגדים אם הוא נכון או לא נכון. נמקו את קביעותיכם. (1) מלצר שיהיה אחראי ל-5 שולחנות באירוע ירוויח יותר באולם א׳ מבאולם ב׳. (2) מלצר שיהיה אחראי ל-6 שולחנות באירוע ירוויח יותר באולם א׳ מבאולם ב׳. תומר הוא מלצר שעובד באולם א׳. הוא אחראי ל-7 שולחנות בכל אירוע שבו הוא עובד. ג. מצאו את התשלום שתומר מקבל בכל אירוע. נדב הוא מלצר שעובד באולם ב׳. הוא מקבל תשלום של 598 שקלים בכל אירוע שבו הוא עובד. ד. מצאו לכמה שולחנות נדב אחראי בכל אירוע. בחודש מסוים מספר האירועים שנדב עבד בהם היה גדול ב-3 ממספר האירועים שבהם עבד תומר. התשלום סך הכול שקיבלו נדב ותומר יחד באותו החודש היה 15,810 שקלים. ה. מצאו את מספר האירועים שבהם עבד תומר בחודש זה.',
+ hint:['כתבו לכל אולם ביטוי לתשלום לפי מספר השולחנות x, ובדקו איזה מהם מתחיל נמוך יותר על הציר האנכי.'],
+ steps:[
+  S('א','נסמן ב-x את מספר השולחנות. באולם א׳: בסיס 80 ועוד 70 לכל שולחן. באולם ב׳: בסיס 150 ועוד 56 לכל שולחן.','אולם א׳:|80 + 70x','אולם ב׳:|150 + 56x'),
+  S('א','כשאין שולחנות, נשאר רק הבסיס. זו הנקודה על הציר האנכי. באולם א׳ הבסיס קטן יותר (80), לכן הגרף שלו מתחיל נמוך יותר.','!אולם א׳ – גרף II'),
+  S('א','גם התלילות מתאימה: באולם א׳ כל שולחן מוסיף יותר (70 לעומת 56), ולכן הגרף שלו תלול יותר – כמו גרף II.'),
+  S('ב(1)','מציבים 5 במקום x בשני הביטויים. קודם כפל, אחר כך חיבור.','80 + 70 · {5} = 430','150 + 56 · {5} = 430'),
+  S('ב(1)','התשלום שווה בשני האולמות. לכן לא נכון שבאולם א׳ ירוויח יותר.','430 = 430','!היגד (1) לא נכון'),
+  S('ב(2)','מציבים 6 במקום x בשני הביטויים.','80 + 70 · {6} = 500','150 + 56 · {6} = 486'),
+  S('ב(2)','באולם א׳ התשלום גדול יותר.','500 > 486','!היגד (2) נכון'),
+  S('ג','תומר עובד באולם א׳ ואחראי ל-7 שולחנות. מציבים 7 במקום x בביטוי של אולם א׳.','80 + 70 · {7}','80 + 490 = 570'),
+  S('ד','נדב עובד באולם ב׳ ומקבל 598. משווים את הביטוי של אולם ב׳ ל-598.','150 + 56x = 598'),
+  S('ד','מעבירים 150 אגף (הסימן מתחלף למינוס).','56x = 598 {− 150}','56x = 448'),
+  S('ד','מחלקים את שני האגפים ב-56.','x = [448/56] = 8'),
+  S('ה','נסמן ב-x את מספר האירועים של תומר. לנדב היו 3 אירועים יותר.','תומר:|x','נדב:|x + 3'),
+  S('ה','תומר מקבל 570 בכל אירוע (סעיף ג), ונדב מקבל 598. לכל אחד: מספר האירועים כפול התשלום לאירוע. מחברים את שניהם.','570x + 598(x + 3) = 15,810'),
+  S('ה','פותחים סוגריים: 598 כופל גם את x וגם את 3.','570x + {598x + 1,794} = 15,810'),
+  S('ה','מכנסים את איברי x.','{1,168x} + 1,794 = 15,810'),
+  S('ה','מעבירים 1,794 אגף (הסימן מתחלף למינוס).','1,168x = 15,810 {− 1,794}','1,168x = 14,016'),
+  S('ה','מחלקים את שני האגפים ב-1,168.','x = [14,016/1,168] = 12'),
+  S('ה','בדיקה: תומר עבד ב-12 אירועים, ונדב ב-15.','570 · 12 + 598 · 15','6,840 + 8,970 = 15,810 ✓'),
+ ],
+ final:[['א.','!גרף II'],['ב.','(1) לא נכון:|430 = 430'],['','(2) נכון:|500 > 486'],['ג.','570 ₪'],['ד.','!8 שולחנות'],['ה.','!12 אירועים']],
+ errs:[E('מזהים את אולם א׳ לפי הגרף העליון. בודקים את נקודת ההתחלה על הציר האנכי: הבסיס של אולם א׳ (80) קטן יותר, לכן הגרף שלו מתחיל נמוך – גרף II.'),
+       E('לא שומרים על סדר פעולות: מחברים לפני שכופלים.','80 + 70 · 7 = 150 · 7 = 1,050','80 + 70 · 7 = 80 + 490 = 570'),
+       E('בסעיף ד מחלקים את 598 ב-56 בלי להוריד קודם את הבסיס 150.','x = [598/56] ≈ 10.68','x = [448/56] = 8'),
+       E('בפתיחת סוגריים כופלים רק את x.','598(x + 3) = 598x + 3','598(x + 3) = 598x + 1,794'),
+       E('בסעיף ה מוסיפים את 3 לתשלום במקום למספר האירועים. נדב עבד ב-3 אירועים יותר, לכן x + 3 הוא מספר האירועים שלו.','570x + 601x = 15,810','570x + 598(x + 3) = 15,810')]},
+
+{n:4, img:'q4', title:'קיץ 25, מועד א – כרטיסים לסרטים',
+ text:'חברה מסוימת מציעה שתי אפשרויות תשלום בעבור כרטיסים לסרט לשנה אחת לאדם: אפשרות א׳ – 40 שקלים בעבור כל כרטיס. אפשרות ב׳ – תשלום שנתי של 180 שקלים ונוסף על כך 25 שקלים בעבור כל כרטיס. בסרטוט שלפניכם שני גרפים I–II המתארים את שתי האפשרויות. (בסרטוט: ציר אנכי "המחיר לשנה בשקלים", ציר אופקי "מספר הכרטיסים". גרף I מתחיל מעל ראשית הצירים ופחות תלול; גרף II יוצא מראשית הצירים ותלול יותר; הם נחתכים.) א. קבעו איזה מן הגרפים I–II מתאר את אפשרות א׳. ב. אפרת צופה ב-38 סרטים בשנה. איזו מן האפשרויות א׳ או ב׳ היא המשתלמת ביותר לאפרת? ג. מהו מספר הכרטיסים הגדול ביותר שאפשר לקנות בשנה ב-640 שקלים? חני קנתה x כרטיסים, ובחרה לשלם לפי אפשרות ב׳. ד. (1) כתבו ביטוי המתאים למחיר של x הכרטיסים שקנתה חני. (2) המחיר של x הכרטיסים שקנתה חני על פי אפשרות ב׳ שווה למחירם על פי אפשרות א׳. מצאו את x.',
+ hint:['באפשרות א׳ אין תשלום שנתי – כמה עולים 0 כרטיסים, ואיזה גרף יוצא מראשית הצירים?'],
+ steps:[
+  S('א','נסמן ב-x את מספר הכרטיסים. באפשרות א׳ משלמים רק 40 לכל כרטיס. באפשרות ב׳ משלמים 180 פעם אחת, ועוד 25 לכל כרטיס.','אפשרות א׳:|40x','אפשרות ב׳:|180 + 25x'),
+  S('א','כשלא קונים אף כרטיס, באפשרות א׳ המחיר הוא 0. לכן הגרף שלה יוצא מראשית הצירים – זה גרף II.','40 · 0 = 0','!אפשרות א׳ – גרף II'),
+  S('ב','מציבים 38 במקום x בשני הביטויים. קודם כפל, אחר כך חיבור.','א׳:|40 · 38 = 1,520','ב׳:|180 + 25 · 38 = 1,130'),
+  S('ב','באפשרות ב׳ המחיר נמוך יותר, לכן היא משתלמת יותר לאפרת.','1,130 < 1,520','!אפשרות ב׳'),
+  S('ג','אפשרות א׳: בודקים כמה כרטיסים של 40 שקלים אפשר לקנות ב-640.','40x = 640','x = [640/40] = 16'),
+  S('ג','אפשרות ב׳: קודם משלמים 180, ומה שנשאר הולך לכרטיסים. מעבירים 180 אגף.','180 + 25x = 640','25x = 640 {− 180}','25x = 460'),
+  S('ג','מחלקים את שני האגפים ב-25.','x = [460/25] = 18.4'),
+  S('ג','אי אפשר לקנות חלק מכרטיס. 19 כרטיסים כבר עולים יותר מ-640, לכן אפשר לקנות 18.','180 + 25 · 18 = 630','180 + 25 · 19 = 655 > 640'),
+  S('ג','משווים בין שתי האפשרויות: 18 גדול מ-16.','!הכי הרבה: 18 כרטיסים (לפי אפשרות ב׳)'),
+  S('ד(1)','חני משלמת לפי אפשרות ב׳: 180 פעם אחת, ועוד 25 לכל אחד מ-x הכרטיסים.','180 + 25x'),
+  S('ד(2)','המחיר לפי אפשרות ב׳ שווה למחיר לפי אפשרות א׳. משווים את שני הביטויים.','180 + 25x = 40x'),
+  S('ד(2)','מעבירים את 25x לאגף ימין (הסימן מתחלף למינוס).','180 = 40x {− 25x}','180 = 15x'),
+  S('ד(2)','מחלקים את שני האגפים ב-15.','x = [180/15] = 12'),
+  S('ד(2)','בדיקה: מציבים 12 במקום x בשני הביטויים.','180 + 25 · 12 = 480','40 · 12 = 480 ✓'),
+ ],
+ final:[['א.','!גרף II'],['ב.','!אפשרות ב׳ (1,130 ₪ לעומת 1,520 ₪)'],['ג.','!18 כרטיסים (לפי אפשרות ב׳)'],['ד.','(1)  180 + 25x'],['','(2)  x = 12']],
+ errs:[E('בוחרים לאפשרות א׳ את הגרף שמתחיל גבוה. באפשרות א׳ אין תשלום קבוע, לכן הגרף שלה יוצא מ-0.'),
+       E('מציבים בביטוי של אפשרות ב׳ ושוכחים את התשלום השנתי 180.','25 · 38 = 950','180 + 25 · 38 = 1,130'),
+       E('בסעיף ג מעגלים 18.4 ל-19. אבל 19 כרטיסים עולים 655 – יותר מ-640. כאן מעגלים כלפי מטה.','x = 19','x = 18'),
+       E('בסעיף ג עונים 16 – בודקים רק את אפשרות א׳. צריך לבדוק את שתי האפשרויות ולבחור את המספר הגדול.'),
+       E('מחליפים בין 180 ל-25 בביטוי. את 180 משלמים פעם אחת; 25 משלמים על כל כרטיס.','180x + 25','180 + 25x')]},
+
+{n:5, img:'q5', title:'קיץ 25, מועד ב – אפרסקים וענבים',
+ text:'עלות הגידול החודשית של כל אחד מסוגי הפירות, אפרסקים וענבים, מורכבת מהוצאה קבועה ומהוצאה נוספת על כל דונם מטע. העלות החודשית של גידול אפרסקים: הוצאה קבועה של 1,650 שקלים והוצאה נוספת של 80 שקלים על כל דונם מטע. העלות החודשית של גידול ענבים: הוצאה קבועה של 1,200 שקלים והוצאה נוספת של 130 שקלים על כל דונם מטע. א. מהי העלות החודשית של גידול אפרסקים במטע של 7 דונם? נסמן ב-x את מספר הדונמים במטע (של אפרסקים או ענבים). ב. (1) קבעו איזה מן הביטויים I–II שלפניכם מתאר את העלות החודשית של גידול אפרסקים. I. 1,650 + 80x  II. 80 + 1,650x. (2) כתבו ביטוי המתאר את העלות החודשית של גידול ענבים. ג. מצאו את x שבעבורו העלות החודשית של גידול אפרסקים שווה לעלות החודשית של גידול ענבים. לעוזי החקלאי יש מטע אפרסקים ומטע ענבים. מספר הדונמים במטע האפרסקים שווה למספר הדונמים במטע הענבים. העלות החודשית של שני המטעים של עוזי היא 6,210 שקלים סך הכול. ד. מצאו את מספר הדונמים במטע האפרסקים של עוזי.',
+ hint:['את ההוצאה הקבועה משלמים פעם אחת, ואת ההוצאה הנוספת משלמים על כל אחד מ-7 הדונמים.'],
+ steps:[
+  S('א','ההוצאה הנוספת היא 80 לכל דונם. ב-7 דונמים: 7 פעמים 80.','80 · 7 = 560'),
+  S('א','מוסיפים את ההוצאה הקבועה.','1,650 + 560 = 2,210'),
+  S('ב(1)','ההוצאה הקבועה (1,650) לא תלויה במספר הדונמים, לכן היא לבד. 80 משלמים על כל דונם, לכן הוא מוכפל ב-x.','1,650 + 80x','!ביטוי I'),
+  S('ב(1)','בדיקה: מציבים 7 במקום x ומקבלים את התשובה של סעיף א.','1,650 + 80 · 7 = 2,210 ✓'),
+  S('ב(2)','באותו אופן לענבים: 1,200 קבוע, ו-130 לכל דונם.','1,200 + 130x'),
+  S('ג','עלות שווה: משווים את שני הביטויים.','1,650 + 80x = 1,200 + 130x'),
+  S('ג','מעבירים את 80x לאגף ימין ואת 1,200 לאגף שמאל. כל איבר שעובר אגף מחליף סימן.','1,650 {− 1,200} = 130x {− 80x}'),
+  S('ג','מכנסים איברים דומים בכל אגף.','450 = 50x'),
+  S('ג','מחלקים את שני האגפים ב-50.','x = [450/50] = 9'),
+  S('ג','בדיקה: מציבים 9 במקום x בשני הביטויים.','1,650 + 80 · 9 = 2,370','1,200 + 130 · 9 = 2,370 ✓'),
+  S('ד','בשני המטעים אותו מספר דונמים, x. העלות של שניהם ביחד היא סכום שני הביטויים.','1,650 + 80x + 1,200 + 130x = 6,210'),
+  S('ד','מכנסים: מספרים עם מספרים, ואיברי x עם איברי x.','{2,850} + {210x} = 6,210'),
+  S('ד','מעבירים 2,850 אגף (הסימן מתחלף למינוס).','210x = 6,210 {− 2,850}','210x = 3,360'),
+  S('ד','מחלקים את שני האגפים ב-210.','x = [3,360/210] = 16'),
+  S('ד','בדיקה: מציבים 16 במקום x בשני הביטויים ומחברים.','1,650 + 80 · 16 = 2,930','1,200 + 130 · 16 = 3,280','2,930 + 3,280 = 6,210 ✓'),
+ ],
+ final:[['א.','2,210 ₪'],['ב.','(1) ביטוי I:|1,650 + 80x'],['','(2)  1,200 + 130x'],['ג.','x = 9'],['ד.','!16 דונם']],
+ errs:[E('מחליפים בין ההוצאה הקבועה לבין מה שמשלמים לכל דונם. מה שמשלמים "על כל דונם" מוכפל ב-x.','80 + 1,650x','1,650 + 80x'),
+       E('בסעיף א כופלים את כל הסכום במספר הדונמים. רק ההוצאה הנוספת מוכפלת.','(1,650 + 80) · 7 = 12,110','1,650 + 80 · 7 = 2,210'),
+       E('מעבירים אגף בלי להחליף סימן.','1,650 + 1,200 = 130x + 80x','1,650 − 1,200 = 130x − 80x'),
+       E('בסעיף ד משווים את שני הביטויים זה לזה, כמו בסעיף ג. כאן העלות הכוללת היא הסכום שלהם.','1,650 + 80x = 1,200 + 130x','1,650 + 80x + 1,200 + 130x = 6,210'),
+       E('בסעיף ד שוכחים אחת מההוצאות הקבועות.','1,650 + 210x = 6,210','2,850 + 210x = 6,210')]},
+
+{n:6, img:'q6', title:'חורף 25 – קניית פרחים',
+ text:'במשתלה מסוימת אפשר לקנות פרחים בשתי דרכים: בחנות המשתלה או באתר האינטרנט של המשתלה. בקנייה בחנות המחיר של כל פרח הוא 7.5 שקלים. בקנייה באתר האינטרנט המחיר של כל פרח הוא 5 שקלים, ונוסף על כך יש לשלם 40 שקלים בעבור משלוח. לפניכם שני גרפים I–II המתארים את שתי הדרכים האפשריות לקנות פרחים. (בסרטוט: ציר אנכי "המחיר בשקלים", ציר אופקי "מספר הפרחים". גרף I הוא קו רציף שיוצא מראשית הצירים ותלול יותר; גרף II הוא קו מקווקו שמתחיל מעל ראשית הצירים ופחות תלול; הם נחתכים.) א. קבעו איזה מן הגרפים I–II מתאר קניית פרחים באתר האינטרנט. ב. לפניכם שלושה ביטויים 1–3. קבעו מהו הביטוי המתאים למחיר של x פרחים בקנייה בחנות. 1. 7.5  2. 7.5x  3. 7.5x + 40. ג. כתבו ביטוי המתאים למחיר של x פרחים בקנייה באתר האינטרנט. ד. מצאו בעבור כמה פרחים המחיר בקנייה בחנות יהיה שווה למחיר בקנייה באתר האינטרנט. ה. מצאו כמה פרחים אפשר לקנות באתר האינטרנט במחיר של 210 שקלים. ענת קנתה פרחים בחנות, ולאחר מכן היא קנתה באתר האינטרנט פרחים נוספים. מספר הפרחים שהיא קנתה בחנות היה שווה למספר הפרחים שהיא קנתה באתר האינטרנט. ענת שילמה 490 שקלים סך הכול. ו. מצאו כמה פרחים קנתה ענת באתר האינטרנט.',
+ hint:['באתר משלמים 40 שקלים משלוח עוד לפני שקונים פרח – איזה גרף לא מתחיל מ-0?'],
+ steps:[
+  S('א','באתר האינטרנט משלמים 40 משלוח גם כשמספר הפרחים הוא 0. לכן הגרף של האינטרנט פוגש את הציר האנכי מעל ראשית הצירים – זה גרף II.','!האינטרנט – גרף II'),
+  S('א','בדיקה: גרף I יוצא מראשית הצירים. זה מתאים לחנות – בחנות 0 פרחים עולים 0 שקלים.'),
+  S('ב','בחנות כל פרח עולה 7.5. x פרחים עולים x פעמים 7.5, ואין תוספת קבועה.','7.5x','!ביטוי 2'),
+  S('ג','באינטרנט כל פרח עולה 5, ועוד 40 משלוח פעם אחת.','5x + 40'),
+  S('ד','מחיר שווה: משווים את שני הביטויים.','7.5x = 5x + 40'),
+  S('ד','מעבירים את 5x לאגף שמאל (הסימן מתחלף למינוס).','7.5x {− 5x} = 40','2.5x = 40'),
+  S('ד','מחלקים את שני האגפים ב-2.5.','x = [40/2.5] = 16'),
+  S('ד','בדיקה: מציבים 16 במקום x בשני הביטויים.','7.5 · 16 = 120','5 · 16 + 40 = 120 ✓'),
+  S('ה','משווים את הביטוי של האינטרנט ל-210.','5x + 40 = 210'),
+  S('ה','מעבירים 40 אגף (הסימן מתחלף למינוס).','5x = 210 {− 40}','5x = 170'),
+  S('ה','מחלקים את שני האגפים ב-5.','x = [170/5] = 34'),
+  S('ו','ענת קנתה אותו מספר פרחים, x, בחנות ובאינטרנט. סך הכול היא שילמה את שני המחירים ביחד.','7.5x + 5x + 40 = 490'),
+  S('ו','מכנסים את איברי x.','{12.5x} + 40 = 490'),
+  S('ו','מעבירים 40 אגף (הסימן מתחלף למינוס).','12.5x = 490 {− 40}','12.5x = 450'),
+  S('ו','מחלקים את שני האגפים ב-12.5.','x = [450/12.5] = 36'),
+  S('ו','בדיקה: מציבים 36 במקום x ומחברים.','7.5 · 36 = 270','5 · 36 + 40 = 220','270 + 220 = 490 ✓'),
+ ],
+ final:[['א.','!גרף II'],['ב.','ביטוי 2:|7.5x'],['ג.','5x + 40'],['ד.','!16 פרחים'],['ה.','!34 פרחים'],['ו.','!36 פרחים']],
+ errs:[E('בוחרים לאינטרנט את הגרף התלול. התלילות מראה את המחיר של פרח אחד. באינטרנט כל פרח זול יותר, לכן הגרף פחות תלול, והוא מתחיל מעל 0 בגלל המשלוח.'),
+       E('בוחרים 7.5 כמחיר של x פרחים. 7.5 הוא המחיר של פרח אחד; ל-x פרחים כופלים ב-x.','7.5','7.5x'),
+       E('כופלים גם את דמי המשלוח במחיר הפרח. את המשלוח משלמים פעם אחת.','5(x + 40)','5x + 40'),
+       E('בסעיף ה מחלקים את 210 ב-5 בלי להוריד קודם את המשלוח.','x = [210/5] = 42','x = [170/5] = 34'),
+       E('בסעיף ו שוכחים את המשלוח, או משווים בין שני המחירים במקום לחבר אותם.','7.5x + 5x = 490','7.5x + 5x + 40 = 490')]},
+];
+
+// ================================================== AI prompt
+function aiPrompt(q){
+  return `אתה מורה פרטי סבלני למתמטיקה. אני תלמיד/ה ב${CONFIG.level}, ואני רוצה ללמוד לפתור את השאלה הזאת לבד.
+
+הכללים:
+1. אל תכתוב לי את הפתרון ואל תגלה את התשובה הסופית, גם אם אבקש.
+2. עבוד איתי צעד אחד בכל פעם: שאל אותי שאלה מנחה אחת, וחכה לתשובה שלי לפני שממשיכים.
+3. אם טעיתי, אל תתקן במקומי. תגיד לי באיזו שורה לבדוק (למשל סימן מינוס, פתיחת סוגריים, העברת אגף), ותן לי לנסות שוב.
+4. אם אני תקוע/ה פעמיים באותו מקום, תן רמז קטן או דוגמה דומה עם מספרים אחרים.
+5. השתמש רק בשיטות שלומדים ברמה הזאת: ${CONFIG.methods}.
+6. כתוב בעברית פשוטה, במשפטים קצרים.
+7. כשאגיע לתשובה, בקש ממני לבדוק אותה בעצמי (למשל בהצבה), ולהסביר במילים שלי מה עשיתי.
+
+השאלה (שאלה ${q.n} ${CONFIG.source}):
+${q.text}
+
+נתחיל: שאל אותי מה הצעד הראשון שאני חושב/ת לעשות.`;
+}
+
+// ================================================== render helpers
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function math(s){
+  let h = esc(s);
+  h = h.replace(/\[([^\[\]\/]+)\/([^\[\]]+)\]/g, '<span class="fr"><span>$1</span><span>$2</span></span>');
+  h = h.replace(/\{([^{}]+)\}/g, '<span class="hl">$1</span>');
+  h = h.replace(/_([A-Z]{1,2})/g, '<sub>$1</sub>');
+  h = h.replace(/ או /g, ' <span class="or">או</span> ');
+  h = h.replace(/✓/g, '<span class="ok">✓</span>');
+  return h;
+}
+function eqLine(e){
+  if (typeof e === 'object') return e.html;
+  if (e.startsWith('!')) return `<div class="eq heb">${esc(e.slice(1))}</div>`;
+  if (e.includes('|')){ const [l,m]=e.split('|'); return `<div class="eq lab">${l?`<b>${esc(l)}</b>`:''}<span class="m">${math(m)}</span></div>`; }
+  return `<div class="eq"><span class="m">${math(e)}</span></div>`;
+}
+function finLine([l,e]){
+  let body;
+  if (e.startsWith('!')) body = `<div class="eq heb" style="text-align:right">${esc(e.slice(1))}</div>`;
+  else if (e.includes('|')){ const [a,b]=e.split('|'); body = `<div class="eq lab" style="justify-content:flex-start"><b>${esc(a)}</b><span class="m">${math(b)}</span></div>`; }
+  else body = `<div class="eq" style="text-align:right"><span class="m">${math(e)}</span></div>`;
+  return `<div class="fl">${esc(l)}</div>${body}`;
+}
+
+// ================================================== build
+const stage = document.getElementById('stage'), jump = document.getElementById('jump');
+const cards = [], chips = [];
+SECTIONS.forEach((sec, si) => {
+  if (si) { const s=document.createElement('span'); s.className='sep'; jump.appendChild(s); }
+  Q.filter(q => q.n >= sec.from && q.n <= sec.to).forEach(q => {
+    q.sec = sec;
+    const chip = document.createElement('button'); chip.textContent = q.n; chip.setAttribute('aria-label','שאלה '+q.n);
+    chip.onclick = () => go(q.n - 1); jump.appendChild(chip); chips.push(chip);
+
+    const c = document.createElement('article'); c.className = 'card'; c.id = 'q'+q.n;
+    let steps = `<div class="step hint-step" data-k="0"><div class="say"><span class="sn">רמז:</span>${esc(q.hint[0])}</div>${q.hint.slice(1).map(eqLine).join('')}<div class="small-note">נסו להמשיך לבד. לא מצליחים? לחצו "לפתרון".</div></div>`, lastPart = null, k = 0;
+    q.steps.forEach(st => {
+      if (st.p && st.p !== lastPart){ steps += `<div class="part" data-k="${k+1}">${st.p.startsWith('(')?'גרף '+st.p:'סעיף '+st.p}</div>`; lastPart = st.p; }
+      steps += `<div class="step" data-k="${k+1}"><div class="say"><span class="sn">${k+1}.</span>${esc(st.say)}</div>${st.eq.map(eqLine).join('')}</div>`;
+      k++;
+    });
+    const pr = aiPrompt(q);
+    const errs = q.errs.map(e => `<div class="err-item"><div>${esc(e.t)}</div>`+
+        (e.w?`<div class="eq w"><span class="mk">לא נכון:</span><span class="m">${math(e.w)}</span></div>`:'')+
+        (e.r?`<div class="eq r"><span class="mk">נכון:</span><span class="m">${math(e.r)}</span></div>`:'')+`</div>`).join('');
+    c.innerHTML = `
+      <div class="head"><div class="num">${q.n}</div><div class="ttl">${q.title}</div></div>
+      <div class="imgbox${q.small?' small':''}" role="button" aria-label="הגדלת השאלה">
+        <img class="qimg" src="img/${q.img}.png" alt="שאלה ${q.n}: ${esc(q.text).replace(/"/g,'&quot;')}">
+        <span class="zoom-ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21M10.5 7.5v6M7.5 10.5h6"/></svg></span>
+      </div>
+      ${q.instr?`<div class="instr">${q.instr}</div>`:''}
+      <div class="final-box"><h4>תשובה סופית:</h4><div class="fin">${q.final.map(finLine).join('')}</div></div>
+      <div class="btns">
+        <button class="tg t-steps" data-p="steps" aria-pressed="false">פתרון מפורט</button>
+        <button class="tg t-err" data-p="err" aria-pressed="false">טעויות נפוצות</button>
+        <button class="tg t-ai" data-p="ai" aria-pressed="false">עזרה מ-AI</button>
+      </div>
+      <div class="panel p-steps" data-panel="steps">
+        ${steps}
+        <div class="step-ctl"><button class="b-next">לפתרון</button><button class="b-all">הכול</button></div>
+        <div class="done-msg">זהו! עכשיו נסו לפתור שוב לבד במחברת, בלי להסתכל.</div>
+      </div>
+      <div class="panel p-err" data-panel="err"><h4>טעויות נפוצות – אולי אחת מהן אצלכם?</h4>${errs}</div>
+      <div class="panel p-ai" data-panel="ai"><p class="ai-note">הכפתורים שולחים לצ'אט את השאלה עם הוראה <b>להנחות אתכם בשאלות, בלי לפתור במקומכם</b>. ב-Gemini מדביקים (ההוראה מועתקת אוטומטית).</p>
+        <div class="ai-btns">
+          <button class="b-copy">העתקה בלבד</button>
+          <a href="https://chatgpt.com/?q=${encodeURIComponent(pr)}" target="_blank" rel="noopener">ChatGPT</a>
+          <a href="https://claude.ai/new?q=${encodeURIComponent(pr)}" target="_blank" rel="noopener">Claude</a>
+          <a class="b-gem" href="https://gemini.google.com/app" target="_blank" rel="noopener">Gemini</a>
+        </div>
+      </div>`;
+    stage.appendChild(c); cards.push(c);
+
+    const stepsEls = [...c.querySelectorAll('.step')], parts = [...c.querySelectorAll('.part')];
+    let shown = 0;
+    const showUpTo = n => {
+      shown = Math.min(n, stepsEls.length);
+      stepsEls.forEach((s,i) => s.classList.toggle('show', i < shown));
+      parts.forEach(p => p.classList.toggle('show', +p.dataset.k < shown));
+      const done = shown >= stepsEls.length;
+      c.querySelector('.step-ctl').style.display = done ? 'none' : '';
+      c.querySelector('.done-msg').style.display = done ? 'block' : 'none';
+      c.querySelector('.b-next').textContent = shown <= 1 ? 'לפתרון – שלב 1' : 'השלב הבא';
+    };
+    c.querySelectorAll('.tg').forEach(b => b.onclick = () => {
+      const p = c.querySelector(`[data-panel="${b.dataset.p}"]`);
+      const on = !p.classList.contains('open');
+      p.classList.toggle('open', on); b.setAttribute('aria-pressed', on);
+      if (b.dataset.p === 'steps' && on && shown === 0) showUpTo(1);
+      if (on) p.scrollIntoView({block:'nearest', behavior:'smooth'});
+    });
+    c.querySelector('.b-next').onclick = () => { showUpTo(shown + 1); stepsEls[shown-1].scrollIntoView({block:'nearest', behavior:'smooth'}); };
+    c.querySelector('.b-all').onclick = () => showUpTo(stepsEls.length);
+    c.querySelector('.b-copy').onclick = () => copy(pr);
+    c.querySelector('.b-gem').addEventListener('click', () => copy(pr, 'ההוראה הועתקה – מדביקים ב-Gemini'));
+    c.querySelector('.imgbox').onclick = () => openLb(`img/${q.img}.png`);
+  });
+});
+
+// shrink long equation lines so they fit on one line
+function fit(root){
+  root.querySelectorAll('.eq').forEach(e => {
+    if (!e.offsetParent) return;
+    e.style.fontSize = '';
+    let fs = parseFloat(getComputedStyle(e).fontSize), min = fs * 0.62;
+    while (e.scrollWidth > e.clientWidth + 1 && fs > min){ fs -= 1; e.style.fontSize = fs + 'px'; }
+  });
+}
+new MutationObserver(ms => ms.forEach(m => m.target.closest && m.target.closest('.card') && fit(m.target)))
+  .observe(stage, {attributes:true, subtree:true, attributeFilter:['class']});
+addEventListener('resize', () => cards[cur] && fit(cards[cur]));
+
+// ================================================== carousel
+let cur = -1;
+function go(i, dir){
+  i = Math.max(0, Math.min(Q.length - 1, i));
+  if (i === cur) return;
+  if (dir === undefined) dir = i > cur ? 1 : -1;
+  if (cur >= 0) cards[cur].classList.remove('on','in-next','in-prev');
+  const c = cards[i]; c.classList.remove('in-next','in-prev'); void c.offsetWidth;
+  c.classList.add('on', cur < 0 ? 'x' : (dir > 0 ? 'in-next' : 'in-prev'));
+  chips.forEach((ch,k) => ch.classList.toggle('cur', k === i));
+  chips[i].scrollIntoView({inline:'center', block:'nearest', behavior: cur<0?'auto':'smooth'});
+  cur = i;
+  const q = Q[i];
+  document.getElementById('secName').textContent = q.sec.name;
+  document.getElementById('secCount').textContent = '';
+  document.getElementById('cnt').textContent = `${i+1} / ${Q.length}`;
+  document.getElementById('prev').disabled = i === 0;
+  document.getElementById('next').disabled = i === Q.length - 1;
+  history.replaceState(null, '', '#q' + q.n);
+  const top = document.querySelector('.where').getBoundingClientRect().top + scrollY - 60;
+  if (scrollY > top) scrollTo({top, behavior:'auto'});
+}
+document.getElementById('prev').onclick = () => go(cur - 1, -1);
+document.getElementById('next').onclick = () => go(cur + 1, 1);
+const m0 = location.hash.match(/^#q(\d+)$/);
+go(m0 ? +m0[1] - 1 : 0);
+if (!m0) { scrollTo(0, 0); addEventListener('load', () => setTimeout(() => scrollTo(0, 0), 50)); }
+
+// swipe (RTL: finger to the right = next)
+let sx = null, sy = null;
+stage.addEventListener('touchstart', e => {
+  if (e.touches.length !== 1 || e.target.closest('.tbl-wrap')) { sx = null; return; }
+  sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+}, {passive:true});
+stage.addEventListener('touchend', e => {
+  if (sx === null) return;
+  const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+  sx = null;
+  if (Math.abs(dx) > 60 && Math.abs(dx) > 1.5 * Math.abs(dy)) go(cur + (dx > 0 ? 1 : -1), dx > 0 ? 1 : -1);
+}, {passive:true});
+document.addEventListener('keydown', e => {
+  if (lb.classList.contains('on')) { if (e.key === 'Escape') closeLb(); return; }
+  if (e.key === 'ArrowLeft') go(cur + 1, 1);
+  if (e.key === 'ArrowRight') go(cur - 1, -1);
+});
+
+// ================================================== lightbox
+const lb = document.getElementById('lb'), lbimg = document.getElementById('lbimg');
+function openLb(src){ lbimg.src = src; lb.classList.remove('big'); lb.classList.add('on'); document.body.style.overflow='hidden'; lb.scrollTo(0,0); }
+function closeLb(){ lb.classList.remove('on'); document.body.style.overflow=''; }
+document.getElementById('lbx').onclick = closeLb;
+lb.addEventListener('click', e => { if (e.target === lb || e.target.classList.contains('inner')) closeLb(); });
+lbimg.onclick = () => lb.classList.toggle('big');
+
+// ================================================== copy
+function copy(t, msg){
+  const ok = () => { const el = document.getElementById('toast'); el.textContent = msg || "הועתק! עכשיו מדביקים בצ'אט"; el.classList.add('on'); setTimeout(()=>el.classList.remove('on'), 1800); };
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(ok, () => fallback(t, ok));
+  else fallback(t, ok);
+}
+function fallback(t, ok){
+  const ta = document.createElement('textarea'); ta.value = t; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); ok(); }catch(e){} ta.remove();
+}
+</script>
+</body>
+</html>

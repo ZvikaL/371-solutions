@@ -1,0 +1,691 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>הסתברות – פתרונות 371</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f6f8; --card:#fff; --ink:#1d2330; --muted:#5d6577; --line:#e2e5ec;
+  --blue:#2f6fde; --blue-soft:#eaf1fd; --orange:#e8590c; --orange-soft:#fff1e8;
+  --pos:#1f5fd0; --neg:#d32f2f; --zero:#7b3fb8; --ok:#1e8e4e; --ok-soft:#e8f6ee;
+  --hint:#9a6b00; --hint-soft:#fff8dc; --err:#b42318; --err-soft:#fdeceb; --hl:#fff1a8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14171d; --card:#1d222b; --ink:#e8ebf1; --muted:#a3abbb; --line:#2f3644;
+    --blue:#6f9ef0; --blue-soft:#1f2b40; --orange:#ff8a4c; --orange-soft:#3a271c;
+    --pos:#79a8ff; --neg:#ff7b7b; --zero:#c79bf2; --ok:#5fd08f; --ok-soft:#1b3326;
+    --hint:#f3d36b; --hint-soft:#2f2a16; --err:#ff9a9a; --err-soft:#3b1d1d; --hl:#5a4d12;
+  }
+  :root:not([data-theme="light"]) .qimg, :root:not([data-theme="light"]) .lb img{ filter: invert(.9) hue-rotate(180deg); }
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:'Assistant',system-ui,sans-serif; font-size:17px; line-height:1.6; padding-bottom:84px}
+.wrap{max-width:720px; margin:0 auto; padding:0 16px}
+
+/* ---------- math */
+.m{font-family:'Times New Roman',Times,serif; direction:ltr; unicode-bidi:isolate; font-size:1.12em}
+.or{unicode-bidi:isolate; direction:rtl; font-family:'Assistant',sans-serif; font-size:.85em; margin:0 .45em; color:var(--muted)}
+.fr{display:inline-flex; flex-direction:column; vertical-align:middle; text-align:center; margin:0 .12em; line-height:1.15}
+.fr>span:first-child{border-bottom:1.3px solid currentColor; padding:0 .2em .05em}
+.fr>span:last-child{padding:.05em .2em 0}
+.hl{background:var(--hl); border-radius:4px; padding:0 .15em}
+.eq{direction:ltr; text-align:center; font-family:'Times New Roman',Times,serif; font-size:1.18em; margin:6px 0; line-height:1.9; white-space:nowrap; overflow-x:auto; scrollbar-width:none}
+.eq .m{white-space:nowrap}
+.eq.lab{display:flex; justify-content:center; align-items:center; gap:10px; direction:rtl; flex-wrap:wrap}
+.eq.lab b{font-family:'Assistant',sans-serif; font-size:.82em}
+.eq.heb{direction:rtl; font-family:'Assistant',sans-serif; font-weight:800; font-size:1em}
+.eq .ok{color:var(--ok); font-family:'Assistant',sans-serif; font-weight:800; margin-inline-start:.4em}
+
+/* ---------- top */
+header.top{background:var(--blue); color:#fff; padding:16px 16px 14px}
+header.top h1{margin:0; font-size:1.35rem; font-weight:800; line-height:1.25}
+header.top p{margin:4px 0 0; opacity:.92; font-size:.95rem}
+nav.jump{position:sticky; top:0; z-index:5; background:var(--card); border-bottom:1px solid var(--line); box-shadow:0 2px 6px rgba(0,0,0,.05)}
+nav.jump .wrap{display:flex; gap:6px; overflow-x:auto; padding:8px 16px; scrollbar-width:none}
+nav.jump .wrap::-webkit-scrollbar{display:none}
+nav.jump button{flex:none; min-width:38px; min-height:38px; padding:0; border-radius:10px; background:var(--blue-soft); color:var(--blue); font-weight:800; border:2px solid transparent}
+nav.jump button.cur{background:var(--blue); color:#fff}
+nav.jump .sep{flex:none; width:1px; background:var(--line); margin:4px 2px}
+details.intro{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:10px 14px; margin:14px 0 0}
+details.intro summary{font-weight:800; cursor:pointer}
+details.intro ol{margin:6px 0 0; padding-inline-start:22px}
+details.intro.ai{border-color:var(--orange); background:var(--orange-soft)}
+.small-note{color:var(--muted); font-size:.9rem}
+
+/* ---------- carousel */
+.where{display:flex; justify-content:space-between; align-items:baseline; margin:16px 2px 6px; color:var(--muted); font-weight:700; font-size:.95rem}
+.stage{position:relative; overflow:hidden; touch-action:pan-y pinch-zoom}
+.card{display:none; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px; box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card.on{display:block}
+.card.in-next{animation:inNext .25s ease}
+.card.in-prev{animation:inPrev .25s ease}
+@keyframes inNext{from{opacity:0; transform:translateX(-40px)} to{opacity:1; transform:none}}
+@keyframes inPrev{from{opacity:0; transform:translateX(40px)} to{opacity:1; transform:none}}
+.card .head{display:flex; align-items:center; gap:10px; margin-bottom:10px}
+.card .num{background:var(--blue); color:#fff; font-weight:800; border-radius:10px; min-width:38px; height:38px; display:grid; place-items:center; font-size:1.1rem}
+.card .ttl{font-weight:800}
+.imgbox{position:relative; cursor:zoom-in; border-radius:8px; overflow:hidden; background:#fff; border:1px solid var(--line)}
+.qimg{display:block; width:100%; height:auto}
+.imgbox.small .qimg{max-width:380px; margin-inline-start:auto}
+.zoom-ic{position:absolute; bottom:6px; left:6px; width:34px; height:34px; border-radius:50%; background:rgba(29,35,48,.75); display:grid; place-items:center}
+.instr{margin-top:6px; color:var(--muted)}
+
+/* ---------- toggle buttons */
+.btns{display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:10px}
+.tg{font:inherit; font-weight:800; border-radius:12px; padding:8px 10px; cursor:pointer; min-height:40px; font-size:.88rem; line-height:1.2; padding:6px 4px; background:var(--card); border:2px solid currentColor; display:flex; align-items:center; justify-content:center; gap:8px; transition:background .15s, color .15s, box-shadow .15s}
+.tg .st{font-size:.75rem; font-weight:700; opacity:.75}
+.tg[aria-pressed="true"]{color:#fff !important; box-shadow:inset 0 3px 6px rgba(0,0,0,.25)}
+.t-hint{color:var(--hint)} .t-hint[aria-pressed="true"]{background:#b58300}
+.t-steps{color:var(--blue)} .t-steps[aria-pressed="true"]{background:var(--blue)}
+.t-final{color:var(--ok)} .t-final[aria-pressed="true"]{background:var(--ok)}
+.t-err{color:var(--err)} .t-err[aria-pressed="true"]{background:var(--err)}
+.t-ai{color:var(--orange)} .t-ai[aria-pressed="true"]{background:var(--orange)}
+
+/* ---------- panels */
+.panel{display:none; margin-top:12px; border-radius:12px; padding:12px 14px}
+.panel.open{display:block; animation:fade .2s ease}
+.panel h4{margin:0 0 6px; font-size:1rem}
+.p-hint{background:var(--hint-soft); border:2px solid #e6c65c}
+.p-steps{background:var(--blue-soft); border:2px solid var(--blue)}
+.p-final{background:var(--ok-soft); border:2px solid var(--ok)}
+.p-err{background:var(--err-soft); border:2px solid var(--err)}
+.p-ai{background:var(--orange-soft); border:2px solid var(--orange)}
+.step{display:none; background:var(--card); border-radius:10px; padding:10px 12px; margin:8px 0; border-inline-start:4px solid var(--blue)}
+.step.show{display:block; animation:fade .25s ease}
+.step .say{font-weight:600}
+.step.hint-step{border-inline-start-color:#c99a00; background:var(--hint-soft)}
+.step.hint-step .sn{color:var(--hint)}
+.final-box{margin-top:6px; color:var(--ok); font-size:.88rem; line-height:1.4}
+.final-box h4{margin:0; font-size:.85rem; font-weight:800}
+.final-box .fin{gap:0 8px}
+.final-box .eq{font-size:1.05em; margin:0; line-height:1.5}
+.final-box .fl{font-weight:700}
+.final-box .eq.heb{font-size:.95em; font-weight:700}
+.ai-note{margin:0 0 4px}
+.step .sn{font-weight:800; color:var(--blue); margin-inline-end:6px}
+.part{display:none; font-weight:800; margin:14px 0 2px; color:var(--orange)}
+.part.show{display:block}
+.step-ctl{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
+.b-next,.b-all{font:inherit; font-weight:800; border-radius:12px; padding:8px 14px; min-height:44px; cursor:pointer}
+.b-next{background:var(--blue); color:#fff; border:0; flex:1}
+.b-all{background:transparent; color:var(--blue); border:2px solid var(--blue)}
+.done-msg{display:none; font-weight:800; color:var(--ok); margin-top:6px}
+.fin{display:grid; grid-template-columns:auto 1fr; gap:4px 12px; align-items:center}
+.fin .fl{font-weight:800}
+.fin .eq{text-align:left; margin:2px 0}
+.err-item{background:var(--card); border-radius:10px; padding:8px 12px; margin:8px 0}
+.err-item .eq{text-align:right; direction:rtl; display:flex; gap:8px; align-items:center; justify-content:flex-start; flex-wrap:wrap; margin:2px 0}
+.err-item .mk{font-family:'Assistant',sans-serif; font-weight:800; font-size:.8em; min-width:3.6em}
+.err-item .w .mk{color:var(--err)} .err-item .w .m{color:var(--err); background:var(--err-soft); border-radius:6px; padding:0 .35em}
+.err-item .r .mk{color:var(--ok)}
+@keyframes fade{from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none}}
+
+/* ---------- tables, sketch */
+.tbl-wrap{overflow-x:auto; margin:6px 0}
+table.s{direction:ltr; border-collapse:collapse; margin:0 auto; font-size:.86rem; font-family:'Times New Roman',serif}
+table.s th, table.s td{border:1px solid var(--line); padding:4px 4px; text-align:center; background:var(--card); line-height:1.3}
+table.s th{background:var(--bg); white-space:nowrap}
+table.s td.h{font-weight:700; background:var(--bg); font-family:'Assistant',sans-serif; direction:rtl; font-size:.95em}
+table.s .tv{color:var(--muted); font-size:.85em}
+.pos{color:var(--pos); font-weight:800} .neg{color:var(--neg); font-weight:800} .zr{color:var(--zero); font-weight:800}
+.sketch{display:block; margin:6px auto; max-width:260px; width:100%; direction:ltr}
+
+/* ---------- AI */
+.prompt{white-space:pre-wrap; background:var(--card); border:1px dashed var(--orange); border-radius:10px; padding:10px 12px; font-size:.9rem; max-height:200px; overflow:auto}
+.ai-btns{display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:6px}
+.ai-btns a, .ai-btns button{font:inherit; font-weight:800; text-decoration:none; border-radius:12px; padding:6px 8px; min-height:40px; font-size:.9rem; display:flex; align-items:center; justify-content:center; background:var(--card); color:var(--orange); border:2px solid var(--orange); cursor:pointer}
+
+/* ---------- bottom bar */
+.bar{position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--line); box-shadow:0 -2px 8px rgba(0,0,0,.06); z-index:6}
+.bar .wrap{display:flex; align-items:center; gap:10px; padding:10px 16px}
+.bar button{font:inherit; font-weight:800; flex:1; min-height:48px; border-radius:12px; border:2px solid var(--blue); background:var(--card); color:var(--blue); cursor:pointer}
+.bar button.nx{background:var(--blue); color:#fff}
+.bar button:disabled{opacity:.35; cursor:default}
+.bar .cnt{flex:none; font-weight:800; color:var(--muted); min-width:56px; text-align:center}
+
+/* ---------- lightbox */
+.lb{position:fixed; inset:0; z-index:30; background:rgba(10,12,16,.92); display:none; overflow:auto; touch-action:pan-x pan-y pinch-zoom}
+.lb.on{display:block}
+.lb .inner{min-height:100%; display:flex; align-items:center; justify-content:center; padding:56px 8px 24px}
+.lb img{display:block; width:100%; max-width:1300px; height:auto; background:#fff; border-radius:6px; cursor:zoom-in}
+.lb.big img{width:200%; max-width:none; cursor:zoom-out}
+.lb.big .inner{justify-content:flex-start}
+.lb .x{position:fixed; top:10px; left:10px; width:44px; height:44px; border-radius:50%; border:0; background:#fff; color:#111; font-size:1.4rem; font-weight:800; cursor:pointer}
+.lb .tip{position:fixed; top:16px; right:14px; color:#fff; font-weight:700; font-size:.9rem}
+
+.toast{position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:#1d2330; color:#fff; padding:10px 18px; border-radius:12px; font-weight:700; opacity:0; transition:opacity .2s; pointer-events:none; z-index:40}
+.toast.on{opacity:1}
+
+/* ---------- topics nav */
+nav.topics{background:#1f4fa8}
+nav.topics .wrap{display:flex; gap:6px; overflow-x:auto; padding:8px 16px; scrollbar-width:none}
+nav.topics .wrap::-webkit-scrollbar{display:none}
+.tp{flex:none; color:#fff; text-decoration:none; font-weight:700; font-size:.9rem; padding:5px 12px; border-radius:999px; border:1.5px solid rgba(255,255,255,.45); white-space:nowrap}
+.tp.cur{background:#fff; color:#1f4fa8; border-color:#fff}
+.tp.off{opacity:.45; border-style:dashed}
+.tp.home{border-color:transparent; text-decoration:underline; text-underline-offset:3px}
+</style>
+</head>
+<body>
+<nav class="topics" aria-label="נושאים"><div class="wrap" id="topics"></div></nav>
+<header class="top"><div class="wrap">
+  <h1>פתרונות</h1>
+  <p>שלב אחרי שלב, עם הסברים וטעויות נפוצות</p>
+</div></header>
+<nav class="jump"><div class="wrap" id="jump"></div></nav>
+
+<main class="wrap">
+  <details class="intro">
+    <summary>איך משתמשים בדף הזה</summary>
+    <ol>
+      <li>קודם פותרים לבד במחברת, ובודקים מול ה<b>תשובה הסופית</b> שמתחת לשאלה.</li>
+      <li>נתקעתם או יצא לא נכון? <b>פתרון מפורט</b>: קודם רמז, ואחר כך שלב אחד בכל פעם. אחרי כל שלב – ממשיכים לבד.</li>
+      <li>כדאי לקרוא גם את <b>טעויות נפוצות</b> – אולי אחת מהן אצלכם.</li>
+      <li>מעבר בין שאלות: החצים למטה, המספרים למעלה, או החלקה הצידה.</li>
+    </ol>
+  </details>
+  <details class="intro ai">
+    <summary>רוצים עזרה מ-AI? שיעזור, לא יפתור במקומכם</summary>
+    <p style="margin:6px 0">אם תכתבו לצ'אט "תפתור לי", תקבלו פתרון – ולא תלמדו כלום. במבחן לא יהיה AI.<br>
+    בכל שאלה יש כפתור <b>עזרה מ-AI</b> עם הוראה מוכנה. מעתיקים לצ'אט, והוא ישאל אתכם שאלות מנחות, צעד אחד בכל פעם.</p>
+    <p class="small-note" style="margin:0">גם AI טועה לפעמים. אם יצא לכם משהו שונה מה"תשובה הסופית" כאן – תאמינו לתשובה הסופית ושאלו את המורה.</p>
+  </details>
+
+  <div class="where"><span id="secName"></span><span id="secCount"></span></div>
+  <div class="stage" id="stage"></div>
+</main>
+
+<div class="bar"><div class="wrap">
+  <button id="prev" aria-label="השאלה הקודמת">→ הקודמת</button>
+  <span class="cnt" id="cnt"></span>
+  <button id="next" class="nx" aria-label="השאלה הבאה">הבאה ←</button>
+</div></div>
+
+<div class="lb" id="lb" role="dialog" aria-label="השאלה בהגדלה">
+  <button class="x" id="lbx" aria-label="סגירה">✕</button>
+  <span class="tip">לחיצה על התמונה – הגדלה נוספת</span>
+  <div class="inner"><img id="lbimg" alt=""></div>
+</div>
+<div class="toast" id="toast">הועתק! עכשיו מדביקים בצ'אט</div>
+
+<script src="../topics.js"></script>
+<script>
+renderTopics('probability');
+/* ===== notation in math strings =====
+   [a/b]  fraction with horizontal bar      {..}  highlight
+   _AB    subscript (1-2 capitals)          ' או '  Hebrew "or"
+   step equation lines:  'math'  |  'label|math'  |  '!Hebrew line'  |  {html:'...'}          */
+// ================================================== CONFIG (edit)
+const CONFIG = {
+  pageTitle: 'הסתברות – פתרונות 371',
+  title:     'הסתברות – פתרונות',
+  subtitle:  'שאלון 371 · מקבץ שאלות בגרות · שלב אחרי שלב',
+  level:     'הכנה לבגרות בשאלון 371 (3 יחידות)',
+  methods:   'הסתברות כמספר המקרים המתאימים חלקי כל המקרים, עץ הסתברויות, טבלה דו-ממדית (טבלת שכיחויות), כפל לאורך ענף, חיבור ענפים, מאורע משלים (1 פחות ההסתברות)',
+  source:    'ממקבץ ההסתברות',
+};
+document.title = CONFIG.pageTitle;
+document.querySelector('header.top h1').textContent = CONFIG.title;
+document.querySelector('header.top p').textContent = CONFIG.subtitle;
+
+const SECTIONS = [
+  {name:'בגרות 2026', from:1, to:3},
+  {name:'בגרות 2025', from:4, to:6},
+  {name:'בגרות 2024', from:7, to:8},
+];
+
+function signTable(zeros, tests, vals){
+  let head='<tr><th>x</th>', sub='<tr><td class="h">מציבים<br><span class="tv">יוצא</span></td>', sg='<tr><td class="h">סימן</td>';
+  tests.forEach((t,i)=>{
+    head += `<th>${i===0?'x &lt;':(i===tests.length-1?'&lt; x':'&lt; x &lt;')}</th>`;
+    const [tx,tv]=t.split(':');
+    sub += `<td>${tx}<br><span class="tv">${tv}</span></td>`;
+    sg  += `<td>${vals[i]==='+'?'<span class="pos">+</span>':'<span class="neg">−</span>'}</td>`;
+    if(i<zeros.length){ head+=`<th class="zr">${zeros[i]}</th>`; sub+='<td></td>'; sg+='<td class="zr">0</td>'; }
+  });
+  return {html:`<div class="tbl-wrap"><table class="s">${head}</tr>${sub}</tr>${sg}</tr></table></div>`};
+}
+// [a/b] → fraction (own small version: the page's math() is defined further down)
+const fx = s => String(s).replace(/\[([^\[\]\/]+)\/([^\[\]]+)\]/g, '<span class="fr"><span>$1</span><span>$2</span></span>');
+const hb = s => `<span style="font-family:Assistant,sans-serif">${s}</span>`;
+const sm = (top, p) => `<span class="tv">${top}</span><br>${p}`;   // small line (sum) above the probability
+const DIAG = n => [...Array(n)].map((_, i) => [i, i]);
+// two-way table (right to left): rows = first draw, columns = second draw; hl = [[row,col],...] highlighted cells
+function grid2(corner, rows, cols, cells, hl){
+  hl = hl || [];
+  let h = `<tr><th>${hb(corner)}</th>` + cols.map(c => `<th>${hb(c)}</th>`).join('') + '</tr>';
+  rows.forEach((r, i) => {
+    h += `<tr><td class="h">${r}</td>` + cells[i].map((c, j) => {
+      const on = hl.some(([a, b]) => a === i && b === j);
+      const v = `<span dir="ltr" style="unicode-bidi:isolate">${fx(c)}</span>`;
+      return `<td>${on ? `<span class="hl">${v}</span>` : v}</td>`;
+    }).join('') + '</tr>';
+  });
+  return {html:`<div class="tbl-wrap"><table class="s" style="direction:rtl">${h}</table></div>`};
+}
+// two-stage probability tree with the same branches in both stages; leaf = result of each path, hl = highlighted leaves
+function tree2(lab, pr, leaf, hl){
+  hl = hl || [];
+  const n = lab.length, rh = 36, H = n*n*rh + 8, W = 300;
+  const ly = k => 4 + rh*(k + .5), my = i => 4 + rh*(i*n + (n - 1)/2 + .5), ry = H/2;
+  let ln = '', tx = '';
+  for (let i = 0; i < n; i++){
+    ln += `<line x1="6" y1="${ry}" x2="70" y2="${my(i)}"/>`;
+    tx += `<text x="40" y="${ry + .6*(my(i) - ry) + (my(i) < ry ? -6 : 15)}" text-anchor="middle" style="fill:var(--muted)">${pr[i]}</text>`;
+    tx += `<text x="74" y="${my(i) + 5}">${lab[i]}</text>`;
+    for (let j = 0; j < n; j++){
+      const k = i*n + j;
+      ln += `<line x1="132" y1="${my(i)}" x2="200" y2="${ly(k)}"/>`;
+      tx += `<text x="${132 + .65*68}" y="${my(i) + .65*(ly(k) - my(i)) + (ly(k) > my(i) ? 14 : -5)}" text-anchor="middle" style="fill:var(--muted)">${pr[j]}</text>`;
+      if (hl.includes(k)) tx += `<rect x="202" y="${ly(k) - 12}" width="${W - 204}" height="22" rx="5" style="fill:var(--hl)"/>`;
+      tx += `<text x="206" y="${ly(k) + 5}">${lab[j]}</text>`;
+      tx += `<text x="${W - 6}" y="${ly(k) + 5}" text-anchor="end" style="font-family:'Times New Roman',serif">${leaf[k]}</text>`;
+    }
+  }
+  return {html:`<svg class="sketch" style="max-width:300px;direction:ltr" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="עץ הסתברויות"><g stroke="currentColor" stroke-width="1.3">${ln}</g><g fill="currentColor" font-family="Assistant,sans-serif" font-size="14">${tx}</g></svg>`};
+}
+const S=(p,say,...eq)=>({p,say,eq});
+const E=(t,w,r)=>({t,w,r});
+
+// ---- tables and trees used in the steps
+const T1 = hl => grid2('יום 1 ↓<br>יום 2 ←', ['נמוכים','בינוניים','גבוהים'], ['נמוכים','בינוניים','גבוהים'],
+  [['0.36','0.15','0.09'],['0.15','0.0625','0.0375'],['0.09','0.0375','0.0225']], hl);
+const TR1 = tree2(['גולשת','לא גולשת'], ['0.4','0.6'], ['0.16','0.24','0.24','0.36'], [0,1,2]);
+const TR2 = hl => tree2(['עפרון','עט'], ['1/4','3/4'], ['1/16','3/16','3/16','9/16'], hl);
+const T3 = hl => grid2('סיבוב 1 ↓<br>סיבוב 2 ←', ['10 ₪','5 ₪','0 ₪'], ['10 ₪','5 ₪','0 ₪'],
+  [[sm('20 ₪','0.04'), sm('15 ₪','0.06'), sm('10 ₪','0.1')],
+   [sm('15 ₪','0.06'), sm('10 ₪','0.09'), sm('5 ₪','0.15')],
+   [sm('10 ₪','0.1'),  sm('5 ₪','0.15'),  sm('0 ₪','0.25')]], hl);
+const T4 = grid2('אסף ↓<br>חגי ←', ['משקה','פיצה','כלום'], ['משקה','פיצה','כלום'],
+  [['[4/81]','[2/81]','[12/81]'],['[2/81]','[1/81]','[6/81]'],['[12/81]','[6/81]','[36/81]']], [[1,1],[0,1],[1,0]]);
+const TR4 = tree2(['זוכה','לא זוכה'], ['1/3','2/3'], ['1/9','2/9','2/9','4/9'], [0,1,2]);
+const T5 = grid2('ענת ↓<br>שקד ←', ['עברית','אנגלית','ספרדית'], ['עברית','אנגלית','ספרדית'],
+  [['[1444/5184]','[760/5184]','[532/5184]'],['[760/5184]','[400/5184]','[280/5184]'],['[532/5184]','[280/5184]','[196/5184]']], DIAG(3));
+const T6p = grid2('פעם 1 ↓<br>פעם 2 ←', ['40','60','80','100'], ['40','60','80','100'],
+  [['[1/36]','[1/36]','[1/36]','[1/12]'],['[1/36]','[1/36]','[1/36]','[1/12]'],['[1/36]','[1/36]','[1/36]','[1/12]'],['[1/12]','[1/12]','[1/12]','[1/4]']], DIAG(4));
+const T6s = grid2('פעם 1 ↓<br>פעם 2 ←', ['40','60','80','100'], ['40','60','80','100'],
+  [['80','100','120','140'],['100','120','140','160'],['120','140','160','180'],['140','160','180','200']], [[1,3],[2,2],[3,1]]);
+const T7 = hl => grid2('גלגל א׳ ↓<br>גלגל ב׳ ←', ['1','2','3'], ['1','2','4'],
+  [[sm('1+1=2','[1/6]'), sm('1+2=3','[1/12]'), sm('1+4=5','[1/12]')],
+   [sm('2+1=3','[1/6]'), sm('2+2=4','[1/12]'), sm('2+4=6','[1/12]')],
+   [sm('3+1=4','[1/6]'), sm('3+2=5','[1/12]'), sm('3+4=7','[1/12]')]], hl);
+const T8 = grid2('ראשון ↓<br>שני ←', ['מועמד א׳','מועמד ב׳','מועמד ג׳'], ['א׳','ב׳','ג׳'],
+  [['0.2025','0.1575','0.09'],['0.1575','0.1225','0.07'],['0.09','0.07','0.04']], DIAG(3));
+
+const Q = [
+{n:1, img:'q1', title:'קיץ 26, מועד א – גובה הגלים',
+ text:'התחזית היומית של גובה הגלים בים התיכון מתייחסת לשלושה סוגי גלים: נמוכים, בינוניים או גבוהים. בכל אחד מן הימים בתקופה מסוימת ההסתברות שהגלים יהיו נמוכים היא 0.6, וההסתברות שהגלים יהיו בינוניים היא 0.25. א. מהי ההסתברות שהגלים יהיו גבוהים בכל אחד מן הימים בתקופה זו? הדר מתכננת ללכת לים התיכון בשני ימים מסוימים בתקופה זו. ב. (1) מהי ההסתברות שבשני הימים האלה הגלים יהיו נמוכים? (2) מהי ההסתברות שבשני הימים האלה סוג הגלים יהיה זהה? הדר גולשת בים התיכון רק כאשר הגלים בינוניים או גבוהים. ג. מהי ההסתברות שהדר תגלוש לפחות באחד משני הימים האלה?',
+ hint:['בכל יום הגלים הם בדיוק מסוג אחד מתוך שלושה. כמה צריך להיות הסכום של שלוש ההסתברויות?'],
+ steps:[
+  S('א','בכל יום הגלים הם בדיוק מסוג אחד: נמוכים, בינוניים או גבוהים. לכן סכום שלוש ההסתברויות הוא 1. מסמנים ב-P את ההסתברות שהגלים יהיו גבוהים.','0.6 + 0.25 + {P} = 1'),
+  S('א','מחברים את שתי ההסתברויות הידועות.','{0.85} + P = 1'),
+  S('א','מעבירים 0.85 אגף (מחליף סימן).','P = 1 {− 0.85}','P = 0.15'),
+  S('ב(1)','מה שקורה ביום אחד לא משפיע על היום השני. מסדרים את כל האפשרויות בטבלה: שורה – היום הראשון, עמודה – היום השני. בכל משבצת כופלים את שתי ההסתברויות.',T1([[0,0]])),
+  S('ב(1)','"בשני הימים נמוכים" זו משבצת אחת: נמוכים וגם נמוכים. "וגם" – כופלים.','P = 0.6 · 0.6 = 0.36'),
+  S('ב(2)','"סוג זהה" – שלוש משבצות: שני הימים נמוכים, שני הימים בינוניים, או שני הימים גבוהים. אלה המשבצות על האלכסון.',T1(DIAG(3))),
+  S('ב(2)','"או" בין משבצות – מחברים (חיבור ענפים).','P = 0.6 · 0.6 + 0.25 · 0.25','+ 0.15 · 0.15','P = {0.36} + {0.0625} + {0.0225}','P = 0.445'),
+  S('ג','הדר גולשת כשהגלים בינוניים או גבוהים. מחברים את שתי ההסתברויות. ההסתברות שלא תגלוש היא ההסתברות לגלים נמוכים.','גולשת:|P = 0.25 + 0.15 = 0.4','לא גולשת:|P = 0.6'),
+  S('ג','בונים עץ לשני הימים, עם שני ענפים בכל יום: גולשת או לא גולשת. מסומנים הענפים שבהם היא גולשת לפחות פעם אחת.',TR1),
+  S('ג','"לפחות באחד" זה כל המקרים חוץ ממקרה אחד: לא גולשת באף יום. לכן נוח להשתמש במאורע המשלים.','!לפחות באחד = 1 − באף יום'),
+  S('ג','"באף יום" – לא גולשת ביום הראשון וגם לא ביום השני. כופלים.','P = 1 − {0.6 · 0.6}','P = 1 − 0.36 = 0.64'),
+  S('ג','בדיקה: מחברים את שלושת הענפים המסומנים בעץ.','0.16 + 0.24 + 0.24 = 0.64 ✓'),
+ ],
+ final:[['א.','P = 0.15'],['ב.','(1)  P = 0.36'],['','(2)  P = 0.445'],['ג.','P = 0.64']],
+ errs:[E('"בשני הימים נמוכים" זה "וגם" – כופלים, לא מחברים. הסתברות לא יכולה להיות יותר מ-1.','0.6 + 0.6 = 1.2','0.6 · 0.6 = 0.36'),
+       E('ב"סוג זהה" לוקחים רק נמוכים-נמוכים. יש שלוש אפשרויות.','P = 0.36','P = 0.36 + 0.0625 + 0.0225 = 0.445'),
+       E('ריבוע של 0.25 הוא 0.25 כפול 0.25, ולא 0.25 כפול 2.','0.25² = 0.5','0.25² = 0.0625'),
+       E('"לפחות באחד" – מחשבים רק "בדיוק באחד", ושוכחים את המקרה שהיא גולשת בשני הימים.','P = 0.4 · 0.6 + 0.6 · 0.4 = 0.48','P = 1 − 0.6 · 0.6 = 0.64'),
+       E('במאורע המשלים מחסרים 0.6 של יום אחד בלבד. "באף יום" זה שני ימים – כופלים.','P = 1 − 0.6 = 0.4','P = 1 − 0.6 · 0.6 = 0.64')]},
+
+{n:2, img:'q2', title:'קיץ 26, מועד ב – עפרונות ועטים',
+ text:'בקלמר של סיגל יש שני סוגים של כלי כתיבה: 6 עפרונות ו-18 עטים. ביום ראשון סיגל הוציאה באקראי כלי כתיבה אחד מן הקלמר, החזירה אותו לקלמר ושוב הוציאה באקראי כלי כתיבה (הוצאה עם החזרה). א. מהי ההסתברות שסיגל הוציאה שני עפרונות? ב. מהי ההסתברות שבדיוק אחד מכלי הכתיבה שהוציאה סיגל הוא עט? ג. מהי ההסתברות שלפחות אחד מכלי הכתיבה שהוציאה סיגל הוא עט? ביום שני נתנה סיגל לחברתה עיפרון אחד ו-3 עטים מן הקלמר. לאחר מכן הוציאה סיגל באקראי כלי כתיבה אחד מן הקלמר, החזירה אותו לקלמר ושוב הוציאה באקראי כלי כתיבה (הוצאה עם החזרה). ד. האם ההסתברות שביום שני הוציאה סיגל שני עפרונות, גדולה מן ההסתברות שמצאתם בסעיף א, קטנה ממנה או שווה לה? נמקו את תשובתכם.',
+ hint:['כמה כלי כתיבה יש בקלמר בסך הכול, וכמה מהם עפרונות?'],
+ steps:[
+  S('א','בקלמר 6 עפרונות ו-18 עטים, כלומר 24 כלי כתיבה. ההסתברות היא מספר העפרונות חלקי מספר כל כלי הכתיבה.','6 + 18 = 24','עפרון:|P = [6/24] = [1/4]','עט:|P = [18/24] = [3/4]'),
+  S('א','ההוצאה היא עם החזרה, לכן בפעם השנייה הקלמר זהה וההסתברויות אותן הסתברויות. בונים עץ.',TR2([0])),
+  S('א','שני עפרונות: עפרון וגם עפרון. כופלים לאורך הענף.','P = [1/4] · [1/4] = [1/16]'),
+  S('ב','"בדיוק עט אחד" – שני ענפים: עפרון ואז עט, או עט ואז עפרון.',TR2([1,2]),'עפרון ואז עט:|[1/4] · [3/4] = [3/16]','עט ואז עפרון:|[3/4] · [1/4] = [3/16]'),
+  S('ב','"או" בין ענפים – מחברים.','P = [3/16] + [3/16] = [6/16] = [3/8]'),
+  S('ג','"לפחות עט אחד" – כל המקרים חוץ משני עפרונות. משתמשים במאורע המשלים ובתשובה של סעיף א.','!לפחות עט אחד = 1 − שני עפרונות','P = 1 − {[1/16]} = [15/16]'),
+  S('ג','בדיקה: בדיוק עט אחד, ועוד שני עטים.','[6/16] + [3/4] · [3/4]','= [6/16] + [9/16] = [15/16] ✓'),
+  S('ד','אחרי שסיגל נתנה עיפרון אחד ו-3 עטים, נשארו בקלמר פחות כלי כתיבה.','עפרונות:|6 − 1 = 5','עטים:|18 − 3 = 15','סך הכול:|5 + 15 = 20'),
+  S('ד','ההסתברות להוציא עיפרון ביום השני:','עפרון:|P = [5/20] = [1/4]'),
+  S('ד','זו אותה הסתברות כמו ביום הראשון: גם עכשיו רבע מכלי הכתיבה הם עפרונות. לכן גם ההסתברות לשני עפרונות לא משתנה.','P = [1/4] · [1/4] = [1/16]','!ההסתברות שווה להסתברות בסעיף א.'),
+ ],
+ final:[['א.','P = [1/16] = 0.0625'],['ב.','P = [3/8]'],['ג.','P = [15/16]'],['ד.','!שווה לה – גם ביום שני רבע מכלי הכתיבה הם עפרונות'],['','P = [5/20] · [5/20] = [1/16]']],
+ errs:[E('מחלקים במספר העטים במקום במספר כל כלי הכתיבה.','P = [6/18]','P = [6/24] = [1/4]'),
+       E('ב"בדיוק עט אחד" לוקחים רק סדר אחד. יש שני סדרים: עט ואז עפרון, או עפרון ואז עט.','P = [1/4] · [3/4] = [3/16]','P = 2 · [3/16] = [3/8]'),
+       E('"לפחות עט אחד" – חושבים שזה "בדיוק עט אחד", ושוכחים את המקרה של שני עטים.','P = [3/8]','P = 1 − [1/16] = [15/16]'),
+       E('ביום השני מחסרים רק מהעפרונות, ולא מהמספר הכולל של כלי הכתיבה.','P = [5/24]','P = [5/20] = [1/4]'),
+       E('בסעיף ד עונים "קטנה" כי יש פחות עפרונות. לא מספיק לבדוק כמה עפרונות יש – בודקים איזה חלק הם מכל הקלמר: 5 מתוך 20 זה עדיין רבע.')]},
+
+{n:3, img:'q3', title:'חורף 26 – גלגל מזל',
+ text:'בקניון מסוים הציבו גלגל מזל המחולק ל-10 גזרות שוות. על שתי גזרות כתוב "זכית ב-10 שקלים!", על שלוש גזרות כתוב "זכית ב-5 שקלים!", על חמש גזרות כתוב "לא זכית". לאחר שמסובבים את הגלגל, הוא נעצר כשהחץ מצביע באקראי על אחת מן הגזרות (הגלגל אינו נעצר כשהחץ נמצא בין גזרות). מי שקונה בחנויות הקניון בסכום כולל של 30 עד 100 שקלים מסובב את הגלגל פעם אחת, ומי שקונה בסכום כולל של יותר מ-100 שקלים מסובב את הגלגל פעמיים. רינת קנתה בקניון יומן שמחירו 27 שקלים ועט שמחירו 9 שקלים, וניגשה לסובב את גלגל המזל. א. מהי ההסתברות שרינת תזכה בדיוק ב-5 שקלים? ניר קנה בקניון תיק שמחירו 104 שקלים, וניגש לסובב את גלגל המזל. ב. (1) מהי ההסתברות שניר יזכה בדיוק ב-20 שקלים? (2) מהי ההסתברות שניר יזכה בדיוק ב-10 שקלים? איתן קנה בקניון קלמר שמחירו 36 שקלים, וניגש לסובב את גלגל המזל. ג. מהי ההסתברות שאיתן יזכה ב-15 שקלים? נמקו את תשובתכם.',
+ hint:['קודם בודקים לפי הסכום ששילמו כמה פעמים מסובבים את הגלגל, ורק אחר כך מחשבים.'],
+ steps:[
+  S('א','רינת שילמה בסך הכול 36 שקלים. זה בין 30 ל-100, לכן היא מסובבת את הגלגל פעם אחת.','27 + 9 = 36'),
+  S('א','בגלגל 10 גזרות שוות, ועל 3 מהן כתוב "זכית ב-5 שקלים". ההסתברות: מספר הגזרות המתאימות חלקי כל הגזרות.','P(5 ₪) = [3/10] = 0.3'),
+  S('ב(1)','ניר שילם 104 שקלים – יותר מ-100. לכן הוא מסובב פעמיים. ההסתברויות בכל סיבוב:','10 שקלים:|P = [2/10] = 0.2','5 שקלים:|P = [3/10] = 0.3','לא זכית:|P = [5/10] = 0.5'),
+  S('ב(1)','מסדרים את שני הסיבובים בטבלה. בכל משבצת: למעלה – כמה כסף זוכים בסך הכול, ולמטה – ההסתברות (כפל של שני הסיבובים).',T3([[0,0]])),
+  S('ב(1)','20 שקלים יוצאים רק אם בשני הסיבובים יוצא 10. "וגם" – כופלים.','P = 0.2 · 0.2 = 0.04'),
+  S('ב(2)','בדיוק 10 שקלים – שלוש משבצות: 10 ואז כלום, כלום ואז 10, או 5 ואז 5.',T3([[0,2],[2,0],[1,1]])),
+  S('ב(2)','מחשבים כל משבצת: כופלים לאורך הענף.','10 ואז 0:|0.2 · 0.5 = 0.1','0 ואז 10:|0.5 · 0.2 = 0.1','5 ואז 5:|0.3 · 0.3 = 0.09'),
+  S('ב(2)','"או" בין משבצות – מחברים.','P = 0.1 + 0.1 + 0.09 = 0.29'),
+  S('ג','איתן שילם 36 שקלים – בין 30 ל-100. לכן הוא מסובב את הגלגל פעם אחת בלבד.','30 ≤ 36 ≤ 100'),
+  S('ג','בסיבוב אחד אפשר לזכות רק ב-0, ב-5 או ב-10 שקלים. 15 שקלים אפשר לקבל רק בשני סיבובים (10 ועוד 5). לכן זה מאורע שלא יכול לקרות.','P(15 ₪) = 0'),
+ ],
+ final:[['א.','P = 0.3'],['ב.','(1)  P = 0.04'],['','(2)  P = 0.29'],['ג.','P = 0'],['','!איתן מסובב פעם אחת, ואין גזרה של 15 שקלים']],
+ errs:[E('לא בודקים כמה פעמים מסובבים. רינת ואיתן שילמו 36 שקלים – סיבוב אחד. ניר שילם 104 שקלים – שני סיבובים.'),
+       E('בסעיף ג מחשבים כאילו איתן מסובב פעמיים (10 ואז 5, או 5 ואז 10).','P = 2 · 0.2 · 0.3 = 0.12','P = 0'),
+       E('ב"בדיוק 10 שקלים" שוכחים את 5 ועוד 5.','P = 0.1 + 0.1 = 0.2','P = 0.1 + 0.1 + 0.09 = 0.29'),
+       E('לוקחים רק "10 ואז כלום" ושוכחים את הסדר ההפוך – כלום ואז 10.','P = 0.1 + 0.09 = 0.19','P = 0.1 + 0.1 + 0.09 = 0.29'),
+       E('ב-20 שקלים מחברים את ההסתברויות במקום לכפול.','P = 0.2 + 0.2 = 0.4','P = 0.2 · 0.2 = 0.04')]},
+
+{n:4, img:'q4', title:'קיץ 25, מועד א – כרטיס גירוד',
+ text:'באירוע שנערך לרגל פתיחת פיצרייה חדשה, קיבל כל אחד מן המוזמנים כרטיס של משחק גירוד נושא פרסים. בכל כרטיס יש 9 ריבועים שאפשר לגרד (בציור: כרטיס עם 9 ריבועים בשלוש שורות). בכל כרטיס יש שני ריבועים שמתחת לכל אחד מהם כתוב "זכית במשקה!", וריבוע אחד שמתחתיו כתוב "זכית במגש פיצה!". מתחת לשאר הריבועים לא כתוב דבר. בכל כרטיס מותר לגרד ריבוע אחד בלבד. אסף קיבל כרטיס גירוד אחד. א. מהי ההסתברות שאסף יזכה בפרס כלשהו? גם חגי קיבל כרטיס גירוד אחד. ב. (1) מהי ההסתברות שגם אסף וגם חגי יזכו במגש פיצה? (2) מהי ההסתברות שאחד מהם יזכה בפיצה ואחד מהם יזכה במשקה? ג. מהי ההסתברות שלפחות אחד מהם יזכה בפרס?',
+ hint:['בכל כרטיס 9 ריבועים. מתחת לכמה מהם יש פרס כלשהו?'],
+ steps:[
+  S('א','בכרטיס 9 ריבועים: 2 עם משקה, 1 עם מגש פיצה, ו-6 בלי כלום. מגרדים ריבוע אחד.','משקה:|P = [2/9]','פיצה:|P = [1/9]','כלום:|P = [6/9]'),
+  S('א','"פרס כלשהו" – משקה או פיצה. "או" – מחברים.','פרס כלשהו:|P = [2/9] + [1/9] = [3/9] = [1/3]'),
+  S('ב(1)','לכל אחד כרטיס משלו, ולכן מה שיוצא לאסף לא משפיע על חגי. מסדרים בטבלה: שורה – אסף, עמודה – חגי. בכל משבצת כופלים.',T4),
+  S('ב(1)','גם אסף וגם חגי זוכים בפיצה. "וגם" – כופלים. בכפל שברים כופלים מונה במונה ומכנה במכנה.','P = [1/9] · [1/9] = [1/81]'),
+  S('ב(2)','"אחד בפיצה ואחד במשקה" – שתי משבצות: אסף פיצה וחגי משקה, או אסף משקה וחגי פיצה.','אסף פיצה, חגי משקה:|[1/9] · [2/9] = [2/81]','אסף משקה, חגי פיצה:|[2/9] · [1/9] = [2/81]'),
+  S('ב(2)','"או" בין משבצות – מחברים.','P = [2/81] + [2/81] = [4/81]'),
+  S('ג','עכשיו מעניין רק "זוכה" או "לא זוכה". מסעיף א: זוכה בהסתברות שליש, ולא זוכה בהסתברות שני שלישים. בונים עץ.','זוכה:|P = [1/3]','לא זוכה:|P = 1 − [1/3] = [2/3]',TR4),
+  S('ג','"לפחות אחד זוכה" – כל המקרים חוץ ממקרה אחד: שניהם לא זוכים. משתמשים במאורע המשלים.','!לפחות אחד = 1 − שניהם לא זוכים','P = 1 − {[2/3] · [2/3]}','P = 1 − [4/9] = [5/9]'),
+  S('ג','בדיקה: מחברים את שלושת הענפים המסומנים בעץ.','[1/9] + [2/9] + [2/9] = [5/9] ✓'),
+ ],
+ final:[['א.','P = [1/3]'],['ב.','(1)  P = [1/81]'],['','(2)  P = [4/81]'],['ג.','P = [5/9]']],
+ errs:[E('"פרס כלשהו" – לוקחים רק משקה, ושוכחים את הפיצה.','P = [2/9]','P = [2/9] + [1/9] = [1/3]'),
+       E('בכפל שברים מחברים את המכנים במקום לכפול אותם.','[1/9] · [1/9] = [1/18]','[1/9] · [1/9] = [1/81]'),
+       E('ב"אחד בפיצה ואחד במשקה" לוקחים רק סדר אחד. גם אסף יכול לזכות במשקה וחגי בפיצה.','P = [2/81]','P = [2/81] + [2/81] = [4/81]'),
+       E('"לפחות אחד זוכה" – מחשבים "שניהם זוכים".','P = [1/3] · [1/3] = [1/9]','P = 1 − [2/3] · [2/3] = [5/9]'),
+       E('במאורע המשלים מחסרים את ההסתברות של אחד בלבד.','P = 1 − [2/3] = [1/3]','P = 1 − [2/3] · [2/3] = [5/9]')]},
+
+{n:5, img:'q5', title:'קיץ 25, מועד ב – רשימת שירים',
+ text:'לקראת הטיול השנתי יצרו ענת ושקד רשימה משותפת של שירים ששתיהן אוהבות לשמוע. ברשימה היו סך הכול 72 שירים, בשלוש שפות: 38 שירים בעברית, 20 שירים באנגלית, והשאר שירים בספרדית. ענת בחרה באקראי שיר אחד מתוך כל הרשימה. א. מהי ההסתברות שהיא בחרה שיר בספרדית? גם שקד בחרה באקראי שיר אחד מתוך כל הרשימה. ב. מהי ההסתברות שגם ענת וגם שקד בחרו שיר בעברית? ג. מהי ההסתברות שגם ענת וגם שקד בחרו שיר באותה השפה? ד. מהי ההסתברות שבדיוק אחת מהן בחרה שיר בעברית?',
+ hint:['כמה שירים בספרדית יש ברשימה? זה מה שנשאר אחרי העברית והאנגלית.'],
+ steps:[
+  S('א','מוצאים כמה שירים בספרדית: מכל הרשימה מחסרים את השירים בעברית ובאנגלית.','72 − 38 − 20 = 14'),
+  S('א','ההסתברות: מספר השירים בספרדית חלקי מספר כל השירים.','ספרדית:|P = [14/72] = [7/36] ≈ 0.194'),
+  S('ב','כל אחת בוחרת מתוך כל הרשימה, והבחירה של ענת לא משפיעה על הבחירה של שקד. ההסתברויות לכל אחת:','עברית:|P = [38/72]','אנגלית:|P = [20/72]','ספרדית:|P = [14/72]'),
+  S('ב','גם ענת וגם שקד בעברית. "וגם" – כופלים.','P = [38/72] · [38/72] = [1444/5184]','P = [361/1296] ≈ 0.279'),
+  S('ג','מסדרים בטבלה: שורה – ענת, עמודה – שקד. "באותה שפה" – שלוש משבצות על האלכסון: שתיהן עברית, שתיהן אנגלית, שתיהן ספרדית.',T5),
+  S('ג','מחשבים כל משבצת על האלכסון.','עברית:|[38/72] · [38/72] = [1444/5184]','אנגלית:|[20/72] · [20/72] = [400/5184]','ספרדית:|[14/72] · [14/72] = [196/5184]'),
+  S('ג','"או" בין משבצות – מחברים. המכנה זהה, אז מחברים רק את המונים.','P = [1444 + 400 + 196/5184]','P = [2040/5184] = [85/216] ≈ 0.394'),
+  S('ד','"בדיוק אחת בעברית" – שני מקרים: ענת בעברית ושקד לא, או ענת לא ושקד כן. כמה שירים לא בעברית?','72 − 38 = 34','לא עברית:|P = [34/72]'),
+  S('ד','מחשבים את שני הענפים.','ענת עברית, שקד לא:|[38/72] · [34/72] = [1292/5184]','ענת לא, שקד עברית:|[34/72] · [38/72] = [1292/5184]'),
+  S('ד','"או" – מחברים.','P = [1292/5184] + [1292/5184] = [2584/5184]','P = [323/648] ≈ 0.498'),
+ ],
+ final:[['א.','P = [7/36] ≈ 0.194'],['ב.','P = [361/1296] ≈ 0.279'],['ג.','P = [85/216] ≈ 0.394'],['ד.','P = [323/648] ≈ 0.498']],
+ errs:[E('מחלקים במספר השירים שאינם בספרדית במקום בכל הרשימה.','P = [14/58]','P = [14/72]'),
+       E('בסעיף ב לוקחים את ההסתברות של אחת מהן בלבד.','P = [38/72]','P = [38/72] · [38/72] ≈ 0.279'),
+       E('"באותה שפה" – לוקחים רק עברית, ושוכחים אנגלית וספרדית.','P ≈ 0.279','P ≈ 0.279 + 0.077 + 0.038 ≈ 0.394'),
+       E('"בדיוק אחת בעברית" – לוקחים רק סדר אחד.','P = [38/72] · [34/72] ≈ 0.249','P = 2 · [38/72] · [34/72] ≈ 0.498'),
+       E('בסעיף ד כופלים רק באנגלית. "לא עברית" זה אנגלית או ספרדית – 34 שירים.','[38/72] · [20/72]','[38/72] · [34/72]')]},
+
+{n:6, img:'q6', title:'חורף 25 – משחק קליעה',
+ text:'הלוח של משחק קליעה למטרה מחולק לארבעה אזורים. בכל אזור רשום מספר הנקודות שבהן זוכים אם קולעים לאזור זה (בסרטוט: עיגול פנימי עם 100, וטבעת חיצונית המחולקת לשלושה אזורים עם 40, 80 ו-60). אורית קולעת למטרה בלוח זה. ההסתברות שאורית תקלע לאזור שרשום בו 100 היא 1/2. ההסתברות שאורית תקלע לכל אחד מן האזורים שרשום בהם 40, 60 או 80 היא זהה, ושווה ל-1/6. א. אורית קלעה למטרה פעם אחת. מהי ההסתברות שאורית זכתה ב-80 נקודות או יותר? אורית קלעה למטרה פעמיים. ב. מהי ההסתברות שבכל אחת משתי הפעמים זכתה אורית ב-40 נקודות? ג. מהי ההסתברות שבשתי הפעמים זכתה אורית באותו מספר נקודות? ד. מהי ההסתברות שסכום הנקודות שזכתה בהן אורית בשתי הפעמים שווה ל-160?',
+ hint:['אילו אזורים נותנים 80 נקודות או יותר?'],
+ steps:[
+  S('א','ההסתברויות לכל אזור, לפי הנתונים. בודקים שהסכום הוא 1.','P(100) = [1/2]','P(40) = P(60) = P(80) = [1/6]','[1/2] + 3 · [1/6] = [1/2] + [1/2] = 1 ✓'),
+  S('א','"80 נקודות או יותר" – האזורים 80 ו-100. "או" – מחברים. מביאים למכנה משותף 6.','P = P(80) + P(100) = [1/6] + [1/2]','P = [1/6] + {[3/6]} = [4/6] = [2/3]'),
+  S('ב','שתי הקליעות לא משפיעות זו על זו. 40 בפעם הראשונה וגם 40 בפעם השנייה – כופלים.','P = [1/6] · [1/6] = [1/36]'),
+  S('ג','מסדרים בטבלה: שורה – הקליעה הראשונה, עמודה – השנייה. בכל משבצת – הכפל של שתי ההסתברויות. "אותו מספר נקודות" – ארבע המשבצות על האלכסון.',T6p),
+  S('ג','"או" – מחברים את ארבע המשבצות. מכנה משותף 36.','P = [1/36] + [1/36] + [1/36] + [1/4]','P = [3/36] + {[9/36]} = [12/36] = [1/3]'),
+  S('ד','בטבלה של סכומי הנקודות מחפשים 160. יש שלוש משבצות: 60 ואז 100, 80 ואז 80, 100 ואז 60.',T6s),
+  S('ד','מחשבים כל משבצת: כופלים.','60 ואז 100:|[1/6] · [1/2] = [1/12] = [3/36]','80 ואז 80:|[1/6] · [1/6] = [1/36]','100 ואז 60:|[1/2] · [1/6] = [1/12] = [3/36]'),
+  S('ד','"או" – מחברים.','P = [3/36] + [1/36] + [3/36] = [7/36]'),
+ ],
+ final:[['א.','P = [2/3]'],['ב.','P = [1/36]'],['ג.','P = [1/3]'],['ד.','P = [7/36]']],
+ errs:[E('חושבים שלכל אזור הסתברות רבע, כי יש 4 אזורים. האזורים לא באותו גודל, וההסתברויות נתונות בשאלה.','P(100) = [1/4]','P(100) = [1/2]'),
+       E('"80 או יותר" – לוקחים רק את 80, ושוכחים את 100.','P = [1/6]','P = [1/6] + [1/2] = [2/3]'),
+       E('ב"אותו מספר נקודות" שוכחים את 100 ו-100 – דווקא המקרה הסביר ביותר.','P = [3/36]','P = [3/36] + [9/36] = [1/3]'),
+       E('בסכום 160 לוקחים רק 60 ואז 100, ושוכחים את הסדר ההפוך ואת 80 ועוד 80.','P = [1/12]','P = [3/36] + [1/36] + [3/36] = [7/36]'),
+       E('מחברים שברים בלי מכנה משותף.','[1/36] + [1/12] = [2/48]','[1/36] + [3/36] = [4/36]')]},
+
+{n:7, img:'q7', title:'קיץ 24, מועד א – שני גלגלים',
+ text:'בציור שלפניכם שני גלגלים, גלגל א\' וגלגל ב\'. גלגל א\' מחולק לשלוש גזרות שוות בגודלן: על כל גזרה רשום אחד מן המספרים 1, 2, 3. גלגל ב\' מחולק לשלוש גזרות: גזרה אחת שגודלה 1/2 עיגול ועליה רשום המספר 1, ושתי גזרות נוספות שהגודל של כל אחת מהן הוא 1/4 עיגול, ועל כל אחת מהן רשום אחד מן המספרים 2, 4 (ראו ציור). מסובבים כל גלגל פעם אחת. כל אחד מן הגלגלים נעצר באקראי על אחד מן המספרים (הוא לא נעצר על הקווים המפרידים בין הגזרות). א. מהי ההסתברות שגלגל א\' ייעצר על מספר גדול מ-1? ב. מהי ההסתברות ששני הגלגלים ייעצרו על המספר 2? ג. מהי ההסתברות ששני הגלגלים ייעצרו על אותו המספר? ד. מהי ההסתברות שסכום המספרים שעליהם ייעצרו שני הגלגלים יהיה 5?',
+ hint:['בגלגל א׳ שלוש גזרות שוות. כמה מהן גדולות מ-1?'],
+ steps:[
+  S('א','בגלגל א׳ שלוש גזרות שוות, ולכן לכל מספר הסתברות שליש. גדול מ-1 – המספרים 2 ו-3. "או" – מחברים.','P = [1/3] + [1/3] = [2/3]'),
+  S('ב','בגלגל ב׳ הגזרות לא שוות. ההסתברות של כל מספר היא החלק של הגזרה מכל העיגול.','גלגל ב׳, המספר 1:|P = [1/2]','גלגל ב׳, המספר 2:|P = [1/4]','גלגל ב׳, המספר 4:|P = [1/4]'),
+  S('ב','שני הגלגלים לא משפיעים זה על זה. מסדרים בטבלה: שורה – גלגל א׳, עמודה – גלגל ב׳. בכל משבצת: למעלה – סכום המספרים, ולמטה – ההסתברות (כפל).',T7([[1,1]])),
+  S('ב','שני הגלגלים על 2 – "וגם", כופלים.','P = [1/3] · [1/4] = [1/12]'),
+  S('ג','"אותו מספר" – רק מספר שיש בשני הגלגלים: 1 או 2. ל-3 ול-4 אין זוג בגלגל השני.',T7([[0,0],[1,1]]),'שניהם 1:|[1/3] · [1/2] = [1/6]','שניהם 2:|[1/3] · [1/4] = [1/12]'),
+  S('ג','"או" – מחברים. מכנה משותף 12.','P = [1/6] + [1/12]','P = {[2/12]} + [1/12] = [3/12] = [1/4]'),
+  S('ד','מחפשים בטבלה משבצות שהסכום בהן 5: גלגל א׳ על 1 וגלגל ב׳ על 4, או גלגל א׳ על 3 וגלגל ב׳ על 2. (2 ועוד 3 לא אפשרי – בגלגל ב׳ אין 3.)',T7([[0,2],[2,1]])),
+  S('ד','מחשבים כל משבצת ומחברים.','1 ועוד 4:|[1/3] · [1/4] = [1/12]','3 ועוד 2:|[1/3] · [1/4] = [1/12]','P = [1/12] + [1/12] = [2/12] = [1/6]'),
+ ],
+ final:[['א.','P = [2/3]'],['ב.','P = [1/12]'],['ג.','P = [1/4]'],['ד.','P = [1/6]']],
+ errs:[E('בגלגל ב׳ נותנים שליש לכל מספר, כי יש שלוש גזרות. הגזרות לא שוות: המספר 1 תופס חצי עיגול.','P(1) = [1/3]','P(1) = [1/2]'),
+       E('בסעיף ב מחברים במקום לכפול. שני הגלגלים על 2 זה "וגם".','P = [1/3] + [1/4] = [7/12]','P = [1/3] · [1/4] = [1/12]'),
+       E('ב"אותו מספר" סופרים גם את 3 או 4 – אבל אין להם זוג בגלגל השני.'),
+       E('בסכום 5 מוסיפים גם 2 ועוד 3. בגלגל ב׳ אין 3.','P = [3/12]','P = [2/12] = [1/6]'),
+       E('בסעיף א כוללים גם את 1. "גדול מ-1" לא כולל את 1 עצמו.','P = [3/3] = 1','P = [2/3]')]},
+
+{n:8, img:'q8', title:'קיץ 24, מועד ב – בחירות',
+ text:'בבחירות לעירייה בעיר מסוימת התמודדו 3 מועמדים: מועמד א\', מועמד ב\' ומועמד ג\'. 45% מן המצביעים בעיר בחרו במועמד א\', ו-35% מן המצביעים בעיר בחרו במועמד ב\' (בציור: דיאגרמת עוגה עם מועמד א\' 45%, מועמד ב\' 35%, ומועמד ג\' בלי אחוז רשום). א. מהי ההסתברות שמצביע שנבחר באקראי בחר במועמד ג\'? בוחרים באקראי שני מצביעים. ב. מהי ההסתברות ששניהם בחרו במועמד א\'? ג. מהי ההסתברות ששניהם בחרו באותו מועמד? ד. מהי ההסתברות שאחד מהם בחר במועמד א\' והאחר בחר במועמד ב\'?',
+ hint:['כל מצביע בחר במועמד אחד, אז סכום האחוזים הוא 100%. כמה נשאר למועמד ג׳?'],
+ steps:[
+  S('א','כל מצביע בחר במועמד אחד בלבד, לכן סכום האחוזים הוא 100%. מחסרים את א׳ ואת ב׳.','100% − 45% − 35% = 20%'),
+  S('א','הופכים אחוזים להסתברות: מחלקים ב-100.','מועמד א׳:|P = 0.45','מועמד ב׳:|P = 0.35','מועמד ג׳:|P = [20/100] = 0.2'),
+  S('ב','שני המצביעים נבחרים באקראי, וכל אחד בחר בלי קשר לשני. שניהם במועמד א׳ – "וגם", כופלים.','P = 0.45 · 0.45 = 0.2025'),
+  S('ג','מסדרים בטבלה: שורה – המצביע הראשון, עמודה – השני. "אותו מועמד" – שלוש המשבצות על האלכסון: שניהם א׳, שניהם ב׳, שניהם ג׳.',T8),
+  S('ג','"או" – מחברים את שלוש המשבצות.','P = 0.45² + 0.35² + 0.2²','P = {0.2025} + {0.1225} + {0.04}','P = 0.365'),
+  S('ד','אחד א׳ ואחד ב׳ – שני סדרים: הראשון א׳ והשני ב׳, או הראשון ב׳ והשני א׳.','א׳ ואז ב׳:|0.45 · 0.35 = 0.1575','ב׳ ואז א׳:|0.35 · 0.45 = 0.1575'),
+  S('ד','"או" – מחברים.','P = 0.1575 + 0.1575 = 0.315'),
+  S('ד','בדיקה: סכום כל תשע המשבצות בטבלה צריך להיות 1.','0.365 + 2 · (0.1575 + 0.09 + 0.07)','= 0.365 + 0.635 = 1 ✓'),
+ ],
+ final:[['א.','P = 0.2'],['ב.','P = 0.2025'],['ג.','P = 0.365'],['ד.','P = 0.315']],
+ errs:[E('עונים 20 במקום 0.2. הסתברות היא מספר בין 0 ל-1 – מחלקים את האחוזים ב-100.','P = 20','P = 0.2'),
+       E('"שניהם בחרו במועמד א׳" – לוקחים רק 0.45, של מצביע אחד.','P = 0.45','P = 0.45 · 0.45 = 0.2025'),
+       E('"אותו מועמד" – שוכחים את מועמד ג׳.','P = 0.2025 + 0.1225 = 0.325','P = 0.2025 + 0.1225 + 0.04 = 0.365'),
+       E('ריבוע של 0.2 הוא 0.2 כפול 0.2.','0.2² = 0.4','0.2² = 0.04'),
+       E('בסעיף ד שוכחים את הסדר ההפוך (הראשון ב׳ והשני א׳).','P = 0.1575','P = 2 · 0.1575 = 0.315')]},
+];
+
+// ================================================== AI prompt
+function aiPrompt(q){
+  return `אתה מורה פרטי סבלני למתמטיקה. אני תלמיד/ה ב${CONFIG.level}, ואני רוצה ללמוד לפתור את השאלה הזאת לבד.
+
+הכללים:
+1. אל תכתוב לי את הפתרון ואל תגלה את התשובה הסופית, גם אם אבקש.
+2. עבוד איתי צעד אחד בכל פעם: שאל אותי שאלה מנחה אחת, וחכה לתשובה שלי לפני שממשיכים.
+3. אם טעיתי, אל תתקן במקומי. תגיד לי באיזו שורה לבדוק (למשל סימן מינוס, פתיחת סוגריים, העברת אגף), ותן לי לנסות שוב.
+4. אם אני תקוע/ה פעמיים באותו מקום, תן רמז קטן או דוגמה דומה עם מספרים אחרים.
+5. השתמש רק בשיטות שלומדים ברמה הזאת: ${CONFIG.methods}.
+6. כתוב בעברית פשוטה, במשפטים קצרים.
+7. כשאגיע לתשובה, בקש ממני לבדוק אותה בעצמי (למשל בהצבה), ולהסביר במילים שלי מה עשיתי.
+
+השאלה (שאלה ${q.n} ${CONFIG.source}):
+${q.text}
+
+נתחיל: שאל אותי מה הצעד הראשון שאני חושב/ת לעשות.`;
+}
+
+// ================================================== render helpers
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function math(s){
+  let h = esc(s);
+  h = h.replace(/\[([^\[\]\/]+)\/([^\[\]]+)\]/g, '<span class="fr"><span>$1</span><span>$2</span></span>');
+  h = h.replace(/\{([^{}]+)\}/g, '<span class="hl">$1</span>');
+  h = h.replace(/_([A-Z]{1,2})/g, '<sub>$1</sub>');
+  h = h.replace(/ או /g, ' <span class="or">או</span> ');
+  h = h.replace(/✓/g, '<span class="ok">✓</span>');
+  return h;
+}
+function eqLine(e){
+  if (typeof e === 'object') return e.html;
+  if (e.startsWith('!')) return `<div class="eq heb">${esc(e.slice(1))}</div>`;
+  if (e.includes('|')){ const [l,m]=e.split('|'); return `<div class="eq lab">${l?`<b>${esc(l)}</b>`:''}<span class="m">${math(m)}</span></div>`; }
+  return `<div class="eq"><span class="m">${math(e)}</span></div>`;
+}
+function finLine([l,e]){
+  let body;
+  if (e.startsWith('!')) body = `<div class="eq heb" style="text-align:right">${esc(e.slice(1))}</div>`;
+  else if (e.includes('|')){ const [a,b]=e.split('|'); body = `<div class="eq lab" style="justify-content:flex-start"><b>${esc(a)}</b><span class="m">${math(b)}</span></div>`; }
+  else body = `<div class="eq" style="text-align:right"><span class="m">${math(e)}</span></div>`;
+  return `<div class="fl">${esc(l)}</div>${body}`;
+}
+
+// ================================================== build
+const stage = document.getElementById('stage'), jump = document.getElementById('jump');
+const cards = [], chips = [];
+SECTIONS.forEach((sec, si) => {
+  if (si) { const s=document.createElement('span'); s.className='sep'; jump.appendChild(s); }
+  Q.filter(q => q.n >= sec.from && q.n <= sec.to).forEach(q => {
+    q.sec = sec;
+    const chip = document.createElement('button'); chip.textContent = q.n; chip.setAttribute('aria-label','שאלה '+q.n);
+    chip.onclick = () => go(q.n - 1); jump.appendChild(chip); chips.push(chip);
+
+    const c = document.createElement('article'); c.className = 'card'; c.id = 'q'+q.n;
+    let steps = `<div class="step hint-step" data-k="0"><div class="say"><span class="sn">רמז:</span>${esc(q.hint[0])}</div>${q.hint.slice(1).map(eqLine).join('')}<div class="small-note">נסו להמשיך לבד. לא מצליחים? לחצו "לפתרון".</div></div>`, lastPart = null, k = 0;
+    q.steps.forEach(st => {
+      if (st.p && st.p !== lastPart){ steps += `<div class="part" data-k="${k+1}">${st.p.startsWith('(')?'גרף '+st.p:'סעיף '+st.p}</div>`; lastPart = st.p; }
+      steps += `<div class="step" data-k="${k+1}"><div class="say"><span class="sn">${k+1}.</span>${esc(st.say)}</div>${st.eq.map(eqLine).join('')}</div>`;
+      k++;
+    });
+    const pr = aiPrompt(q);
+    const errs = q.errs.map(e => `<div class="err-item"><div>${esc(e.t)}</div>`+
+        (e.w?`<div class="eq w"><span class="mk">לא נכון:</span><span class="m">${math(e.w)}</span></div>`:'')+
+        (e.r?`<div class="eq r"><span class="mk">נכון:</span><span class="m">${math(e.r)}</span></div>`:'')+`</div>`).join('');
+    c.innerHTML = `
+      <div class="head"><div class="num">${q.n}</div><div class="ttl">${q.title}</div></div>
+      <div class="imgbox${q.small?' small':''}" role="button" aria-label="הגדלת השאלה">
+        <img class="qimg" src="img/${q.img}.png" alt="שאלה ${q.n}: ${esc(q.text).replace(/"/g,'&quot;')}">
+        <span class="zoom-ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21M10.5 7.5v6M7.5 10.5h6"/></svg></span>
+      </div>
+      ${q.instr?`<div class="instr">${q.instr}</div>`:''}
+      <div class="final-box"><h4>תשובה סופית:</h4><div class="fin">${q.final.map(finLine).join('')}</div></div>
+      <div class="btns">
+        <button class="tg t-steps" data-p="steps" aria-pressed="false">פתרון מפורט</button>
+        <button class="tg t-err" data-p="err" aria-pressed="false">טעויות נפוצות</button>
+        <button class="tg t-ai" data-p="ai" aria-pressed="false">עזרה מ-AI</button>
+      </div>
+      <div class="panel p-steps" data-panel="steps">
+        ${steps}
+        <div class="step-ctl"><button class="b-next">לפתרון</button><button class="b-all">הכול</button></div>
+        <div class="done-msg">זהו! עכשיו נסו לפתור שוב לבד במחברת, בלי להסתכל.</div>
+      </div>
+      <div class="panel p-err" data-panel="err"><h4>טעויות נפוצות – אולי אחת מהן אצלכם?</h4>${errs}</div>
+      <div class="panel p-ai" data-panel="ai"><p class="ai-note">הכפתורים שולחים לצ'אט את השאלה עם הוראה <b>להנחות אתכם בשאלות, בלי לפתור במקומכם</b>. ב-Gemini מדביקים (ההוראה מועתקת אוטומטית).</p>
+        <div class="ai-btns">
+          <button class="b-copy">העתקה בלבד</button>
+          <a href="https://chatgpt.com/?q=${encodeURIComponent(pr)}" target="_blank" rel="noopener">ChatGPT</a>
+          <a href="https://claude.ai/new?q=${encodeURIComponent(pr)}" target="_blank" rel="noopener">Claude</a>
+          <a class="b-gem" href="https://gemini.google.com/app" target="_blank" rel="noopener">Gemini</a>
+        </div>
+      </div>`;
+    stage.appendChild(c); cards.push(c);
+
+    const stepsEls = [...c.querySelectorAll('.step')], parts = [...c.querySelectorAll('.part')];
+    let shown = 0;
+    const showUpTo = n => {
+      shown = Math.min(n, stepsEls.length);
+      stepsEls.forEach((s,i) => s.classList.toggle('show', i < shown));
+      parts.forEach(p => p.classList.toggle('show', +p.dataset.k < shown));
+      const done = shown >= stepsEls.length;
+      c.querySelector('.step-ctl').style.display = done ? 'none' : '';
+      c.querySelector('.done-msg').style.display = done ? 'block' : 'none';
+      c.querySelector('.b-next').textContent = shown <= 1 ? 'לפתרון – שלב 1' : 'השלב הבא';
+    };
+    c.querySelectorAll('.tg').forEach(b => b.onclick = () => {
+      const p = c.querySelector(`[data-panel="${b.dataset.p}"]`);
+      const on = !p.classList.contains('open');
+      p.classList.toggle('open', on); b.setAttribute('aria-pressed', on);
+      if (b.dataset.p === 'steps' && on && shown === 0) showUpTo(1);
+      if (on) p.scrollIntoView({block:'nearest', behavior:'smooth'});
+    });
+    c.querySelector('.b-next').onclick = () => { showUpTo(shown + 1); stepsEls[shown-1].scrollIntoView({block:'nearest', behavior:'smooth'}); };
+    c.querySelector('.b-all').onclick = () => showUpTo(stepsEls.length);
+    c.querySelector('.b-copy').onclick = () => copy(pr);
+    c.querySelector('.b-gem').addEventListener('click', () => copy(pr, 'ההוראה הועתקה – מדביקים ב-Gemini'));
+    c.querySelector('.imgbox').onclick = () => openLb(`img/${q.img}.png`);
+  });
+});
+
+// shrink long equation lines so they fit on one line
+function fit(root){
+  root.querySelectorAll('.eq').forEach(e => {
+    if (!e.offsetParent) return;
+    e.style.fontSize = '';
+    let fs = parseFloat(getComputedStyle(e).fontSize), min = fs * 0.62;
+    while (e.scrollWidth > e.clientWidth + 1 && fs > min){ fs -= 1; e.style.fontSize = fs + 'px'; }
+  });
+}
+new MutationObserver(ms => ms.forEach(m => m.target.closest && m.target.closest('.card') && fit(m.target)))
+  .observe(stage, {attributes:true, subtree:true, attributeFilter:['class']});
+addEventListener('resize', () => cards[cur] && fit(cards[cur]));
+
+// ================================================== carousel
+let cur = -1;
+function go(i, dir){
+  i = Math.max(0, Math.min(Q.length - 1, i));
+  if (i === cur) return;
+  if (dir === undefined) dir = i > cur ? 1 : -1;
+  if (cur >= 0) cards[cur].classList.remove('on','in-next','in-prev');
+  const c = cards[i]; c.classList.remove('in-next','in-prev'); void c.offsetWidth;
+  c.classList.add('on', cur < 0 ? 'x' : (dir > 0 ? 'in-next' : 'in-prev'));
+  chips.forEach((ch,k) => ch.classList.toggle('cur', k === i));
+  chips[i].scrollIntoView({inline:'center', block:'nearest', behavior: cur<0?'auto':'smooth'});
+  cur = i;
+  const q = Q[i];
+  document.getElementById('secName').textContent = q.sec.name;
+  document.getElementById('secCount').textContent = '';
+  document.getElementById('cnt').textContent = `${i+1} / ${Q.length}`;
+  document.getElementById('prev').disabled = i === 0;
+  document.getElementById('next').disabled = i === Q.length - 1;
+  history.replaceState(null, '', '#q' + q.n);
+  const top = document.querySelector('.where').getBoundingClientRect().top + scrollY - 60;
+  if (scrollY > top) scrollTo({top, behavior:'auto'});
+}
+document.getElementById('prev').onclick = () => go(cur - 1, -1);
+document.getElementById('next').onclick = () => go(cur + 1, 1);
+const m0 = location.hash.match(/^#q(\d+)$/);
+go(m0 ? +m0[1] - 1 : 0);
+if (!m0) { scrollTo(0, 0); addEventListener('load', () => setTimeout(() => scrollTo(0, 0), 50)); }
+
+// swipe (RTL: finger to the right = next)
+let sx = null, sy = null;
+stage.addEventListener('touchstart', e => {
+  if (e.touches.length !== 1 || e.target.closest('.tbl-wrap')) { sx = null; return; }
+  sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+}, {passive:true});
+stage.addEventListener('touchend', e => {
+  if (sx === null) return;
+  const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+  sx = null;
+  if (Math.abs(dx) > 60 && Math.abs(dx) > 1.5 * Math.abs(dy)) go(cur + (dx > 0 ? 1 : -1), dx > 0 ? 1 : -1);
+}, {passive:true});
+document.addEventListener('keydown', e => {
+  if (lb.classList.contains('on')) { if (e.key === 'Escape') closeLb(); return; }
+  if (e.key === 'ArrowLeft') go(cur + 1, 1);
+  if (e.key === 'ArrowRight') go(cur - 1, -1);
+});
+
+// ================================================== lightbox
+const lb = document.getElementById('lb'), lbimg = document.getElementById('lbimg');
+function openLb(src){ lbimg.src = src; lb.classList.remove('big'); lb.classList.add('on'); document.body.style.overflow='hidden'; lb.scrollTo(0,0); }
+function closeLb(){ lb.classList.remove('on'); document.body.style.overflow=''; }
+document.getElementById('lbx').onclick = closeLb;
+lb.addEventListener('click', e => { if (e.target === lb || e.target.classList.contains('inner')) closeLb(); });
+lbimg.onclick = () => lb.classList.toggle('big');
+
+// ================================================== copy
+function copy(t, msg){
+  const ok = () => { const el = document.getElementById('toast'); el.textContent = msg || "הועתק! עכשיו מדביקים בצ'אט"; el.classList.add('on'); setTimeout(()=>el.classList.remove('on'), 1800); };
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(ok, () => fallback(t, ok));
+  else fallback(t, ok);
+}
+function fallback(t, ok){
+  const ta = document.createElement('textarea'); ta.value = t; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); ok(); }catch(e){} ta.remove();
+}
+</script>
+</body>
+</html>

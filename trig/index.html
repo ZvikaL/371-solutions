@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>טריגונומטריה – פתרונות 371</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f6f8; --card:#fff; --ink:#1d2330; --muted:#5d6577; --line:#e2e5ec;
+  --blue:#2f6fde; --blue-soft:#eaf1fd; --orange:#e8590c; --orange-soft:#fff1e8;
+  --pos:#1f5fd0; --neg:#d32f2f; --zero:#7b3fb8; --ok:#1e8e4e; --ok-soft:#e8f6ee;
+  --hint:#9a6b00; --hint-soft:#fff8dc; --err:#b42318; --err-soft:#fdeceb; --hl:#fff1a8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14171d; --card:#1d222b; --ink:#e8ebf1; --muted:#a3abbb; --line:#2f3644;
+    --blue:#6f9ef0; --blue-soft:#1f2b40; --orange:#ff8a4c; --orange-soft:#3a271c;
+    --pos:#79a8ff; --neg:#ff7b7b; --zero:#c79bf2; --ok:#5fd08f; --ok-soft:#1b3326;
+    --hint:#f3d36b; --hint-soft:#2f2a16; --err:#ff9a9a; --err-soft:#3b1d1d; --hl:#5a4d12;
+  }
+  :root:not([data-theme="light"]) .qimg, :root:not([data-theme="light"]) .lb img{ filter: invert(.9) hue-rotate(180deg); }
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:'Assistant',system-ui,sans-serif; font-size:17px; line-height:1.6; padding-bottom:84px}
+.wrap{max-width:720px; margin:0 auto; padding:0 16px}
+
+/* ---------- math */
+.m{font-family:'Times New Roman',Times,serif; direction:ltr; unicode-bidi:isolate; font-size:1.12em}
+.or{unicode-bidi:isolate; direction:rtl; font-family:'Assistant',sans-serif; font-size:.85em; margin:0 .45em; color:var(--muted)}
+.fr{display:inline-flex; flex-direction:column; vertical-align:middle; text-align:center; margin:0 .12em; line-height:1.15}
+.fr>span:first-child{border-bottom:1.3px solid currentColor; padding:0 .2em .05em}
+.fr>span:last-child{padding:.05em .2em 0}
+.hl{background:var(--hl); border-radius:4px; padding:0 .15em}
+.eq{direction:ltr; text-align:center; font-family:'Times New Roman',Times,serif; font-size:1.18em; margin:6px 0; line-height:1.9; white-space:nowrap; overflow-x:auto; scrollbar-width:none}
+.eq .m{white-space:nowrap}
+.eq.lab{display:flex; justify-content:center; align-items:center; gap:10px; direction:rtl; flex-wrap:wrap}
+.eq.lab b{font-family:'Assistant',sans-serif; font-size:.82em}
+.eq.heb{direction:rtl; font-family:'Assistant',sans-serif; font-weight:800; font-size:1em}
+.eq .ok{color:var(--ok); font-family:'Assistant',sans-serif; font-weight:800; margin-inline-start:.4em}
+
+/* ---------- top */
+header.top{background:var(--blue); color:#fff; padding:16px 16px 14px}
+header.top h1{margin:0; font-size:1.35rem; font-weight:800; line-height:1.25}
+header.top p{margin:4px 0 0; opacity:.92; font-size:.95rem}
+nav.jump{position:sticky; top:0; z-index:5; background:var(--card); border-bottom:1px solid var(--line); box-shadow:0 2px 6px rgba(0,0,0,.05)}
+nav.jump .wrap{display:flex; gap:6px; overflow-x:auto; padding:8px 16px; scrollbar-width:none}
+nav.jump .wrap::-webkit-scrollbar{display:none}
+nav.jump button{flex:none; min-width:38px; min-height:38px; padding:0; border-radius:10px; background:var(--blue-soft); color:var(--blue); font-weight:800; border:2px solid transparent}
+nav.jump button.cur{background:var(--blue); color:#fff}
+nav.jump .sep{flex:none; width:1px; background:var(--line); margin:4px 2px}
+details.intro{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:10px 14px; margin:14px 0 0}
+details.intro summary{font-weight:800; cursor:pointer}
+details.intro ol{margin:6px 0 0; padding-inline-start:22px}
+details.intro.ai{border-color:var(--orange); background:var(--orange-soft)}
+.small-note{color:var(--muted); font-size:.9rem}
+
+/* ---------- carousel */
+.where{display:flex; justify-content:space-between; align-items:baseline; margin:16px 2px 6px; color:var(--muted); font-weight:700; font-size:.95rem}
+.stage{position:relative; overflow:hidden; touch-action:pan-y pinch-zoom}
+.card{display:none; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px; box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card.on{display:block}
+.card.in-next{animation:inNext .25s ease}
+.card.in-prev{animation:inPrev .25s ease}
+@keyframes inNext{from{opacity:0; transform:translateX(-40px)} to{opacity:1; transform:none}}
+@keyframes inPrev{from{opacity:0; transform:translateX(40px)} to{opacity:1; transform:none}}
+.card .head{display:flex; align-items:center; gap:10px; margin-bottom:10px}
+.card .num{background:var(--blue); color:#fff; font-weight:800; border-radius:10px; min-width:38px; height:38px; display:grid; place-items:center; font-size:1.1rem}
+.card .ttl{font-weight:800}
+.imgbox{position:relative; cursor:zoom-in; border-radius:8px; overflow:hidden; background:#fff; border:1px solid var(--line)}
+.qimg{display:block; width:100%; height:auto}
+.imgbox.small .qimg{max-width:380px; margin-inline-start:auto}
+.zoom-ic{position:absolute; bottom:6px; left:6px; width:34px; height:34px; border-radius:50%; background:rgba(29,35,48,.75); display:grid; place-items:center}
+.instr{margin-top:6px; color:var(--muted)}
+
+/* ---------- toggle buttons */
+.btns{display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:10px}
+.tg{font:inherit; font-weight:800; border-radius:12px; padding:8px 10px; cursor:pointer; min-height:40px; font-size:.88rem; line-height:1.2; padding:6px 4px; background:var(--card); border:2px solid currentColor; display:flex; align-items:center; justify-content:center; gap:8px; transition:background .15s, color .15s, box-shadow .15s}
+.tg .st{font-size:.75rem; font-weight:700; opacity:.75}
+.tg[aria-pressed="true"]{color:#fff !important; box-shadow:inset 0 3px 6px rgba(0,0,0,.25)}
+.t-hint{color:var(--hint)} .t-hint[aria-pressed="true"]{background:#b58300}
+.t-steps{color:var(--blue)} .t-steps[aria-pressed="true"]{background:var(--blue)}
+.t-final{color:var(--ok)} .t-final[aria-pressed="true"]{background:var(--ok)}
+.t-err{color:var(--err)} .t-err[aria-pressed="true"]{background:var(--err)}
+.t-ai{color:var(--orange)} .t-ai[aria-pressed="true"]{background:var(--orange)}
+
+/* ---------- panels */
+.panel{display:none; margin-top:12px; border-radius:12px; padding:12px 14px}
+.panel.open{display:block; animation:fade .2s ease}
+.panel h4{margin:0 0 6px; font-size:1rem}
+.p-hint{background:var(--hint-soft); border:2px solid #e6c65c}
+.p-steps{background:var(--blue-soft); border:2px solid var(--blue)}
+.p-final{background:var(--ok-soft); border:2px solid var(--ok)}
+.p-err{background:var(--err-soft); border:2px solid var(--err)}
+.p-ai{background:var(--orange-soft); border:2px solid var(--orange)}
+.step{display:none; background:var(--card); border-radius:10px; padding:10px 12px; margin:8px 0; border-inline-start:4px solid var(--blue)}
+.step.show{display:block; animation:fade .25s ease}
+.step .say{font-weight:600}
+.step.hint-step{border-inline-start-color:#c99a00; background:var(--hint-soft)}
+.step.hint-step .sn{color:var(--hint)}
+.final-box{margin-top:6px; color:var(--ok); font-size:.88rem; line-height:1.4}
+.final-box h4{margin:0; font-size:.85rem; font-weight:800}
+.final-box .fin{gap:0 8px}
+.final-box .eq{font-size:1.05em; margin:0; line-height:1.5}
+.final-box .fl{font-weight:700}
+.final-box .eq.heb{font-size:.95em; font-weight:700}
+.ai-note{margin:0 0 4px}
+.step .sn{font-weight:800; color:var(--blue); margin-inline-end:6px}
+.part{display:none; font-weight:800; margin:14px 0 2px; color:var(--orange)}
+.part.show{display:block}
+.step-ctl{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
+.b-next,.b-all{font:inherit; font-weight:800; border-radius:12px; padding:8px 14px; min-height:44px; cursor:pointer}
+.b-next{background:var(--blue); color:#fff; border:0; flex:1}
+.b-all{background:transparent; color:var(--blue); border:2px solid var(--blue)}
+.done-msg{display:none; font-weight:800; color:var(--ok); margin-top:6px}
+.fin{display:grid; grid-template-columns:auto 1fr; gap:4px 12px; align-items:center}
+.fin .fl{font-weight:800}
+.fin .eq{text-align:left; margin:2px 0}
+.err-item{background:var(--card); border-radius:10px; padding:8px 12px; margin:8px 0}
+.err-item .eq{text-align:right; direction:rtl; display:flex; gap:8px; align-items:center; justify-content:flex-start; flex-wrap:wrap; margin:2px 0}
+.err-item .mk{font-family:'Assistant',sans-serif; font-weight:800; font-size:.8em; min-width:3.6em}
+.err-item .w .mk{color:var(--err)} .err-item .w .m{color:var(--err); background:var(--err-soft); border-radius:6px; padding:0 .35em}
+.err-item .r .mk{color:var(--ok)}
+@keyframes fade{from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none}}
+
+/* ---------- tables, sketch */
+.tbl-wrap{overflow-x:auto; margin:6px 0}
+table.s{direction:ltr; border-collapse:collapse; margin:0 auto; font-size:.86rem; font-family:'Times New Roman',serif}
+table.s th, table.s td{border:1px solid var(--line); padding:4px 4px; text-align:center; background:var(--card); line-height:1.3}
+table.s th{background:var(--bg); white-space:nowrap}
+table.s td.h{font-weight:700; background:var(--bg); font-family:'Assistant',sans-serif; direction:rtl; font-size:.95em}
+table.s .tv{color:var(--muted); font-size:.85em}
+.pos{color:var(--pos); font-weight:800} .neg{color:var(--neg); font-weight:800} .zr{color:var(--zero); font-weight:800}
+.sketch{display:block; margin:6px auto; max-width:260px; width:100%; direction:ltr}
+
+/* ---------- AI */
+.prompt{white-space:pre-wrap; background:var(--card); border:1px dashed var(--orange); border-radius:10px; padding:10px 12px; font-size:.9rem; max-height:200px; overflow:auto}
+.ai-btns{display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:6px}
+.ai-btns a, .ai-btns button{font:inherit; font-weight:800; text-decoration:none; border-radius:12px; padding:6px 8px; min-height:40px; font-size:.9rem; display:flex; align-items:center; justify-content:center; background:var(--card); color:var(--orange); border:2px solid var(--orange); cursor:pointer}
+
+/* ---------- bottom bar */
+.bar{position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--line); box-shadow:0 -2px 8px rgba(0,0,0,.06); z-index:6}
+.bar .wrap{display:flex; align-items:center; gap:10px; padding:10px 16px}
+.bar button{font:inherit; font-weight:800; flex:1; min-height:48px; border-radius:12px; border:2px solid var(--blue); background:var(--card); color:var(--blue); cursor:pointer}
+.bar button.nx{background:var(--blue); color:#fff}
+.bar button:disabled{opacity:.35; cursor:default}
+.bar .cnt{flex:none; font-weight:800; color:var(--muted); min-width:56px; text-align:center}
+
+/* ---------- lightbox */
+.lb{position:fixed; inset:0; z-index:30; background:rgba(10,12,16,.92); display:none; overflow:auto; touch-action:pan-x pan-y pinch-zoom}
+.lb.on{display:block}
+.lb .inner{min-height:100%; display:flex; align-items:center; justify-content:center; padding:56px 8px 24px}
+.lb img{display:block; width:100%; max-width:1300px; height:auto; background:#fff; border-radius:6px; cursor:zoom-in}
+.lb.big img{width:200%; max-width:none; cursor:zoom-out}
+.lb.big .inner{justify-content:flex-start}
+.lb .x{position:fixed; top:10px; left:10px; width:44px; height:44px; border-radius:50%; border:0; background:#fff; color:#111; font-size:1.4rem; font-weight:800; cursor:pointer}
+.lb .tip{position:fixed; top:16px; right:14px; color:#fff; font-weight:700; font-size:.9rem}
+
+.toast{position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:#1d2330; color:#fff; padding:10px 18px; border-radius:12px; font-weight:700; opacity:0; transition:opacity .2s; pointer-events:none; z-index:40}
+.toast.on{opacity:1}
+
+/* ---------- topics nav */
+nav.topics{background:#1f4fa8}
+nav.topics .wrap{display:flex; gap:6px; overflow-x:auto; padding:8px 16px; scrollbar-width:none}
+nav.topics .wrap::-webkit-scrollbar{display:none}
+.tp{flex:none; color:#fff; text-decoration:none; font-weight:700; font-size:.9rem; padding:5px 12px; border-radius:999px; border:1.5px solid rgba(255,255,255,.45); white-space:nowrap}
+.tp.cur{background:#fff; color:#1f4fa8; border-color:#fff}
+.tp.off{opacity:.45; border-style:dashed}
+.tp.home{border-color:transparent; text-decoration:underline; text-underline-offset:3px}
+</style>
+</head>
+<body>
+<nav class="topics" aria-label="נושאים"><div class="wrap" id="topics"></div></nav>
+<header class="top"><div class="wrap">
+  <h1>פתרונות</h1>
+  <p>שלב אחרי שלב, עם הסברים וטעויות נפוצות</p>
+</div></header>
+<nav class="jump"><div class="wrap" id="jump"></div></nav>
+
+<main class="wrap">
+  <details class="intro">
+    <summary>איך משתמשים בדף הזה</summary>
+    <ol>
+      <li>קודם פותרים לבד במחברת, ובודקים מול ה<b>תשובה הסופית</b> שמתחת לשאלה.</li>
+      <li>נתקעתם או יצא לא נכון? <b>פתרון מפורט</b>: קודם רמז, ואחר כך שלב אחד בכל פעם. אחרי כל שלב – ממשיכים לבד.</li>
+      <li>כדאי לקרוא גם את <b>טעויות נפוצות</b> – אולי אחת מהן אצלכם.</li>
+      <li>מעבר בין שאלות: החצים למטה, המספרים למעלה, או החלקה הצידה.</li>
+    </ol>
+  </details>
+  <details class="intro ai">
+    <summary>רוצים עזרה מ-AI? שיעזור, לא יפתור במקומכם</summary>
+    <p style="margin:6px 0">אם תכתבו לצ'אט "תפתור לי", תקבלו פתרון – ולא תלמדו כלום. במבחן לא יהיה AI.<br>
+    בכל שאלה יש כפתור <b>עזרה מ-AI</b> עם הוראה מוכנה. מעתיקים לצ'אט, והוא ישאל אתכם שאלות מנחות, צעד אחד בכל פעם.</p>
+    <p class="small-note" style="margin:0">גם AI טועה לפעמים. אם יצא לכם משהו שונה מה"תשובה הסופית" כאן – תאמינו לתשובה הסופית ושאלו את המורה.</p>
+  </details>
+
+  <div class="where"><span id="secName"></span><span id="secCount"></span></div>
+  <div class="stage" id="stage"></div>
+</main>
+
+<div class="bar"><div class="wrap">
+  <button id="prev" aria-label="השאלה הקודמת">→ הקודמת</button>
+  <span class="cnt" id="cnt"></span>
+  <button id="next" class="nx" aria-label="השאלה הבאה">הבאה ←</button>
+</div></div>
+
+<div class="lb" id="lb" role="dialog" aria-label="השאלה בהגדלה">
+  <button class="x" id="lbx" aria-label="סגירה">✕</button>
+  <span class="tip">לחיצה על התמונה – הגדלה נוספת</span>
+  <div class="inner"><img id="lbimg" alt=""></div>
+</div>
+<div class="toast" id="toast">הועתק! עכשיו מדביקים בצ'אט</div>
+
+<script src="../topics.js"></script>
+<script>
+renderTopics('trig');
+/* ===== notation in math strings =====
+   [a/b]  fraction with horizontal bar      {..}  highlight
+   _AB    subscript (1-2 capitals)          ' או '  Hebrew "or"
+   step equation lines:  'math'  |  'label|math'  |  '!Hebrew line'  |  {html:'...'}          */
+// ================================================== CONFIG (edit)
+const CONFIG = {
+  pageTitle: 'טריגונומטריה – פתרונות 371',
+  title:     'טריגונומטריה – פתרונות',
+  subtitle:  'שאלון 371 · מקבץ שאלות בגרות · שלב אחרי שלב',
+  level:     'הכנה לבגרות בשאלון 371 (3 יחידות)',
+  methods:   'sin, cos, tan במשולש ישר זווית (ניצב מול, ניצב ליד, יתר), מציאת זווית עם sin⁻¹, cos⁻¹, tan⁻¹ במחשבון (במצב מעלות DEG), משפט פיתגורס, שטח משולש, מלבן וטרפז, סכום הזוויות במשולש 180°',
+  source:    'ממקבץ הטריגונומטריה',
+};
+document.title = CONFIG.pageTitle;
+document.querySelector('header.top h1').textContent = CONFIG.title;
+document.querySelector('header.top p').textContent = CONFIG.subtitle;
+
+const SECTIONS = [
+  {name:'בגרות 2026', from:1, to:3},
+  {name:'בגרות 2025', from:4, to:6},
+];
+
+function signTable(zeros, tests, vals){
+  let head='<tr><th>x</th>', sub='<tr><td class="h">מציבים<br><span class="tv">יוצא</span></td>', sg='<tr><td class="h">סימן</td>';
+  tests.forEach((t,i)=>{
+    head += `<th>${i===0?'x &lt;':(i===tests.length-1?'&lt; x':'&lt; x &lt;')}</th>`;
+    const [tx,tv]=t.split(':');
+    sub += `<td>${tx}<br><span class="tv">${tv}</span></td>`;
+    sg  += `<td>${vals[i]==='+'?'<span class="pos">+</span>':'<span class="neg">−</span>'}</td>`;
+    if(i<zeros.length){ head+=`<th class="zr">${zeros[i]}</th>`; sub+='<td></td>'; sg+='<td class="zr">0</td>'; }
+  });
+  return {html:`<div class="tbl-wrap"><table class="s">${head}</tr>${sub}</tr>${sg}</tr></table></div>`};
+}
+const S=(p,say,...eq)=>({p,say,eq});
+const E=(t,w,r)=>({t,w,r});
+
+const Q = [
+{n:1, img:'q1', title:'קיץ 26, מועד א – ציפור על עץ',
+ text:'בגינה עירונית שהקרקע שלה מישורית ניצב עץ בנקודה B. סמדר היא צלמת ציפורים. היא עומדת בנקודה A ומצלמת ציפור הנמצאת על העץ בנקודה C, כמתואר בסרטוט. נתון כי BC מאונך ל-AB. המרחק בין סמדר ובין הציפור (AC) הוא 6 מטרים, וגודל הזווית CAB הוא 32°. א. מצאו באיזה גובה מן הקרקע עומדת הציפור (BC). ב. מצאו את המרחק בין סמדר ובין העץ (AB). כדי לצלם את הציפור מזווית נוספת הלכה סמדר עד לנקודה D הנמצאת על המשך הקטע AB, כמתואר בסרטוט. נתון כי אורך הקטע AD הוא 12 מטרים. ג. מצאו את גודל הזווית CDB. (בסרטוט: הנקודות A, B, D על הקרקע בקו ישר, B בין A ל-D, העץ BC מאונך לקרקע ב-B, הקטעים AC ו-DC יוצאים מהציפור C אל A ואל D.)',
+ hint:['במשולש ABC הזווית B ישרה. מסתכלים מהזווית של 32 מעלות: איזו צלע היא היתר, ואיזו צלע נמצאת מול הזווית?'],
+ steps:[
+  S('א','במשולש ABC הזווית B ישרה. מסתכלים מהזווית A (32 מעלות) ומסמנים את הצלעות: AC מול הזווית הישרה – יתר. BC מול הזווית A – ניצב מול. AB צמוד לזווית A – ניצב ליד.','יתר:|AC = 6','ניצב מול:|BC = ?','ניצב ליד:|AB = ?'),
+  S('א','יודעים את היתר ומחפשים את הניצב שמול הזווית. הפונקציה שמקשרת בין מול ויתר היא sin.','sin 32° = [BC/AC]','sin 32° = [BC/{6}]'),
+  S('א','כופלים את שני האגפים ב-6, כדי ש-BC יישאר לבד.','{6 ·} sin 32° = BC'),
+  S('א','מחשבים במחשבון (במצב מעלות, DEG).','BC = 6 · {0.5299}','BC ≈ 3.18'),
+  S('ב','עכשיו מחפשים את AB – הניצב שליד הזווית. יודעים את היתר. הפונקציה שמקשרת בין ליד ויתר היא cos.','cos 32° = [AB/6]'),
+  S('ב','כופלים את שני האגפים ב-6.','AB = {6 ·} cos 32°','AB = 6 · {0.8480} ≈ 5.09'),
+  S('ב','בדיקה בפיתגורס: סכום ריבועי הניצבים צריך לתת את ריבוע היתר.','3.18² + 5.09² = 10.11 + 25.91 = 36.02','6² = 36  ≈ ✓'),
+  S('ג','D נמצאת על המשך AB, לכן BD הוא מה שנשאר מ-AD אחרי AB.','BD = AD − AB','BD = 12 − 5.09 = 6.91'),
+  S('ג','עוברים למשולש CBD. גם בו הזווית B ישרה. מסתכלים מהזווית D: BC מולה – ניצב מול. BD צמוד אליה – ניצב ליד. CD הוא היתר, ואותו לא יודעים.','ניצב מול:|BC ≈ 3.18','ניצב ליד:|BD ≈ 6.91'),
+  S('ג','יודעים מול וליד – הפונקציה המתאימה היא tan. מחלקים עם הערכים המלאים שבמחשבון.','tan ∠D = [BC/BD]','tan ∠D = [{3.18}/{6.91}] ≈ 0.460'),
+  S('ג','מחפשים זווית, לכן לוחצים במחשבון על tan⁻¹ (בדרך כלל SHIFT ואז tan).','∠D = {tan⁻¹}(0.460)','∠CDB ≈ 24.70°'),
+  S('ג','בדיקה: tan של הזווית שמצאנו צריך לתת את היחס.','tan 24.70° ≈ 0.460 ✓'),
+ ],
+ final:[['א.','BC ≈ 3.18 מ׳'],['ב.','AB ≈ 5.09 מ׳'],['ג.','∠CDB ≈ 24.70°']],
+ errs:[E('המחשבון במצב רדיאנים (RAD) במקום מעלות (DEG). בודקים שעל המסך מופיע D או DEG.','sin 32 ≈ 0.551','sin 32° ≈ 0.530'),
+       E('מתבלבלים בין sin ל-cos. BC נמצא מול הזווית של 32 מעלות, לכן sin.','BC = 6 · cos 32° ≈ 5.09','BC = 6 · sin 32° ≈ 3.18'),
+       E('הופכים את השבר. ב-sin המונה הוא הצלע שמול הזווית, והמכנה הוא היתר.','sin 32° = [6/BC]','sin 32° = [BC/6]'),
+       E('בסעיף ג לוקחים את כל AD במקום BD. הניצב שליד הזווית D במשולש CBD הוא BD.','tan ∠D = [3.18/12]','tan ∠D = [3.18/6.91]'),
+       E('מחפשים זווית ולוחצים tan במקום tan⁻¹.','∠D = tan 0.460','∠D = tan⁻¹(0.460) ≈ 24.70°')]},
+
+{n:2, img:'q2', title:'קיץ 26, מועד ב – סולמות ליד עמוד',
+ text:'שני טכנאים, גיא ושרון, נקראו לתקן תקלה בעמוד תקשורת. העמוד ניצב על קרקע מישורית בנקודה A. כל אחד מהם הביא איתו סולם והציב אותו על הקרקע בצד אחר של העמוד. גיא הציב את הסולם שלו בנקודה C, ושרון הציב את הסולם שלו בנקודה D הנמצאת על המשך הקטע CA, כמתואר בסרטוט. שניהם השעינו את הסולם על העמוד בנקודה B. אורך הסולם של גיא (BC) הוא 5 מטרים. גיא הציב את הסולם בזווית של 67° ביחס לקרקע (זווית ACB). א. מצאו את אורך הקטע CA. ב. מצאו את אורך הקטע AB. נתון כי אורך הסולם של שרון (BD) הוא 4.8 מטרים. ג. מצאו את גודל הזווית שבה הציב שרון את הסולם ביחס לקרקע (זווית BDA). ד. מצאו את המרחק בין שתי הנקודות שבהן הציבו גיא ושרון את הסולמות שלהם (CD). (בסרטוט: C, A, D על הקרקע בקו ישר, A באמצע; העמוד AB מאונך לקרקע ב-A; הסולמות BC ו-BD.)',
+ hint:['במשולש ABC הזווית A ישרה. מסתכלים מהזווית של 67 מעלות: איזו צלע היא היתר, ואיזו צלע צמודה לזווית?'],
+ steps:[
+  S('א','העמוד מאונך לקרקע, לכן במשולש ABC הזווית A ישרה. מסתכלים מהזווית C (67 מעלות): BC מול הזווית הישרה – יתר. CA צמוד לזווית C – ניצב ליד. AB מול הזווית C – ניצב מול.','יתר:|BC = 5','ניצב ליד:|CA = ?','ניצב מול:|AB = ?'),
+  S('א','יודעים יתר ומחפשים ניצב ליד – הפונקציה היא cos.','cos 67° = [CA/{5}]'),
+  S('א','כופלים את שני האגפים ב-5 ומחשבים (מחשבון במצב DEG).','CA = {5 ·} cos 67°','CA = 5 · {0.3907} ≈ 1.95'),
+  S('ב','AB הוא הניצב שמול הזווית C. יודעים יתר – הפונקציה היא sin.','sin 67° = [AB/5]'),
+  S('ב','כופלים את שני האגפים ב-5.','AB = {5 ·} sin 67°','AB = 5 · {0.9205} ≈ 4.60'),
+  S('ב','בדיקה בפיתגורס.','1.95² + 4.60² = 3.80 + 21.16 = 24.96','5² = 25  ≈ ✓'),
+  S('ג','עוברים למשולש ABD. גם בו הזווית A ישרה. מסתכלים מהזווית D: BD מול הזווית הישרה – יתר. AB מול הזווית D – ניצב מול.','יתר:|BD = 4.8','ניצב מול:|AB ≈ 4.60'),
+  S('ג','יודעים מול ויתר – הפונקציה היא sin. כאן חשוב לחלק עם הערך המלא של AB מהמחשבון (4.6025...), כי עיגול מוקדם משנה את הזווית.','sin ∠D = [AB/BD]','sin ∠D = [{4.6025}/{4.8}] ≈ 0.95886'),
+  S('ג','מחפשים זווית – לוחצים sin⁻¹ (SHIFT ואז sin).','∠D = {sin⁻¹}(0.95886)','∠BDA ≈ 73.51°'),
+  S('ד','CD מורכב משני חלקים: CA (מצאנו בסעיף א) ועוד AD. צריך למצוא את AD.','CD = CA + AD'),
+  S('ד','במשולש ABD, הצלע AD צמודה לזווית D – ניצב ליד. יודעים יתר – משתמשים ב-cos.','cos 73.51° = [AD/4.8]','AD = {4.8 ·} cos 73.51°','AD = 4.8 · {0.2838} ≈ 1.36'),
+  S('ד','מחברים.','CD = {1.95} + {1.36} ≈ 3.32'),
+  S('ד','בדיקה בפיתגורס במשולש ABD.','1.36² + 4.60² = 1.85 + 21.16 = 23.01','4.8² = 23.04  ≈ ✓'),
+ ],
+ final:[['א.','CA ≈ 1.95 מ׳'],['ב.','AB ≈ 4.60 מ׳'],['ג.','∠BDA ≈ 73.51°'],['ד.','CD ≈ 3.32 מ׳']],
+ errs:[E('מתבלבלים בין מול וליד. CA צמוד לזווית של 67 מעלות, לכן cos ולא sin.','CA = 5 · sin 67° ≈ 4.60','CA = 5 · cos 67° ≈ 1.95'),
+       E('בסעיף ג משתמשים ב-tan. BD הוא יתר, ו-tan לא משתמש ביתר.','tan ∠D = [4.60/4.8]','sin ∠D = [4.60/4.8]'),
+       E('מעגלים את AB ל-4.60 לפני החילוק. ליד 90 מעלות הזווית רגישה מאוד לעיגול – יוצאת 73.40 במקום 73.51. שומרים את הערך המלא במחשבון.','sin⁻¹([4.60/4.8]) ≈ 73.40°','sin⁻¹([4.6025/4.8]) ≈ 73.51°'),
+       E('בסעיף ד עונים רק AD, או מחסרים. C ו-D נמצאים משני צדי העמוד, לכן מחברים.','CD = 1.95 − 1.36','CD = 1.95 + 1.36 ≈ 3.32'),
+       E('המחשבון במצב RAD. בכל שאלה בטריגונומטריה בודקים קודם שהמחשבון במצב מעלות (DEG).')]},
+
+{n:3, img:'q3', title:'חורף 26 – מתקן באולינג',
+ text:'באולם באולינג יש מתקן בצורת טרפז ישר זווית ABCD (AB ∥ CD, זווית BCD = 90°). מטרת המתקן היא לעזור לילדים לגלגל את כדור הבאולינג (ראו סרטוט). המתקן מונח על קטע הרצפה CD. מניחים את הכדור על הצלע AB והוא מתגלגל לאורך הצלע AD. למתקן יש שני מוטות תמיכה, AE ו-AC. מוט התמיכה AE מאונך לקטע הרצפה CD. אורך הצלע AD הוא 104 ס"מ, וגודל הזווית ADC הוא 34°. א. מצאו את האורך של מוט התמיכה AE. אורך קטע הרצפה CD הוא 120 ס"מ. ב. מצאו את אורך הקטע CE. ג. החליטו לתלות על המתקן שלט פרסום ששטחו שווה לשטח הטרפז ABCD. מצאו את השטח של שלט הפרסום. ד. מצאו את גודל הזווית שבין מוט התמיכה AC ובין קטע הרצפה CD (זווית ACE). (בסרטוט: D, E, C על הרצפה בסדר הזה משמאל לימין; A מעל E, B מעל C; AB הצלע העליונה, AD המדרון.)',
+ hint:['במשולש ADE הזווית E ישרה. מסתכלים מהזווית של 34 מעלות: מה היתר, ואיזו צלע נמצאת מול הזווית?'],
+ steps:[
+  S('א','AE מאונך לרצפה, לכן במשולש ADE הזווית E ישרה. מסתכלים מהזווית D (34 מעלות): AD מול הזווית הישרה – יתר. AE מול הזווית D – ניצב מול. DE צמוד לזווית D – ניצב ליד.','יתר:|AD = 104','ניצב מול:|AE = ?','ניצב ליד:|DE = ?'),
+  S('א','יודעים יתר ומחפשים ניצב מול – הפונקציה היא sin.','sin 34° = [AE/{104}]'),
+  S('א','כופלים את שני האגפים ב-104 ומחשבים (מחשבון במצב DEG).','AE = {104 ·} sin 34°','AE = 104 · {0.5592} ≈ 58.16'),
+  S('ב','CE הוא מה שנשאר מ-CD אחרי DE. קודם מוצאים את DE: הוא ניצב ליד הזווית D, ולכן cos.','cos 34° = [DE/104]','DE = {104 ·} cos 34°','DE = 104 · {0.8290} ≈ 86.22'),
+  S('ב','מחסרים.','CE = CD − DE','CE = 120 − 86.22 ≈ 33.78'),
+  S('ב','בדיקה בפיתגורס במשולש ADE.','58.16² + 86.22² ≈ 10816.47','104² = 10816  ≈ ✓'),
+  S('ג','AE ו-BC שניהם מאונכים לרצפה, ו-AB מקביל לרצפה. לכן ABCE מלבן, וצלעות נגדיות במלבן שוות.','AB = CE ≈ 33.78'),
+  S('ג','שטח טרפז: סכום הבסיסים כפול הגובה, לחלק ב-2. הבסיסים הם AB ו-CD, והגובה הוא AE.','S(ABCD) = [(AB + CD) · AE/2]','S(ABCD) = [({33.78} + {120}) · {58.16}/2]'),
+  S('ג','מחשבים עם הערכים המלאים מהמחשבון. (עם הערכים המעוגלים יוצא בערך 4471.9 – גם זה בסדר.)','S(ABCD) ≈ [153.780 · 58.156/2] ≈ 4471.62'),
+  S('ג','בדיקה בדרך אחרת: משולש ADE ועוד מלבן ABCE.','[86.220 · 58.156/2] + 33.780 · 58.156','≈ 2507.105 + 1964.517 = 4471.622 ✓'),
+  S('ד','עוברים למשולש ACE. הזווית E ישרה. מסתכלים מהזווית C: AE מולה – ניצב מול. CE צמוד אליה – ניצב ליד. היתר AC לא ידוע.','ניצב מול:|AE ≈ 58.16','ניצב ליד:|CE ≈ 33.78'),
+  S('ד','יודעים מול וליד – הפונקציה היא tan.','tan ∠ACE = [AE/CE]','tan ∠ACE = [{58.16}/{33.78}] ≈ 1.7216'),
+  S('ד','מחפשים זווית – לוחצים tan⁻¹.','∠ACE = {tan⁻¹}(1.7216)','∠ACE ≈ 59.85°'),
+ ],
+ final:[['א.','AE ≈ 58.16 ס"מ'],['ב.','CE ≈ 33.78 ס"מ'],['ג.','S ≈ 4471.62 סמ"ר'],['ד.','∠ACE ≈ 59.85°']],
+ errs:[E('המחשבון במצב רדיאנים (RAD). יוצא מספר שונה לגמרי.','104 · sin 34 ≈ 55.02','104 · sin 34° ≈ 58.16'),
+       E('בסעיף ב עונים DE במקום CE. CE הוא החלק הקצר, בין E ל-C.','CE ≈ 86.22','CE = 120 − 86.22 ≈ 33.78'),
+       E('בשטח הטרפז לוקחים את AD כגובה. AD משופע; הגובה הוא AE – המאונך לרצפה.','S = [(33.78 + 120) · 104/2]','S = [(33.78 + 120) · 58.16/2]'),
+       E('שוכחים שהבסיס העליון AB שווה ל-CE, ומחשבים רק משולש.','S = [86.22 · 58.16/2]','S = [(33.78 + 120) · 58.16/2]'),
+       E('בסעיף ד משתמשים ב-CD כולו כניצב. הניצב שליד הזווית C במשולש ACE הוא CE.','tan ∠ACE = [58.16/120]','tan ∠ACE = [58.16/33.78]')]},
+
+{n:4, img:'q4', title:'קיץ 25, מועד א – מתקן בגן שעשועים',
+ text:'בגן שעשועים בנו מתקן שצורתו טרפז ישר זווית ABCD (BC ∥ AD, זווית BCD = 90°). הצלע AD מונחת על הקרקע. מן הנקודה B לנקודה D בנו קורת תמיכה למתקן (BD). BE הוא חבל טיפוס המאונך לקרקע (ראו סרטוט). נתון: AB = 4 מטרים, זווית BAE = 37°. א. מצאו את האורך של חבל הטיפוס (BE). נתון כי האורך של קורת התמיכה (BD) הוא 6.5 מטרים. ב. (1) מצאו את האורך של הקטע ED. (2) מצאו את האורך של הצלע AD. לפי דרישת מהנדס העירייה, הזווית שבין קורת התמיכה לקרקע (זווית BDE) צריכה להיות גדולה מ-20°. ג. האם המתקן מתאים לדרישת המהנדס? נמקו את תשובתכם. (בסרטוט: A, E, D על הקרקע משמאל לימין; B מעל E, C מעל D; BC הצלע העליונה.)',
+ hint:['במשולש ABE הזווית E ישרה. מסתכלים מהזווית של 37 מעלות: איזו צלע היא היתר, ואיזו צלע מול הזווית?'],
+ steps:[
+  S('א','BE מאונך לקרקע, לכן במשולש ABE הזווית E ישרה. מסתכלים מהזווית A (37 מעלות): AB מול הזווית הישרה – יתר. BE מול הזווית A – ניצב מול. AE צמוד לזווית A – ניצב ליד.','יתר:|AB = 4','ניצב מול:|BE = ?','ניצב ליד:|AE = ?'),
+  S('א','יודעים יתר ומחפשים ניצב מול – הפונקציה היא sin.','sin 37° = [BE/{4}]'),
+  S('א','כופלים את שני האגפים ב-4 ומחשבים (מחשבון במצב DEG).','BE = {4 ·} sin 37°','BE = 4 · {0.6018} ≈ 2.41'),
+  S('ב(1)','עוברים למשולש BED. גם בו הזווית E ישרה. BD מול הזווית הישרה – יתר. BE ו-ED הם הניצבים. יודעים שתי צלעות – משפט פיתגורס.','ED² + BE² = BD²','ED² + {2.41²} = {6.5²}'),
+  S('ב(1)','מחשבים את הריבועים.','ED² + {5.81} = {42.25}'),
+  S('ב(1)','מעבירים 5.81 אגף (מחליף סימן).','ED² = 42.25 {− 5.81}','ED² = 36.44'),
+  S('ב(1)','מוציאים שורש. אורך תמיד חיובי.','ED = √36.44 ≈ 6.04'),
+  S('ב(2)','AD מורכב מ-AE ועוד ED. מוצאים את AE: במשולש ABE הוא ניצב ליד הזווית A, ולכן cos.','cos 37° = [AE/4]','AE = {4 ·} cos 37°','AE = 4 · {0.7986} ≈ 3.19'),
+  S('ב(2)','מחברים.','AD = AE + ED','AD = {3.19} + {6.04} ≈ 9.23'),
+  S('ב(2)','בדיקה בפיתגורס במשולש ABE.','2.41² + 3.19² = 5.81 + 10.18 = 15.99','4² = 16  ≈ ✓'),
+  S('ג','במשולש BED מסתכלים מהזווית D: BE מולה – ניצב מול. BD הוא היתר. מול ויתר – sin. מחלקים עם הערך המלא של BE מהמחשבון (2.407...).','sin ∠BDE = [BE/BD]','sin ∠BDE = [{2.41}/{6.5}] ≈ 0.3704'),
+  S('ג','מחפשים זווית – לוחצים sin⁻¹. (עם הערך המלא של BE יוצא 21.74; עם 2.41 יוצא 21.76.)','∠BDE = {sin⁻¹}(0.3704)','∠BDE ≈ 21.74°'),
+  S('ג','משווים לדרישה: הזווית צריכה להיות גדולה מ-20 מעלות.','21.74° > 20° ✓','!המתקן מתאים לדרישת המהנדס'),
+ ],
+ final:[['א.','BE ≈ 2.41 מ׳'],['ב.','(1)  ED ≈ 6.04 מ׳'],['','(2)  AD ≈ 9.23 מ׳'],['ג.','!כן: הזווית BDE ≈ 21.74° גדולה מ-20°']],
+ errs:[E('משתמשים בזווית 37 מעלות במשולש BED. הזווית 37 נמצאת ב-A, במשולש אחר. ב-BED יודעים שתי צלעות – פיתגורס.','ED = 6.5 · cos 37°','ED² = 6.5² − 2.41²'),
+       E('מחברים במקום לחסר. מחפשים ניצב, לכן מחסרים מריבוע היתר.','ED² = 6.5² + 2.41²','ED² = 6.5² − 2.41²'),
+       E('בסעיף ב(2) עונים רק ED. הצלע AD מתחילה ב-A, לכן צריך גם את AE.','AD ≈ 6.04','AD = 3.19 + 6.04 ≈ 9.23'),
+       E('בסעיף ג משתמשים ב-tan עם BD. BD הוא יתר, לכן sin.','tan ∠BDE = [2.41/6.5]','sin ∠BDE = [2.41/6.5]'),
+       E('מחשבים את הזווית ולא עונים על השאלה. צריך לכתוב במפורש: 21.74 גדול מ-20, ולכן המתקן מתאים.')]},
+
+{n:5, img:'q5', title:'קיץ 25, מועד ב – מנוף לדירה',
+ text:'סמדר עברה לגור בדירה הנמצאת בקומה האחרונה בבניין. היא הזמינה הובלה במנוף כדי להעלות רהיטים לדירה ולהכניס אותם דרך החלון. חלון הדירה של סמדר נמצא בנקודה A. המנופאי יוסי מיקם את המנוף על הכביש BC, בנקודה B, וכיוון את זרוע המנוף בזווית של 68° (זווית ABC), כמתואר בסרטוט. נתון: AC מאונך ל-BC, AC = 12 מטרים. א. מצאו את האורך של BC. ב. מצאו את האורך של זרוע המנוף בזווית זו (AB). לאחר זמן מסוים המנוף הפריע לתנועה. יוסי הזיז את המנוף לנקודה D, הנמצאת על המשך הכביש BC, וכיוון אותו בהתאם, כמתואר בסרטוט. נתון כי אורך הקטע BD הוא 2 מטרים. ג. (1) מצאו את גודל הזווית החדשה של כיוון זרוע המנוף (זווית ADC). (2) מצאו בכמה מטרים גדול האורך של זרוע המנוף לאחר ההזזה (AD) מן האורך של זרוע המנוף לפני ההזזה (AB). (בסרטוט: D, B, C על הכביש משמאל לימין; C בבסיס הבניין, A מעל C בקיר הבניין; AB ו-AD זרועות המנוף.)',
+ hint:['במשולש ABC הזווית C ישרה. מסתכלים מהזווית של 68 מעלות: איזו צלע מולה, ואיזו צלע צמודה אליה?'],
+ steps:[
+  S('א','AC מאונך לכביש, לכן במשולש ABC הזווית C ישרה. מסתכלים מהזווית B (68 מעלות): AC מול הזווית B – ניצב מול. BC צמוד לזווית B – ניצב ליד. AB מול הזווית הישרה – יתר.','ניצב מול:|AC = 12','ניצב ליד:|BC = ?','יתר:|AB = ?'),
+  S('א','יודעים מול ומחפשים ליד – הפונקציה היא tan.','tan 68° = [{12}/BC]'),
+  S('א','הנעלם במכנה. כופלים את שני האגפים ב-BC.','{BC ·} tan 68° = 12'),
+  S('א','מחלקים את שני האגפים ב-tan 68 ומחשבים (מחשבון במצב DEG).','BC = [12/{tan 68°}]','BC = [12/2.4751] ≈ 4.85'),
+  S('ב','מחפשים את היתר AB. יודעים את הניצב שמול הזווית – הפונקציה היא sin.','sin 68° = [12/AB]'),
+  S('ב','גם כאן הנעלם במכנה: כופלים ב-AB ומחלקים ב-sin 68.','AB · sin 68° = 12','AB = [12/{sin 68°}] = [12/0.9272] ≈ 12.94'),
+  S('ב','בדיקה בפיתגורס.','4.85² + 12² = 23.52 + 144 = 167.52','12.94² = 167.44  ≈ ✓'),
+  S('ג(1)','D נמצאת על המשך הכביש, לכן DC הוא DB ועוד BC.','DC = DB + BC','DC = 2 + 4.85 = 6.85'),
+  S('ג(1)','במשולש ADC הזווית C ישרה. מסתכלים מהזווית D: AC מולה – ניצב מול. DC צמוד אליה – ניצב ליד. מול וליד – tan.','tan ∠ADC = [AC/DC]','tan ∠ADC = [{12}/{6.85}] ≈ 1.7523'),
+  S('ג(1)','מחפשים זווית – לוחצים tan⁻¹. (מחלקים עם הערך המלא של DC מהמחשבון, 6.848...)','∠ADC = {tan⁻¹}(1.7523)','∠ADC ≈ 60.29°'),
+  S('ג(2)','מוצאים את AD. במשולש ADC יודעים את שני הניצבים – משפט פיתגורס.','AD² = AC² + DC²','AD² = {12²} + {6.85²}','AD² = 144 + 46.92 = 190.92'),
+  S('ג(2)','מוציאים שורש.','AD = √190.92 ≈ 13.82'),
+  S('ג(2)','בכמה גדול – מחסרים. לוקחים את הערכים המלאים מהמחשבון. (עם 13.82 פחות 12.94 יוצא 0.88 – גם זה מתקבל.)','AD − AB ≈ 13.817 − 12.942 ≈ 0.87'),
+  S('ג(2)','בדיקה: הזרוע החדשה צריכה להיות ארוכה יותר, כי D רחוקה יותר מהבניין.','13.82 > 12.94 ✓'),
+ ],
+ final:[['א.','BC ≈ 4.85 מ׳'],['ב.','AB ≈ 12.94 מ׳'],['ג.','(1)  ∠ADC ≈ 60.29°'],['','(2)  ≈ 0.87 מ׳']],
+ errs:[E('כופלים במקום לחלק. כשהנעלם במכנה, מחלקים ב-tan.','BC = 12 · tan 68° ≈ 29.70','BC = [12/tan 68°] ≈ 4.85'),
+       E('כופלים ב-sin במקום לחלק. היתר תמיד הצלע הארוכה – 11.13 קטן מ-12, וזה סימן לטעות.','AB = 12 · sin 68° ≈ 11.13','AB = [12/sin 68°] ≈ 12.94'),
+       E('בסעיף ג(1) לוקחים רק את BD כניצב. הניצב שליד הזווית D הוא כל DC.','tan ∠ADC = [12/2]','tan ∠ADC = [12/6.85]'),
+       E('בסעיף ג(2) עונים AD במקום ההפרש. שואלים בכמה מטרים גדלה הזרוע.','≈ 13.82','13.82 − 12.94 ≈ 0.87'),
+       E('המחשבון במצב RAD. ב-tan של 68 ברדיאנים יוצא מספר שלילי – סימן שהמחשבון לא במעלות (DEG).','tan 68 ≈ −2.04','tan 68° ≈ 2.475')]},
+
+{n:6, img:'q6', title:'חורף 25 – מתקן בגן שעשועים',
+ text:'בגן שעשועים בנו מתקן שצורתו טרפז ישר זווית ABCD (BC ∥ AD, זווית BCD = 90°). הצלע AD מונחת על הקרקע. מן הנקודה B לנקודה D בנו קורת תמיכה למתקן (BD). BE הוא חבל טיפוס המאונך לקרקע (ראו סרטוט). נתון: AB = 4 מטרים, זווית BAE = 37°. א. מצאו את האורך של חבל הטיפוס (BE). נתון כי האורך של קורת התמיכה (BD) הוא 6.5 מטרים. ב. (1) מצאו את האורך של הקטע ED. (2) מצאו את האורך של הצלע AD. לפי דרישת מהנדס העירייה, הזווית שבין קורת התמיכה לקרקע (זווית BDE) צריכה להיות גדולה מ-20°. ג. האם המתקן מתאים לדרישת המהנדס? נמקו את תשובתכם. (בסרטוט: A, E, D על הקרקע משמאל לימין; B מעל E, C מעל D; BC הצלע העליונה.)',
+ hint:['במשולש ABE הזווית E ישרה. מסתכלים מהזווית של 37 מעלות: איזו צלע היא היתר, ואיזו צלע מול הזווית?'],
+ steps:[
+  S('א','BE מאונך לקרקע, לכן במשולש ABE הזווית E ישרה. מסתכלים מהזווית A (37 מעלות): AB מול הזווית הישרה – יתר. BE מול הזווית A – ניצב מול. AE צמוד לזווית A – ניצב ליד.','יתר:|AB = 4','ניצב מול:|BE = ?','ניצב ליד:|AE = ?'),
+  S('א','יודעים יתר ומחפשים ניצב מול – הפונקציה היא sin.','sin 37° = [BE/{4}]'),
+  S('א','כופלים את שני האגפים ב-4 ומחשבים (מחשבון במצב DEG).','BE = {4 ·} sin 37°','BE = 4 · {0.6018} ≈ 2.41'),
+  S('ב(1)','עוברים למשולש BED. גם בו הזווית E ישרה. BD מול הזווית הישרה – יתר. BE ו-ED הם הניצבים. יודעים שתי צלעות – משפט פיתגורס.','ED² + BE² = BD²','ED² + {2.41²} = {6.5²}'),
+  S('ב(1)','מחשבים את הריבועים.','ED² + {5.81} = {42.25}'),
+  S('ב(1)','מעבירים 5.81 אגף (מחליף סימן).','ED² = 42.25 {− 5.81}','ED² = 36.44'),
+  S('ב(1)','מוציאים שורש. אורך תמיד חיובי.','ED = √36.44 ≈ 6.04'),
+  S('ב(2)','AD מורכב מ-AE ועוד ED. מוצאים את AE: במשולש ABE הוא ניצב ליד הזווית A, ולכן cos.','cos 37° = [AE/4]','AE = {4 ·} cos 37°','AE = 4 · {0.7986} ≈ 3.19'),
+  S('ב(2)','מחברים.','AD = AE + ED','AD = {3.19} + {6.04} ≈ 9.23'),
+  S('ב(2)','בדיקה בפיתגורס במשולש ABE.','2.41² + 3.19² = 5.81 + 10.18 = 15.99','4² = 16  ≈ ✓'),
+  S('ג','במשולש BED מסתכלים מהזווית D: BE מולה – ניצב מול. BD הוא היתר. מול ויתר – sin. מחלקים עם הערך המלא של BE מהמחשבון (2.407...).','sin ∠BDE = [BE/BD]','sin ∠BDE = [{2.41}/{6.5}] ≈ 0.3704'),
+  S('ג','מחפשים זווית – לוחצים sin⁻¹. (עם הערך המלא של BE יוצא 21.74; עם 2.41 יוצא 21.76.)','∠BDE = {sin⁻¹}(0.3704)','∠BDE ≈ 21.74°'),
+  S('ג','משווים לדרישה: הזווית צריכה להיות גדולה מ-20 מעלות.','21.74° > 20° ✓','!המתקן מתאים לדרישת המהנדס'),
+ ],
+ final:[['א.','BE ≈ 2.41 מ׳'],['ב.','(1)  ED ≈ 6.04 מ׳'],['','(2)  AD ≈ 9.23 מ׳'],['ג.','!כן: הזווית BDE ≈ 21.74° גדולה מ-20°']],
+ errs:[E('משתמשים בזווית 37 מעלות במשולש BED. הזווית 37 נמצאת ב-A, במשולש אחר. ב-BED יודעים שתי צלעות – פיתגורס.','ED = 6.5 · cos 37°','ED² = 6.5² − 2.41²'),
+       E('מחברים במקום לחסר. מחפשים ניצב, לכן מחסרים מריבוע היתר.','ED² = 6.5² + 2.41²','ED² = 6.5² − 2.41²'),
+       E('בסעיף ב(2) עונים רק ED. הצלע AD מתחילה ב-A, לכן צריך גם את AE.','AD ≈ 6.04','AD = 3.19 + 6.04 ≈ 9.23'),
+       E('בסעיף ג משתמשים ב-tan עם BD. BD הוא יתר, לכן sin.','tan ∠BDE = [2.41/6.5]','sin ∠BDE = [2.41/6.5]'),
+       E('מחשבים את הזווית ולא עונים על השאלה. צריך לכתוב במפורש: 21.74 גדול מ-20, ולכן המתקן מתאים.')]},
+];
+
+// ================================================== AI prompt
+function aiPrompt(q){
+  return `אתה מורה פרטי סבלני למתמטיקה. אני תלמיד/ה ב${CONFIG.level}, ואני רוצה ללמוד לפתור את השאלה הזאת לבד.
+
+הכללים:
+1. אל תכתוב לי את הפתרון ואל תגלה את התשובה הסופית, גם אם אבקש.
+2. עבוד איתי צעד אחד בכל פעם: שאל אותי שאלה מנחה אחת, וחכה לתשובה שלי לפני שממשיכים.
+3. אם טעיתי, אל תתקן במקומי. תגיד לי באיזו שורה לבדוק (למשל סימן מינוס, פתיחת סוגריים, העברת אגף), ותן לי לנסות שוב.
+4. אם אני תקוע/ה פעמיים באותו מקום, תן רמז קטן או דוגמה דומה עם מספרים אחרים.
+5. השתמש רק בשיטות שלומדים ברמה הזאת: ${CONFIG.methods}.
+6. כתוב בעברית פשוטה, במשפטים קצרים.
+7. כשאגיע לתשובה, בקש ממני לבדוק אותה בעצמי (למשל בהצבה), ולהסביר במילים שלי מה עשיתי.
+
+השאלה (שאלה ${q.n} ${CONFIG.source}):
+${q.text}
+
+נתחיל: שאל אותי מה הצעד הראשון שאני חושב/ת לעשות.`;
+}
+
+// ================================================== render helpers
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function math(s){
+  let h = esc(s);
+  h = h.replace(/\[([^\[\]\/]+)\/([^\[\]]+)\]/g, '<span class="fr"><span>$1</span><span>$2</span></span>');
+  h = h.replace(/\{([^{}]+)\}/g, '<span class="hl">$1</span>');
+  h = h.replace(/_([A-Z]{1,2})/g, '<sub>$1</sub>');
+  h = h.replace(/ או /g, ' <span class="or">או</span> ');
+  h = h.replace(/✓/g, '<span class="ok">✓</span>');
+  return h;
+}
+function eqLine(e){
+  if (typeof e === 'object') return e.html;
+  if (e.startsWith('!')) return `<div class="eq heb">${esc(e.slice(1))}</div>`;
+  if (e.includes('|')){ const [l,m]=e.split('|'); return `<div class="eq lab">${l?`<b>${esc(l)}</b>`:''}<span class="m">${math(m)}</span></div>`; }
+  return `<div class="eq"><span class="m">${math(e)}</span></div>`;
+}
+function finLine([l,e]){
+  let body;
+  if (e.startsWith('!')) body = `<div class="eq heb" style="text-align:right">${esc(e.slice(1))}</div>`;
+  else if (e.includes('|')){ const [a,b]=e.split('|'); body = `<div class="eq lab" style="justify-content:flex-start"><b>${esc(a)}</b><span class="m">${math(b)}</span></div>`; }
+  else body = `<div class="eq" style="text-align:right"><span class="m">${math(e)}</span></div>`;
+  return `<div class="fl">${esc(l)}</div>${body}`;
+}
+
+// ================================================== build
+const stage = document.getElementById('stage'), jump = document.getElementById('jump');
+const cards = [], chips = [];
+SECTIONS.forEach((sec, si) => {
+  if (si) { const s=document.createElement('span'); s.className='sep'; jump.appendChild(s); }
+  Q.filter(q => q.n >= sec.from && q.n <= sec.to).forEach(q => {
+    q.sec = sec;
+    const chip = document.createElement('button'); chip.textContent = q.n; chip.setAttribute('aria-label','שאלה '+q.n);
+    chip.onclick = () => go(q.n - 1); jump.appendChild(chip); chips.push(chip);
+
+    const c = document.createElement('article'); c.className = 'card'; c.id = 'q'+q.n;
+    let steps = `<div class="step hint-step" data-k="0"><div class="say"><span class="sn">רמז:</span>${esc(q.hint[0])}</div>${q.hint.slice(1).map(eqLine).join('')}<div class="small-note">נסו להמשיך לבד. לא מצליחים? לחצו "לפתרון".</div></div>`, lastPart = null, k = 0;
+    q.steps.forEach(st => {
+      if (st.p && st.p !== lastPart){ steps += `<div class="part" data-k="${k+1}">${st.p.startsWith('(')?'גרף '+st.p:'סעיף '+st.p}</div>`; lastPart = st.p; }
+      steps += `<div class="step" data-k="${k+1}"><div class="say"><span class="sn">${k+1}.</span>${esc(st.say)}</div>${st.eq.map(eqLine).join('')}</div>`;
+      k++;
+    });
+    const pr = aiPrompt(q);
+    const errs = q.errs.map(e => `<div class="err-item"><div>${esc(e.t)}</div>`+
+        (e.w?`<div class="eq w"><span class="mk">לא נכון:</span><span class="m">${math(e.w)}</span></div>`:'')+
+        (e.r?`<div class="eq r"><span class="mk">נכון:</span><span class="m">${math(e.r)}</span></div>`:'')+`</div>`).join('');
+    c.innerHTML = `
+      <div class="head"><div class="num">${q.n}</div><div class="ttl">${q.title}</div></div>
+      <div class="imgbox${q.small?' small':''}" role="button" aria-label="הגדלת השאלה">
+        <img class="qimg" src="img/${q.img}.png" alt="שאלה ${q.n}: ${esc(q.text).replace(/"/g,'&quot;')}">
+        <span class="zoom-ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21M10.5 7.5v6M7.5 10.5h6"/></svg></span>
+      </div>
+      ${q.instr?`<div class="instr">${q.instr}</div>`:''}
+      <div class="final-box"><h4>תשובה סופית:</h4><div class="fin">${q.final.map(finLine).join('')}</div></div>
+      <div class="btns">
+        <button class="tg t-steps" data-p="steps" aria-pressed="false">פתרון מפורט</button>
+        <button class="tg t-err" data-p="err" aria-pressed="false">טעויות נפוצות</button>
+        <button class="tg t-ai" data-p="ai" aria-pressed="false">עזרה מ-AI</button>
+      </div>
+      <div class="panel p-steps" data-panel="steps">
+        ${steps}
+        <div class="step-ctl"><button class="b-next">לפתרון</button><button class="b-all">הכול</button></div>
+        <div class="done-msg">זהו! עכשיו נסו לפתור שוב לבד במחברת, בלי להסתכל.</div>
+      </div>
+      <div class="panel p-err" data-panel="err"><h4>טעויות נפוצות – אולי אחת מהן אצלכם?</h4>${errs}</div>
+      <div class="panel p-ai" data-panel="ai"><p class="ai-note">הכפתורים שולחים לצ'אט את השאלה עם הוראה <b>להנחות אתכם בשאלות, בלי לפתור במקומכם</b>. ב-Gemini מדביקים (ההוראה מועתקת אוטומטית).</p>
+        <div class="ai-btns">
+          <button class="b-copy">העתקה בלבד</button>
+          <a href="https://chatgpt.com/?q=${encodeURIComponent(pr)}" target="_blank" rel="noopener">ChatGPT</a>
+          <a href="https://claude.ai/new?q=${encodeURIComponent(pr)}" target="_blank" rel="noopener">Claude</a>
+          <a class="b-gem" href="https://gemini.google.com/app" target="_blank" rel="noopener">Gemini</a>
+        </div>
+      </div>`;
+    stage.appendChild(c); cards.push(c);
+
+    const stepsEls = [...c.querySelectorAll('.step')], parts = [...c.querySelectorAll('.part')];
+    let shown = 0;
+    const showUpTo = n => {
+      shown = Math.min(n, stepsEls.length);
+      stepsEls.forEach((s,i) => s.classList.toggle('show', i < shown));
+      parts.forEach(p => p.classList.toggle('show', +p.dataset.k < shown));
+      const done = shown >= stepsEls.length;
+      c.querySelector('.step-ctl').style.display = done ? 'none' : '';
+      c.querySelector('.done-msg').style.display = done ? 'block' : 'none';
+      c.querySelector('.b-next').textContent = shown <= 1 ? 'לפתרון – שלב 1' : 'השלב הבא';
+    };
+    c.querySelectorAll('.tg').forEach(b => b.onclick = () => {
+      const p = c.querySelector(`[data-panel="${b.dataset.p}"]`);
+      const on = !p.classList.contains('open');
+      p.classList.toggle('open', on); b.setAttribute('aria-pressed', on);
+      if (b.dataset.p === 'steps' && on && shown === 0) showUpTo(1);
+      if (on) p.scrollIntoView({block:'nearest', behavior:'smooth'});
+    });
+    c.querySelector('.b-next').onclick = () => { showUpTo(shown + 1); stepsEls[shown-1].scrollIntoView({block:'nearest', behavior:'smooth'}); };
+    c.querySelector('.b-all').onclick = () => showUpTo(stepsEls.length);
+    c.querySelector('.b-copy').onclick = () => copy(pr);
+    c.querySelector('.b-gem').addEventListener('click', () => copy(pr, 'ההוראה הועתקה – מדביקים ב-Gemini'));
+    c.querySelector('.imgbox').onclick = () => openLb(`img/${q.img}.png`);
+  });
+});
+
+// shrink long equation lines so they fit on one line
+function fit(root){
+  root.querySelectorAll('.eq').forEach(e => {
+    if (!e.offsetParent) return;
+    e.style.fontSize = '';
+    let fs = parseFloat(getComputedStyle(e).fontSize), min = fs * 0.62;
+    while (e.scrollWidth > e.clientWidth + 1 && fs > min){ fs -= 1; e.style.fontSize = fs + 'px'; }
+  });
+}
+new MutationObserver(ms => ms.forEach(m => m.target.closest && m.target.closest('.card') && fit(m.target)))
+  .observe(stage, {attributes:true, subtree:true, attributeFilter:['class']});
+addEventListener('resize', () => cards[cur] && fit(cards[cur]));
+
+// ================================================== carousel
+let cur = -1;
+function go(i, dir){
+  i = Math.max(0, Math.min(Q.length - 1, i));
+  if (i === cur) return;
+  if (dir === undefined) dir = i > cur ? 1 : -1;
+  if (cur >= 0) cards[cur].classList.remove('on','in-next','in-prev');
+  const c = cards[i]; c.classList.remove('in-next','in-prev'); void c.offsetWidth;
+  c.classList.add('on', cur < 0 ? 'x' : (dir > 0 ? 'in-next' : 'in-prev'));
+  chips.forEach((ch,k) => ch.classList.toggle('cur', k === i));
+  chips[i].scrollIntoView({inline:'center', block:'nearest', behavior: cur<0?'auto':'smooth'});
+  cur = i;
+  const q = Q[i];
+  document.getElementById('secName').textContent = q.sec.name;
+  document.getElementById('secCount').textContent = '';
+  document.getElementById('cnt').textContent = `${i+1} / ${Q.length}`;
+  document.getElementById('prev').disabled = i === 0;
+  document.getElementById('next').disabled = i === Q.length - 1;
+  history.replaceState(null, '', '#q' + q.n);
+  const top = document.querySelector('.where').getBoundingClientRect().top + scrollY - 60;
+  if (scrollY > top) scrollTo({top, behavior:'auto'});
+}
+document.getElementById('prev').onclick = () => go(cur - 1, -1);
+document.getElementById('next').onclick = () => go(cur + 1, 1);
+const m0 = location.hash.match(/^#q(\d+)$/);
+go(m0 ? +m0[1] - 1 : 0);
+if (!m0) { scrollTo(0, 0); addEventListener('load', () => setTimeout(() => scrollTo(0, 0), 50)); }
+
+// swipe (RTL: finger to the right = next)
+let sx = null, sy = null;
+stage.addEventListener('touchstart', e => {
+  if (e.touches.length !== 1 || e.target.closest('.tbl-wrap')) { sx = null; return; }
+  sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+}, {passive:true});
+stage.addEventListener('touchend', e => {
+  if (sx === null) return;
+  const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+  sx = null;
+  if (Math.abs(dx) > 60 && Math.abs(dx) > 1.5 * Math.abs(dy)) go(cur + (dx > 0 ? 1 : -1), dx > 0 ? 1 : -1);
+}, {passive:true});
+document.addEventListener('keydown', e => {
+  if (lb.classList.contains('on')) { if (e.key === 'Escape') closeLb(); return; }
+  if (e.key === 'ArrowLeft') go(cur + 1, 1);
+  if (e.key === 'ArrowRight') go(cur - 1, -1);
+});
+
+// ================================================== lightbox
+const lb = document.getElementById('lb'), lbimg = document.getElementById('lbimg');
+function openLb(src){ lbimg.src = src; lb.classList.remove('big'); lb.classList.add('on'); document.body.style.overflow='hidden'; lb.scrollTo(0,0); }
+function closeLb(){ lb.classList.remove('on'); document.body.style.overflow=''; }
+document.getElementById('lbx').onclick = closeLb;
+lb.addEventListener('click', e => { if (e.target === lb || e.target.classList.contains('inner')) closeLb(); });
+lbimg.onclick = () => lb.classList.toggle('big');
+
+// ================================================== copy
+function copy(t, msg){
+  const ok = () => { const el = document.getElementById('toast'); el.textContent = msg || "הועתק! עכשיו מדביקים בצ'אט"; el.classList.add('on'); setTimeout(()=>el.classList.remove('on'), 1800); };
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(ok, () => fallback(t, ok));
+  else fallback(t, ok);
+}
+function fallback(t, ok){
+  const ta = document.createElement('textarea'); ta.value = t; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); ok(); }catch(e){} ta.remove();
+}
+</script>
+</body>
+</html>

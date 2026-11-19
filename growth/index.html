@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>גדילה ודעיכה – פתרונות 371</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f6f8; --card:#fff; --ink:#1d2330; --muted:#5d6577; --line:#e2e5ec;
+  --blue:#2f6fde; --blue-soft:#eaf1fd; --orange:#e8590c; --orange-soft:#fff1e8;
+  --pos:#1f5fd0; --neg:#d32f2f; --zero:#7b3fb8; --ok:#1e8e4e; --ok-soft:#e8f6ee;
+  --hint:#9a6b00; --hint-soft:#fff8dc; --err:#b42318; --err-soft:#fdeceb; --hl:#fff1a8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14171d; --card:#1d222b; --ink:#e8ebf1; --muted:#a3abbb; --line:#2f3644;
+    --blue:#6f9ef0; --blue-soft:#1f2b40; --orange:#ff8a4c; --orange-soft:#3a271c;
+    --pos:#79a8ff; --neg:#ff7b7b; --zero:#c79bf2; --ok:#5fd08f; --ok-soft:#1b3326;
+    --hint:#f3d36b; --hint-soft:#2f2a16; --err:#ff9a9a; --err-soft:#3b1d1d; --hl:#5a4d12;
+  }
+  :root:not([data-theme="light"]) .qimg, :root:not([data-theme="light"]) .lb img{ filter: invert(.9) hue-rotate(180deg); }
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:'Assistant',system-ui,sans-serif; font-size:17px; line-height:1.6; padding-bottom:84px}
+.wrap{max-width:720px; margin:0 auto; padding:0 16px}
+
+/* ---------- math */
+.m{font-family:'Times New Roman',Times,serif; direction:ltr; unicode-bidi:isolate; font-size:1.12em}
+.or{unicode-bidi:isolate; direction:rtl; font-family:'Assistant',sans-serif; font-size:.85em; margin:0 .45em; color:var(--muted)}
+.fr{display:inline-flex; flex-direction:column; vertical-align:middle; text-align:center; margin:0 .12em; line-height:1.15}
+.fr>span:first-child{border-bottom:1.3px solid currentColor; padding:0 .2em .05em}
+.fr>span:last-child{padding:.05em .2em 0}
+.hl{background:var(--hl); border-radius:4px; padding:0 .15em}
+.eq{direction:ltr; text-align:center; font-family:'Times New Roman',Times,serif; font-size:1.18em; margin:6px 0; line-height:1.9; white-space:nowrap; overflow-x:auto; scrollbar-width:none}
+.eq .m{white-space:nowrap}
+.eq.lab{display:flex; justify-content:center; align-items:center; gap:10px; direction:rtl; flex-wrap:wrap}
+.eq.lab b{font-family:'Assistant',sans-serif; font-size:.82em}
+.eq.heb{direction:rtl; font-family:'Assistant',sans-serif; font-weight:800; font-size:1em}
+.eq .ok{color:var(--ok); font-family:'Assistant',sans-serif; font-weight:800; margin-inline-start:.4em}
+
+/* ---------- top */
+header.top{background:var(--blue); color:#fff; padding:16px 16px 14px}
+header.top h1{margin:0; font-size:1.35rem; font-weight:800; line-height:1.25}
+header.top p{margin:4px 0 0; opacity:.92; font-size:.95rem}
+nav.jump{position:sticky; top:0; z-index:5; background:var(--card); border-bottom:1px solid var(--line); box-shadow:0 2px 6px rgba(0,0,0,.05)}
+nav.jump .wrap{display:flex; gap:6px; overflow-x:auto; padding:8px 16px; scrollbar-width:none}
+nav.jump .wrap::-webkit-scrollbar{display:none}
+nav.jump button{flex:none; min-width:38px; min-height:38px; padding:0; border-radius:10px; background:var(--blue-soft); color:var(--blue); font-weight:800; border:2px solid transparent}
+nav.jump button.cur{background:var(--blue); color:#fff}
+nav.jump .sep{flex:none; width:1px; background:var(--line); margin:4px 2px}
+details.intro{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:10px 14px; margin:14px 0 0}
+details.intro summary{font-weight:800; cursor:pointer}
+details.intro ol{margin:6px 0 0; padding-inline-start:22px}
+details.intro.ai{border-color:var(--orange); background:var(--orange-soft)}
+.small-note{color:var(--muted); font-size:.9rem}
+
+/* ---------- carousel */
+.where{display:flex; justify-content:space-between; align-items:baseline; margin:16px 2px 6px; color:var(--muted); font-weight:700; font-size:.95rem}
+.stage{position:relative; overflow:hidden; touch-action:pan-y pinch-zoom}
+.card{display:none; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px; box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card.on{display:block}
+.card.in-next{animation:inNext .25s ease}
+.card.in-prev{animation:inPrev .25s ease}
+@keyframes inNext{from{opacity:0; transform:translateX(-40px)} to{opacity:1; transform:none}}
+@keyframes inPrev{from{opacity:0; transform:translateX(40px)} to{opacity:1; transform:none}}
+.card .head{display:flex; align-items:center; gap:10px; margin-bottom:10px}
+.card .num{background:var(--blue); color:#fff; font-weight:800; border-radius:10px; min-width:38px; height:38px; display:grid; place-items:center; font-size:1.1rem}
+.card .ttl{font-weight:800}
+.imgbox{position:relative; cursor:zoom-in; border-radius:8px; overflow:hidden; background:#fff; border:1px solid var(--line)}
+.qimg{display:block; width:100%; height:auto}
+.imgbox.small .qimg{max-width:380px; margin-inline-start:auto}
+.zoom-ic{position:absolute; bottom:6px; left:6px; width:34px; height:34px; border-radius:50%; background:rgba(29,35,48,.75); display:grid; place-items:center}
+.instr{margin-top:6px; color:var(--muted)}
+
+/* ---------- toggle buttons */
+.btns{display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:10px}
+.tg{font:inherit; font-weight:800; border-radius:12px; padding:8px 10px; cursor:pointer; min-height:40px; font-size:.88rem; line-height:1.2; padding:6px 4px; background:var(--card); border:2px solid currentColor; display:flex; align-items:center; justify-content:center; gap:8px; transition:background .15s, color .15s, box-shadow .15s}
+.tg .st{font-size:.75rem; font-weight:700; opacity:.75}
+.tg[aria-pressed="true"]{color:#fff !important; box-shadow:inset 0 3px 6px rgba(0,0,0,.25)}
+.t-hint{color:var(--hint)} .t-hint[aria-pressed="true"]{background:#b58300}
+.t-steps{color:var(--blue)} .t-steps[aria-pressed="true"]{background:var(--blue)}
+.t-final{color:var(--ok)} .t-final[aria-pressed="true"]{background:var(--ok)}
+.t-err{color:var(--err)} .t-err[aria-pressed="true"]{background:var(--err)}
+.t-ai{color:var(--orange)} .t-ai[aria-pressed="true"]{background:var(--orange)}
+
+/* ---------- panels */
+.panel{display:none; margin-top:12px; border-radius:12px; padding:12px 14px}
+.panel.open{display:block; animation:fade .2s ease}
+.panel h4{margin:0 0 6px; font-size:1rem}
+.p-hint{background:var(--hint-soft); border:2px solid #e6c65c}
+.p-steps{background:var(--blue-soft); border:2px solid var(--blue)}
+.p-final{background:var(--ok-soft); border:2px solid var(--ok)}
+.p-err{background:var(--err-soft); border:2px solid var(--err)}
+.p-ai{background:var(--orange-soft); border:2px solid var(--orange)}
+.step{display:none; background:var(--card); border-radius:10px; padding:10px 12px; margin:8px 0; border-inline-start:4px solid var(--blue)}
+.step.show{display:block; animation:fade .25s ease}
+.step .say{font-weight:600}
+.step.hint-step{border-inline-start-color:#c99a00; background:var(--hint-soft)}
+.step.hint-step .sn{color:var(--hint)}
+.final-box{margin-top:6px; color:var(--ok); font-size:.88rem; line-height:1.4}
+.final-box h4{margin:0; font-size:.85rem; font-weight:800}
+.final-box .fin{gap:0 8px}
+.final-box .eq{font-size:1.05em; margin:0; line-height:1.5}
+.final-box .fl{font-weight:700}
+.final-box .eq.heb{font-size:.95em; font-weight:700}
+.ai-note{margin:0 0 4px}
+.step .sn{font-weight:800; color:var(--blue); margin-inline-end:6px}
+.part{display:none; font-weight:800; margin:14px 0 2px; color:var(--orange)}
+.part.show{display:block}
+.step-ctl{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
+.b-next,.b-all{font:inherit; font-weight:800; border-radius:12px; padding:8px 14px; min-height:44px; cursor:pointer}
+.b-next{background:var(--blue); color:#fff; border:0; flex:1}
+.b-all{background:transparent; color:var(--blue); border:2px solid var(--blue)}
+.done-msg{display:none; font-weight:800; color:var(--ok); margin-top:6px}
+.fin{display:grid; grid-template-columns:auto 1fr; gap:4px 12px; align-items:center}
+.fin .fl{font-weight:800}
+.fin .eq{text-align:left; margin:2px 0}
+.err-item{background:var(--card); border-radius:10px; padding:8px 12px; margin:8px 0}
+.err-item .eq{text-align:right; direction:rtl; display:flex; gap:8px; align-items:center; justify-content:flex-start; flex-wrap:wrap; margin:2px 0}
+.err-item .mk{font-family:'Assistant',sans-serif; font-weight:800; font-size:.8em; min-width:3.6em}
+.err-item .w .mk{color:var(--err)} .err-item .w .m{color:var(--err); background:var(--err-soft); border-radius:6px; padding:0 .35em}
+.err-item .r .mk{color:var(--ok)}
+@keyframes fade{from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none}}
+
+/* ---------- tables, sketch */
+.tbl-wrap{overflow-x:auto; margin:6px 0}
+table.s{direction:ltr; border-collapse:collapse; margin:0 auto; font-size:.86rem; font-family:'Times New Roman',serif}
+table.s th, table.s td{border:1px solid var(--line); padding:4px 4px; text-align:center; background:var(--card); line-height:1.3}
+table.s th{background:var(--bg); white-space:nowrap}
+table.s td.h{font-weight:700; background:var(--bg); font-family:'Assistant',sans-serif; direction:rtl; font-size:.95em}
+table.s .tv{color:var(--muted); font-size:.85em}
+.pos{color:var(--pos); font-weight:800} .neg{color:var(--neg); font-weight:800} .zr{color:var(--zero); font-weight:800}
+.sketch{display:block; margin:6px auto; max-width:260px; width:100%; direction:ltr}
+
+/* ---------- AI */
+.prompt{white-space:pre-wrap; background:var(--card); border:1px dashed var(--orange); border-radius:10px; padding:10px 12px; font-size:.9rem; max-height:200px; overflow:auto}
+.ai-btns{display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:6px}
+.ai-btns a, .ai-btns button{font:inherit; font-weight:800; text-decoration:none; border-radius:12px; padding:6px 8px; min-height:40px; font-size:.9rem; display:flex; align-items:center; justify-content:center; background:var(--card); color:var(--orange); border:2px solid var(--orange); cursor:pointer}
+
+/* ---------- bottom bar */
+.bar{position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--line); box-shadow:0 -2px 8px rgba(0,0,0,.06); z-index:6}
+.bar .wrap{display:flex; align-items:center; gap:10px; padding:10px 16px}
+.bar button{font:inherit; font-weight:800; flex:1; min-height:48px; border-radius:12px; border:2px solid var(--blue); background:var(--card); color:var(--blue); cursor:pointer}
+.bar button.nx{background:var(--blue); color:#fff}
+.bar button:disabled{opacity:.35; cursor:default}
+.bar .cnt{flex:none; font-weight:800; color:var(--muted); min-width:56px; text-align:center}
+
+/* ---------- lightbox */
+.lb{position:fixed; inset:0; z-index:30; background:rgba(10,12,16,.92); display:none; overflow:auto; touch-action:pan-x pan-y pinch-zoom}
+.lb.on{display:block}
+.lb .inner{min-height:100%; display:flex; align-items:center; justify-content:center; padding:56px 8px 24px}
+.lb img{display:block; width:100%; max-width:1300px; height:auto; background:#fff; border-radius:6px; cursor:zoom-in}
+.lb.big img{width:200%; max-width:none; cursor:zoom-out}
+.lb.big .inner{justify-content:flex-start}
+.lb .x{position:fixed; top:10px; left:10px; width:44px; height:44px; border-radius:50%; border:0; background:#fff; color:#111; font-size:1.4rem; font-weight:800; cursor:pointer}
+.lb .tip{position:fixed; top:16px; right:14px; color:#fff; font-weight:700; font-size:.9rem}
+
+.toast{position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:#1d2330; color:#fff; padding:10px 18px; border-radius:12px; font-weight:700; opacity:0; transition:opacity .2s; pointer-events:none; z-index:40}
+.toast.on{opacity:1}
+
+/* ---------- topics nav */
+nav.topics{background:#1f4fa8}
+nav.topics .wrap{display:flex; gap:6px; overflow-x:auto; padding:8px 16px; scrollbar-width:none}
+nav.topics .wrap::-webkit-scrollbar{display:none}
+.tp{flex:none; color:#fff; text-decoration:none; font-weight:700; font-size:.9rem; padding:5px 12px; border-radius:999px; border:1.5px solid rgba(255,255,255,.45); white-space:nowrap}
+.tp.cur{background:#fff; color:#1f4fa8; border-color:#fff}
+.tp.off{opacity:.45; border-style:dashed}
+.tp.home{border-color:transparent; text-decoration:underline; text-underline-offset:3px}
+</style>
+</head>
+<body>
+<nav class="topics" aria-label="נושאים"><div class="wrap" id="topics"></div></nav>
+<header class="top"><div class="wrap">
+  <h1>פתרונות</h1>
+  <p>שלב אחרי שלב, עם הסברים וטעויות נפוצות</p>
+</div></header>
+<nav class="jump"><div class="wrap" id="jump"></div></nav>
+
+<main class="wrap">
+  <details class="intro">
+    <summary>איך משתמשים בדף הזה</summary>
+    <ol>
+      <li>קודם פותרים לבד במחברת, ובודקים מול ה<b>תשובה הסופית</b> שמתחת לשאלה.</li>
+      <li>נתקעתם או יצא לא נכון? <b>פתרון מפורט</b>: קודם רמז, ואחר כך שלב אחד בכל פעם. אחרי כל שלב – ממשיכים לבד.</li>
+      <li>כדאי לקרוא גם את <b>טעויות נפוצות</b> – אולי אחת מהן אצלכם.</li>
+      <li>מעבר בין שאלות: החצים למטה, המספרים למעלה, או החלקה הצידה.</li>
+    </ol>
+  </details>
+  <details class="intro ai">
+    <summary>רוצים עזרה מ-AI? שיעזור, לא יפתור במקומכם</summary>
+    <p style="margin:6px 0">אם תכתבו לצ'אט "תפתור לי", תקבלו פתרון – ולא תלמדו כלום. במבחן לא יהיה AI.<br>
+    בכל שאלה יש כפתור <b>עזרה מ-AI</b> עם הוראה מוכנה. מעתיקים לצ'אט, והוא ישאל אתכם שאלות מנחות, צעד אחד בכל פעם.</p>
+    <p class="small-note" style="margin:0">גם AI טועה לפעמים. אם יצא לכם משהו שונה מה"תשובה הסופית" כאן – תאמינו לתשובה הסופית ושאלו את המורה.</p>
+  </details>
+
+  <div class="where"><span id="secName"></span><span id="secCount"></span></div>
+  <div class="stage" id="stage"></div>
+</main>
+
+<div class="bar"><div class="wrap">
+  <button id="prev" aria-label="השאלה הקודמת">→ הקודמת</button>
+  <span class="cnt" id="cnt"></span>
+  <button id="next" class="nx" aria-label="השאלה הבאה">הבאה ←</button>
+</div></div>
+
+<div class="lb" id="lb" role="dialog" aria-label="השאלה בהגדלה">
+  <button class="x" id="lbx" aria-label="סגירה">✕</button>
+  <span class="tip">לחיצה על התמונה – הגדלה נוספת</span>
+  <div class="inner"><img id="lbimg" alt=""></div>
+</div>
+<div class="toast" id="toast">הועתק! עכשיו מדביקים בצ'אט</div>
+
+<script src="../topics.js"></script>
+<script>
+renderTopics('growth');
+/* ===== notation in math strings =====
+   [a/b]  fraction with horizontal bar      {..}  highlight
+   _AB    subscript (1-2 capitals)          ' או '  Hebrew "or"
+   step equation lines:  'math'  |  'label|math'  |  '!Hebrew line'  |  {html:'...'}          */
+// ================================================== CONFIG (edit)
+const CONFIG = {
+  pageTitle: 'גדילה ודעיכה – פתרונות 371',
+  title:     'גדילה ודעיכה – פתרונות',
+  subtitle:  'שאלון 371 · מקבץ שאלות בגרות · שלב אחרי שלב',
+  level:     'הכנה לבגרות בשאלון 371 (3 יחידות)',
+  methods:   'נוסחת גדילה ודעיכה Mₜ = M₀ · qᵗ, מציאת q מאחוז (גדילה: q = 1 + אחוז/100, דעיכה: q = 1 − אחוז/100) ומציאת האחוז מ-q, מציאת q משני ערכים בעזרת שורש במחשבון, מציאת t (מספר השנים) בניסוי והצבה של ערכים במחשבון (בלי לוגריתמים), חזרה אחורה בזמן בחילוק ב-q, קריאת נתונים מגרף ומטבלה',
+  source:    'ממקבץ גדילה ודעיכה',
+};
+document.title = CONFIG.pageTitle;
+document.querySelector('header.top h1').textContent = CONFIG.title;
+document.querySelector('header.top p').textContent = CONFIG.subtitle;
+
+const SECTIONS = [
+  {name:'בגרות 2026', from:1, to:3},
+  {name:'בגרות 2025', from:4, to:6},
+  {name:'בגרות 2024', from:7, to:7},
+];
+
+const S=(p,say,...eq)=>({p,say,eq});
+const E=(t,w,r)=>({t,w,r});
+
+const Q = [
+{n:1, img:'q1', title:'קיץ 26, מועד א – תוכים באי',
+ text:'באי טרופי מסוים מספר התוכים הירוקים גדל בכל שנה ב-8%. לפניכם גרף המתאר את מספר התוכים הירוקים באי לפי השנה, מתחילת שנת 2010 (גרף עולה שמתחיל בשנת 2010 בגובה 20,000, ומסומנת עליו נקודה בשנת 2013). א. (1) כמה תוכים ירוקים היו באי בתחילת שנת 2010? (2) כמה תוכים ירוקים היו באי בתחילת שנת 2013? ב. בתחילת איזו שנה היו 29,387 תוכים ירוקים באי? באי יש גם תוכים כחולים. מספר התוכים הכחולים באי גדל בכל שנה באחוז קבוע. בתחילת שנת 2010 היה מספר התוכים הכחולים באי שווה למספר התוכים הירוקים באי. ג. בטבלה שלפניכם מוצג מספר התוכים הכחולים בתחילת שנת 2012. (בטבלה יש עמודות לשנים 2010, 2011, 2012, 2013. בשורה "מספר התוכים הכחולים" רשום רק 21,632 בשנת 2012, ושאר התאים ריקים.) (1) מצאו בכמה אחוזים גדל מספר התוכים הכחולים באי בכל שנה. (2) השלימו את הערכים החסרים בטבלה.',
+ hint:['מאיפה מתחיל הגרף בשנת 2010? ואם המספר גדל ב-8% בכל שנה – בכמה כופלים אותו בכל שנה?'],
+ steps:[
+  S('א(1)','קוראים מהגרף: בשנת 2010 הגרף מתחיל בגובה 20,000. זו הכמות ההתחלתית.','M₀ = 20,000'),
+  S('א(2)','גדל ב-8% בכל שנה: כל שנה יש 100% ועוד 8%, כלומר 108%. לכן כופלים בכל שנה ב-1.08.','q = 1 + 0.08 = 1.08'),
+  S('א(2)','מ-2010 עד 2013 עוברות 3 שנים, לכן t = 3. מציבים בנוסחת הגדילה.','Mₜ = M₀ · qᵗ','M₃ = {20,000} · {1.08³}'),
+  S('א(2)','מחשבים במחשבון. מספר תוכים הוא מספר שלם, לכן מעגלים.','M₃ = 20,000 · 1.259712','M₃ = 25,194.24 ≈ 25,194'),
+  S('ב','הפעם הכמות ידועה, ומספר השנים t לא ידוע. מציבים בנוסחה.','20,000 · 1.08ᵗ = 29,387'),
+  S('ב','מחלקים את שני האגפים ב-20,000.','1.08ᵗ = {[29,387/20,000]}','1.08ᵗ = 1.46935'),
+  S('ב','מנסים במחשבון ערכים של t, עד שמגיעים ל-1.469.','1.08³ ≈ 1.260','1.08⁴ ≈ 1.360','{1.08⁵ ≈ 1.469} ✓'),
+  S('ב','t = 5, כלומר 5 שנים אחרי 2010.','2010 + 5 = 2015'),
+  S('ב','בדיקה: מציבים t = 5 בנוסחה.','20,000 · 1.08⁵ ≈ 29,386.6 ≈ 29,387 ✓'),
+  S('ג(1)','בשנת 2010 היו 20,000 תוכים כחולים (כמו הירוקים). מ-2010 עד 2012 עברו 2 שנים. q לא ידוע.','20,000 · q² = 21,632'),
+  S('ג(1)','מחלקים את שני האגפים ב-20,000.','q² = {[21,632/20,000]}','q² = 1.0816'),
+  S('ג(1)','מוציאים שורש. q הוא מספר חיובי (כופלים בו כמות של תוכים), לכן לוקחים רק את השורש החיובי.','q = √1.0816 = 1.04'),
+  S('ג(1)','q = 1.04 פירושו 100% ועוד 4%.','q = 1 + {0.04}','!גדל ב-4% בכל שנה'),
+  S('ג(2)','בשנת 2010 יש 20,000 (נתון). בכל שנה כופלים ב-1.04.','2011:|20,000 · 1.04 = 20,800','2013:|21,632 · 1.04 = 22,497.28 ≈ 22,497'),
+  S('ג(2)','בדיקה: מ-2011 לשנת 2012 צריך לקבל את המספר שבטבלה.','20,800 · 1.04 = 21,632 ✓'),
+ ],
+ final:[['א.','(1)  20,000 תוכים'],['','(2)  ≈ 25,194 תוכים'],['ב.','!בתחילת שנת 2015'],['ג.','(1)  4%'],['','(2)  2010: 20,000 · 2011: 20,800'],['','2013: ≈ 22,497']],
+ errs:[E('כופלים ב-0.08 במקום ב-1.08. כפל ב-0.08 נותן רק את התוספת, לא את הכמות החדשה.','20,000 · 0.08³','20,000 · 1.08³'),
+       E('כופלים במספר השנים במקום להעלות בחזקה. בכל שנה כופלים שוב ב-1.08.','20,000 · 1.08 · 3','20,000 · 1.08³'),
+       E('עונים את מספר השנים במקום את השנה. שאלו "בתחילת איזו שנה".','t = 5','2010 + 5 = 2015'),
+       E('בסעיף ג(1) מחלקים ב-2 במקום להוציא שורש. עברו 2 שנים, לכן q בריבוע.','q = [1.0816/2]','q = √1.0816 = 1.04'),
+       E('כותבים את q כאחוז. q = 1.04 זה 104% מהכמות – הגדילה היא רק 4%.','104%','4%')]},
+
+{n:2, img:'q2', title:'קיץ 26, מועד ב – חיסכון ומכונית',
+ text:'בתחילת שנת 2020 הפקידה ניצן בתוכנית חיסכון 28,500 שקלים. סכום הכסף בתוכנית החיסכון גדל בכל שנה ב-4%. א. מצאו כמה שקלים היו בתוכנית החיסכון בתחילת שנת 2026. ב. מצאו בתחילת איזו שנה היו בתוכנית החיסכון 33,341 שקלים. ניצן רוצה לקנות מכונית. מחיר מכונית זו קטן בכל שנה באחוז קבוע. בתחילת שנת 2023 היה המחיר של המכונית 40,000 שקלים. בתחילת שנת 2025 היה המחיר של המכונית 38,416 שקלים. ג. מצאו בכמה אחוזים קטן המחיר של המכונית בכל שנה. ד. האם בתחילת שנת 2026 סכום הכסף שהיה לניצן בתוכנית החיסכון הספיק לקניית המכונית? נמקו את תשובתכם.',
+ hint:['גדל ב-4% בכל שנה – בכמה כופלים בכל שנה? וכמה שנים עוברות מ-2020 עד 2026?'],
+ steps:[
+  S('א','גדל ב-4%: כל שנה 104% מהשנה הקודמת, לכן כופלים ב-1.04.','q = 1 + 0.04 = 1.04'),
+  S('א','מ-2020 עד 2026 עוברות 6 שנים, לכן t = 6. מציבים בנוסחה.','Mₜ = M₀ · qᵗ','M₆ = {28,500} · {1.04⁶}'),
+  S('א','מחשבים במחשבון ומעגלים לשקל.','M₆ = 28,500 · 1.265319','M₆ ≈ 36,061.59 ≈ 36,062'),
+  S('ב','מספר השנים t לא ידוע. מציבים את הסכום הידוע.','28,500 · 1.04ᵗ = 33,341'),
+  S('ב','מחלקים את שני האגפים ב-28,500.','1.04ᵗ = {[33,341/28,500]}','1.04ᵗ ≈ 1.1699'),
+  S('ב','מנסים במחשבון ערכים של t.','1.04² ≈ 1.0816','1.04³ ≈ 1.1249','{1.04⁴ ≈ 1.1699} ✓'),
+  S('ב','t = 4, כלומר 4 שנים אחרי 2020.','2020 + 4 = 2024'),
+  S('ב','בדיקה: מציבים t = 4.','28,500 · 1.04⁴ ≈ 33,340.97 ≈ 33,341 ✓'),
+  S('ג','מ-2023 עד 2025 עברו 2 שנים. המחיר ההתחלתי 40,000, ו-q לא ידוע.','40,000 · q² = 38,416'),
+  S('ג','מחלקים את שני האגפים ב-40,000.','q² = {[38,416/40,000]}','q² = 0.9604'),
+  S('ג','מוציאים שורש (q חיובי).','q = √0.9604 = 0.98'),
+  S('ג','q קטן מ-1, כי המחיר יורד. 0.98 זה 98% מהמחיר, כלומר ירידה של 2%.','1 − 0.98 = 0.02','!המחיר קטן ב-2% בכל שנה'),
+  S('ד','מחיר המכונית בתחילת 2026: שנה אחת אחרי 2025, כופלים ב-0.98.','38,416 · 0.98 = 37,647.68'),
+  S('ד','משווים לסכום בחיסכון בתחילת 2026 (מסעיף א).','36,062 < 37,647.68'),
+  S('ד','בחיסכון יש פחות כסף ממחיר המכונית.','!לא, הכסף לא הספיק'),
+  S('ד','בדיקה: אפשר לחשב גם מ-2023, שלוש שנים.','40,000 · 0.98³ = 37,647.68 ✓'),
+ ],
+ final:[['א.','≈ 36,062 ₪'],['ב.','!בתחילת שנת 2024'],['ג.','2%'],['ד.','!לא. בחיסכון בערך 36,062 ₪, והמכונית עולה 37,647.68 ₪']],
+ errs:[E('כופלים במספר השנים במקום להעלות בחזקה.','28,500 · 1.04 · 6','28,500 · 1.04⁶'),
+       E('סופרים שנים לא נכון. מ-2020 עד 2026 עוברות 6 שנים, לא 7.','28,500 · 1.04⁷','28,500 · 1.04⁶'),
+       E('בירידה של 2% כופלים ב-0.98, לא ב-1.02 ולא ב-0.02.','38,416 · 0.02','38,416 · 0.98'),
+       E('עונים 98% או 0.98. זה מה שנשאר מהמחיר; הירידה היא 2%.','98%','100% − 98% = 2%'),
+       E('בסעיף ד משווים למחיר של 2025 במקום של 2026.','36,062 < 38,416','36,062 < 37,647.68')]},
+
+{n:3, img:'q3', title:'חורף 26 – מחירי דירות',
+ text:'מחיר הדירה של יותם עולה ב-4% בכל שנה. בתחילת שנת 2017 היה מחיר הדירה של יותם 700,000 שקלים. א. מצאו מה היה מחיר הדירה של יותם בתחילת שנת 2023. ב. מצאו בתחילת איזו שנה היה מחיר הדירה של יותם 757,120 שקלים. מחיר הדירה של נועה יורד בכל שנה באחוז קבוע. בתחילת שנת 2020 היה מחיר הדירה של נועה 480,000 שקלים, ובתחילת שנת 2023 היה מחיר הדירה שלה 438,100 שקלים. ג. (1) מצאו בכמה אחוזים ירד מחיר הדירה של נועה בכל שנה. (2) מצאו מה היה מחיר הדירה של נועה בתחילת שנת 2017. לפניכם שלושה סרטוטים I–III (בכל סרטוט שני גרפים של מחיר הדירה בשקלים לפי השנה, מ-2017): בסרטוט I – גרף יורד שמתחיל גבוה יותר וגרף עולה שמתחיל נמוך יותר, והם נחתכים. בסרטוט II – גרף עולה שמתחיל מעט מעל גרף יורד, והם לא נחתכים. בסרטוט III – שני גרפים עולים. ד. קבעו איזה מן הסרטוטים מתאר את מחיר הדירה של יותם ואת מחיר הדירה של נועה בתחילת שנת 2017 ואילך. נמקו את קביעתכם.',
+ hint:['עלייה של 4% בכל שנה – בכמה כופלים? כמה שנים עוברות מ-2017 עד 2023?'],
+ steps:[
+  S('א','עולה ב-4%: כופלים בכל שנה ב-1.04. מ-2017 עד 2023 עוברות 6 שנים.','q = 1.04 ,  t = 6'),
+  S('א','מציבים בנוסחה.','Mₜ = M₀ · qᵗ','M₆ = {700,000} · {1.04⁶}'),
+  S('א','מחשבים במחשבון.','M₆ = 700,000 · 1.265319','M₆ ≈ 885,723.31'),
+  S('ב','מספר השנים t לא ידוע. מציבים את המחיר הידוע.','700,000 · 1.04ᵗ = 757,120'),
+  S('ב','מחלקים את שני האגפים ב-700,000.','1.04ᵗ = {[757,120/700,000]}','1.04ᵗ = 1.0816'),
+  S('ב','מנסים במחשבון: 1.04 בחזקת 1, אחר כך בחזקת 2.','1.04¹ = 1.04','{1.04² = 1.0816} ✓'),
+  S('ב','t = 2, כלומר שנתיים אחרי 2017.','2017 + 2 = 2019'),
+  S('ג(1)','מ-2020 עד 2023 עברו 3 שנים. q לא ידוע.','480,000 · q³ = 438,100'),
+  S('ג(1)','מחלקים את שני האגפים ב-480,000.','q³ = {[438,100/480,000]}','q³ ≈ 0.912708'),
+  S('ג(1)','q בשלישית, לכן מוציאים שורש שלישי במחשבון.','q = ∛0.912708 ≈ 0.97'),
+  S('ג(1)','q = 0.97 זה 97% מהמחיר. הירידה היא מה שחסר עד 100%.','1 − 0.97 = 0.03','!המחיר ירד ב-3% בכל שנה'),
+  S('ג(2)','2017 היא 3 שנים לפני 2020. המחיר ב-2017 לא ידוע (נקרא לו M₀), ואחרי 3 שנים הוא הגיע ל-480,000.','M₀ · 0.97³ = 480,000'),
+  S('ג(2)','מחלקים את שני האגפים ב-0.97³ (בחזרה אחורה בזמן מחלקים ב-q).','M₀ = {[480,000/0.97³]}','M₀ = [480,000/0.912673] ≈ 525,928'),
+  S('ג(2)','בדיקה: המחיר יורד, לכן ב-2017 הוא צריך להיות גבוה מ-480,000.','525,928 > 480,000 ✓'),
+  S('ד','המחיר של יותם עולה והמחיר של נועה יורד. לכן צריך גרף עולה וגרף יורד – סרטוט III נפסל (שני גרפים עולים).'),
+  S('ד','בשנת 2017 המחיר של יותם גבוה יותר מהמחיר של נועה.','700,000 > 525,928'),
+  S('ד','לכן ב-2017 הגרף העולה (יותם) צריך להתחיל מעל הגרף היורד (נועה). כך זה בסרטוט II. בסרטוט I הגרף היורד מתחיל למעלה – זה לא מתאים.','!סרטוט II'),
+ ],
+ final:[['א.','≈ 885,723 ₪'],['ב.','!בתחילת שנת 2019'],['ג.','(1)  3%'],['','(2)  ≈ 525,928 ₪'],['ד.','!סרטוט II: יותם עולה ונועה יורדת, וב-2017 יותם מתחיל גבוה יותר']],
+ errs:[E('בסעיף ג(2) כופלים ב-q במקום לחלק. חוזרים אחורה בזמן, והמחיר אז היה גבוה יותר.','480,000 · 0.97³','[480,000/0.97³] ≈ 525,928'),
+       E('מחלקים ב-3 במקום להוציא שורש שלישי.','q = [0.912708/3]','q = ∛0.912708 ≈ 0.97'),
+       E('עונים 97% במקום 3%. 0.97 זה מה שנשאר, לא מה שירד.','97%','1 − 0.97 = 0.03 → 3%'),
+       E('בסעיף ג(2) סופרים את השנים מ-2023 במקום מ-2020.','[438,100/0.97³]','[480,000/0.97³]'),
+       E('בסעיף ד בוחרים לפי הצורה בלבד (עולה ויורד) ושוכחים לבדוק מי מתחיל גבוה יותר ב-2017.')]},
+
+{n:4, img:'q4', title:'קיץ 25, מועד א – חשמל ובנזין',
+ text:'במדינה מסוימת מספר המכוניות החשמליות גדל בכל שנה באחוז קבוע, ומספר מכוניות הבנזין קטן בכל שנה באחוז קבוע. הגרפים I–II שלפניכם מתארים את מספר המכוניות החשמליות ואת מספר מכוניות הבנזין במדינה זו לפי השנה, מתחילת שנת 2016 והלאה. (גרף II יורד ומתחיל ב-200,000 בשנת 2016. גרף I עולה ומתחיל ב-53,865 בשנת 2016. הגרפים נחתכים בשנת 2021.) א. מבין שני הגרפים I–II, איזה גרף מתאר את מספר מכוניות הבנזין במדינה זו? נתון כי מספר מכוניות הבנזין במדינה זו קטן ב-10% בכל שנה. ב. מצאו מה היה מספר מכוניות הבנזין במדינה זו בתחילת שנת 2021. בתחילת שנת 2021 היה מספר מכוניות הבנזין שווה למספר המכוניות החשמליות במדינה זו. ג. מצאו בכמה אחוזים גדל מספר המכוניות החשמליות במדינה זו בכל שנה. ד. מצאו בתחילת איזו שנה היו במדינה זו 86,271 מכוניות חשמליות.',
+ hint:['מספר מכוניות הבנזין קטן – האם הגרף שלו עולה או יורד?'],
+ steps:[
+  S('א','מספר מכוניות הבנזין קטן בכל שנה, לכן הגרף שלו יורד. גרף II יורד (מתחיל ב-200,000).','!גרף II'),
+  S('ב','קטן ב-10%: נשאר 90%, לכן כופלים בכל שנה ב-0.9. מ-2016 עד 2021 עוברות 5 שנים.','q = 1 − 0.1 = 0.9 ,  t = 5'),
+  S('ב','מציבים בנוסחה. הכמות ההתחלתית של הבנזין: 200,000.','M₅ = {200,000} · {0.9⁵}'),
+  S('ב','מחשבים במחשבון.','M₅ = 200,000 · 0.59049 = 118,098'),
+  S('ג','בשנת 2021 יש אותו מספר מכוניות חשמליות: 118,098. בשנת 2016 היו 53,865 (מהגרף). עברו 5 שנים, q לא ידוע.','53,865 · q⁵ = 118,098'),
+  S('ג','מחלקים את שני האגפים ב-53,865.','q⁵ = {[118,098/53,865]}','q⁵ ≈ 2.19248'),
+  S('ג','q בחזקת 5, לכן מוציאים שורש חמישי במחשבון.','q = ⁵√2.19248 ≈ 1.17'),
+  S('ג','q = 1.17 זה 100% ועוד 17%.','q = 1 + {0.17}','!גדל ב-17% בכל שנה'),
+  S('ד','מספר השנים t לא ידוע. מציבים את המספר הידוע.','53,865 · 1.17ᵗ = 86,271'),
+  S('ד','מחלקים את שני האגפים ב-53,865.','1.17ᵗ = {[86,271/53,865]}','1.17ᵗ ≈ 1.6016'),
+  S('ד','מנסים במחשבון ערכים של t.','1.17² ≈ 1.3689','{1.17³ ≈ 1.6016} ✓'),
+  S('ד','t = 3, כלומר 3 שנים אחרי 2016.','2016 + 3 = 2019'),
+  S('ד','בדיקה: 2019 לפני 2021, והמספר 86,271 באמת קטן מ-118,098.','53,865 · 1.17³ ≈ 86,271 ✓'),
+ ],
+ final:[['א.','!גרף II'],['ב.','118,098 מכוניות'],['ג.','17%'],['ד.','!בתחילת שנת 2019']],
+ errs:[E('בירידה של 10% כופלים ב-1.1 או ב-0.1. הנכון: נשאר 90%, כלומר 0.9.','200,000 · 0.1⁵','200,000 · 0.9⁵'),
+       E('בסעיף ג מתחילים מ-200,000. הגרף של החשמליות מתחיל ב-53,865.','200,000 · q⁵ = 118,098','53,865 · q⁵ = 118,098'),
+       E('מחלקים ב-5 במקום להוציא שורש חמישי.','q = [2.19248/5]','q = ⁵√2.19248 ≈ 1.17'),
+       E('עונים 1.17% או 117%. q = 1.17 פירושו גדילה של 17%.','1.17%','17%'),
+       E('בסעיף ד עונים t = 3 במקום השנה.','t = 3','2016 + 3 = 2019')]},
+
+{n:5, img:'q5', title:'קיץ 25, מועד ב – בדיקת דרכונים',
+ text:'בנמל תעופה יש שתי אפשרויות לבדוק את הדרכונים של הנוסעים – באמצעות עמדה ממוחשבת או באמצעות עובדי הביטחון. נמצא כי בשנים 2010–2016 מספר הנוסעים שדרכונם נבדק באמצעות עמדה ממוחשבת גדל באחוז קבוע בכל שנה, ומספר הנוסעים שדרכונם נבדק באמצעות עובדי הביטחון לא השתנה. לפניכם שני גרפים I–II שכל אחד מהם מתאר את מספר הנוסעים שדרכונם נבדק בנמל התעופה באמצעות אחת מן האפשרויות, לפי השנה. (גרף I הוא קו ישר אופקי בגובה 300,000. גרף II עולה, מתחיל ב-231,655 בשנת 2010, ופוגש את גרף I בשנת 2013.) א. קבעו איזה מן הגרפים I–II מתאר את מספר הנוסעים שדרכונם נבדק באמצעות עמדה ממוחשבת. בתחילת שנת 2013 מספר הנוסעים שדרכונם נבדק באמצעות עמדה ממוחשבת היה שווה למספר הנוסעים שדרכונם נבדק באמצעות עובדי הביטחון. ב. (1) על פי הגרף, מהו מספר הנוסעים שדרכונם נבדק באמצעות עמדה ממוחשבת בתחילת שנת 2013? (2) מצאו בכמה אחוזים גדל בכל שנה מספר הנוסעים שדרכונם נבדק באמצעות עמדה ממוחשבת. ג. מצאו את מספר הנוסעים שדרכונם נבדק באמצעות עמדה ממוחשבת בתחילת שנת 2016. ד. מצאו כעבור כמה זמן מתחילת שנת 2013 היה מספר הנוסעים שדרכונם נבדק באמצעות עמדה ממוחשבת גדול ב-56,430 ממספר הנוסעים שדרכונם נבדק באמצעות עובדי הביטחון.',
+ hint:['איזה מספר גדל משנה לשנה, ואיזה לא משתנה? איזה גרף עולה ואיזה ישר?'],
+ steps:[
+  S('א','המספר בעמדה הממוחשבת גדל בכל שנה, לכן הגרף שלו עולה. גרף I ישר (לא משתנה) – זה עובדי הביטחון.','!גרף II'),
+  S('ב(1)','ב-2013 שני הגרפים נפגשים, ובגרף I המספר הוא תמיד 300,000.','M(2013) = 300,000'),
+  S('ב(2)','ב-2010 בעמדה הממוחשבת היו 231,655. מ-2010 עד 2013 עברו 3 שנים. q לא ידוע.','231,655 · q³ = 300,000'),
+  S('ב(2)','מחלקים את שני האגפים ב-231,655.','q³ = {[300,000/231,655]}','q³ ≈ 1.29503'),
+  S('ב(2)','מוציאים שורש שלישי במחשבון.','q = ∛1.29503 ≈ 1.09'),
+  S('ב(2)','q = 1.09 זה 100% ועוד 9%.','q = 1 + {0.09}','!גדל ב-9% בכל שנה'),
+  S('ג','מתחילים מ-2013 (300,000). עד 2016 עוברות 3 שנים.','M₃ = {300,000} · {1.09³}'),
+  S('ג','מחשבים במחשבון.','M₃ = 300,000 · 1.295029','M₃ ≈ 388,508.7 ≈ 388,509'),
+  S('ד','עובדי הביטחון בודקים תמיד 300,000. "גדול ב-56,430" – מחברים.','300,000 + 56,430 = 356,430'),
+  S('ד','מחפשים אחרי כמה שנים מ-2013 העמדה הממוחשבת מגיעה ל-356,430.','300,000 · 1.09ᵗ = 356,430'),
+  S('ד','מחלקים את שני האגפים ב-300,000.','1.09ᵗ = {[356,430/300,000]}','1.09ᵗ = 1.1881'),
+  S('ד','מנסים במחשבון.','1.09¹ = 1.09','{1.09² = 1.1881} ✓'),
+  S('ד','t = 2: אחרי שנתיים, כלומר בתחילת 2015.','2013 + 2 = 2015'),
+  S('ד','בדיקה: ההפרש בין שתי הדרכים אחרי שנתיים.','300,000 · 1.09² − 300,000 = 56,430 ✓'),
+ ],
+ final:[['א.','!גרף II'],['ב.','(1)  300,000 נוסעים'],['','(2)  9%'],['ג.','≈ 388,509 נוסעים'],['ד.','!כעבור שנתיים (בתחילת 2015)']],
+ errs:[E('בוחרים בגרף I כי הוא "גבוה יותר". העמדה הממוחשבת גדלה – הגרף שלה עולה.'),
+       E('בסעיף ב(2) מחלקים ב-3 במקום להוציא שורש שלישי.','q = [1.29503/3]','q = ∛1.29503 ≈ 1.09'),
+       E('בסעיף ג מתחילים מ-231,655 אבל מעלים בחזקת 3. מ-2010 עד 2016 עוברות 6 שנים.','231,655 · 1.09³','231,655 · 1.09⁶  או  300,000 · 1.09³'),
+       E('בסעיף ד מציבים 56,430 כמספר הנוסעים. 56,430 זה ההפרש – מוסיפים אותו ל-300,000.','300,000 · 1.09ᵗ = 56,430','300,000 · 1.09ᵗ = 356,430'),
+       E('עונים "2015" כשנשאל "כעבור כמה זמן". התשובה היא שנתיים.')]},
+
+{n:6, img:'q6', title:'חורף 25 – מחירי מכוניות',
+ text:'המחיר של מכונית אספנות גדל בכל שנה באחוז קבוע, והמחיר של מכונית משפחתית קטן בכל שנה באחוז קבוע. הגרפים I–II שלפניכם מתארים את המחיר של כל אחת מן המכוניות, לפי השנה. (גרף II יורד ומתחיל גבוה בשנת 2010. גרף I עולה ומתחיל נמוך יותר בשנת 2010. הגרפים נחתכים בשנת 2016.) א. על פי הגרפים, האם בתחילת שנת 2010 היה המחיר של מכונית האספנות גבוה יותר מן המחיר של המכונית המשפחתית? בתחילת שנת 2010 היה המחיר של מכונית האספנות 40,000 שקלים, ובתחילת שנת 2012 היה מחירה 42,436 שקלים. ב. (1) מצאו בכמה אחוזים גדל המחיר של מכונית האספנות בכל שנה. (2) מצאו מה היה המחיר של מכונית האספנות בתחילת שנת 2016. בתחילת שנת 2016 היה המחיר של שתי המכוניות זהה. המחיר של המכונית המשפחתית קטן בכל שנה ב-15%. מיכל חסכה כסף לקניית מכונית. בתחילת שנת 2017 היו לה 41,000 שקלים. ג. האם בתחילת שנה זו יכלה מיכל לקנות את המכונית המשפחתית? נמקו את תשובתכם.',
+ hint:['מחיר האספנות גדל – איזה גרף עולה? ומי מהשניים גבוה יותר בשנת 2010?'],
+ steps:[
+  S('א','מכונית האספנות מתייקרת, לכן הגרף שלה עולה: גרף I. המשפחתית מוזלת: גרף II (יורד).'),
+  S('א','בשנת 2010 גרף I נמוך מגרף II.','!לא – מכונית האספנות הייתה זולה יותר'),
+  S('ב(1)','מ-2010 עד 2012 עברו 2 שנים. q לא ידוע.','40,000 · q² = 42,436'),
+  S('ב(1)','מחלקים את שני האגפים ב-40,000.','q² = {[42,436/40,000]}','q² = 1.0609'),
+  S('ב(1)','מוציאים שורש (q חיובי).','q = √1.0609 = 1.03'),
+  S('ב(1)','q = 1.03 זה 100% ועוד 3%.','q = 1 + {0.03}','!גדל ב-3% בכל שנה'),
+  S('ב(2)','מ-2010 עד 2016 עוברות 6 שנים.','M₆ = {40,000} · {1.03⁶}'),
+  S('ב(2)','מחשבים במחשבון.','M₆ = 40,000 · 1.194052','M₆ ≈ 47,762.09'),
+  S('ג','ב-2016 גם המשפחתית עלתה 47,762.09. היא קטנה ב-15%: נשאר 85%, לכן כופלים ב-0.85.','q = 1 − 0.15 = 0.85'),
+  S('ג','2017 היא שנה אחת אחרי 2016.','47,762.09 · {0.85} ≈ 40,597.78'),
+  S('ג','משווים לכסף של מיכל.','41,000 > 40,597.78'),
+  S('ג','יש לה יותר כסף ממחיר המכונית.','!כן, מיכל יכלה לקנות'),
+ ],
+ final:[['א.','!לא, האספנות (גרף I) הייתה זולה יותר'],['ב.','(1)  3%'],['','(2)  ≈ 47,762 ₪'],['ג.','!כן: המשפחתית עלתה כ-40,598 ₪, פחות מ-41,000 ₪']],
+ errs:[E('מחלקים ב-2 במקום להוציא שורש.','q = [1.0609/2]','q = √1.0609 = 1.03'),
+       E('כופלים במספר השנים במקום להעלות בחזקה.','40,000 · 1.03 · 6','40,000 · 1.03⁶'),
+       E('בירידה של 15% כופלים ב-0.15 או ב-1.15. הנכון: נשאר 85%.','47,762 · 0.15','47,762 · 0.85'),
+       E('בסעיף ג משווים למחיר של 2016 ולא מורידים עוד 15% עד 2017.','41,000 < 47,762','41,000 > 40,597.78'),
+       E('בסעיף א עונים לפי איזה גרף "חזק יותר". שואלים מי גבוה יותר בשנת 2010 – מסתכלים על נקודת ההתחלה.')]},
+
+{n:7, img:'q7', title:'קיץ 24, מועד א – תושבים בשתי ערים',
+ text:'מספר התושבים בעיר א׳ גדל בכל שנה ב-6%. א. בתחילת שנת 2010 היו בעיר א׳ 24,000 תושבים. (1) כמה תושבים היו בעיר א׳ בתחילת שנת 2015? (2) כמה תושבים היו בעיר א׳ בתחילת שנת 2008? מספר התושבים בעיר ב׳ גדל בכל שנה באחוז קבוע. לפניכם גרף המתאר את מספר התושבים בעיר ב׳, לפי שנים. (הגרף עולה, מתחיל ב-20,000 בשנת 2010, ובשנת 2013 מסומן עליו הערך 25,195.) היעזרו בגרף, וענו על הסעיפים ב–ג. ב. מה היה מספר התושבים בעיר ב׳ בתחילת שנת 2013? ג. באיזו עיר, א׳ או ב׳, מספר התושבים גדל באחוז גדול יותר בכל שנה? נמקו את תשובתכם.',
+ hint:['גדל ב-6% – בכמה כופלים בכל שנה? ובסעיף א(2): האם 2008 לפני 2010 או אחריה?'],
+ steps:[
+  S('א(1)','גדל ב-6%: כופלים בכל שנה ב-1.06. מ-2010 עד 2015 עוברות 5 שנים.','q = 1.06 ,  t = 5'),
+  S('א(1)','מציבים בנוסחה.','M₅ = {24,000} · {1.06⁵}'),
+  S('א(1)','מחשבים במחשבון ומעגלים (מספר תושבים שלם).','M₅ = 24,000 · 1.338226','M₅ ≈ 32,117.41 ≈ 32,117'),
+  S('א(2)','2008 היא שנתיים לפני 2010. מספר התושבים ב-2008 לא ידוע (M₀). אחרי שנתיים הוא הגיע ל-24,000.','M₀ · 1.06² = 24,000'),
+  S('א(2)','מחלקים את שני האגפים ב-1.06². (חוזרים אחורה בזמן – מחלקים ב-q.)','M₀ = {[24,000/1.06²]}','M₀ = [24,000/1.1236] ≈ 21,360'),
+  S('א(2)','בדיקה: העיר גדלה, לכן ב-2008 היו פחות מ-24,000.','21,360 · 1.06² ≈ 24,000 ✓'),
+  S('ב','קוראים מהגרף: בשנת 2013 הקו המקווקו מראה 25,195.','!25,195 תושבים'),
+  S('ג','מוצאים את q של עיר ב׳: ב-2010 היו 20,000 (מהגרף), ועד 2013 עברו 3 שנים.','20,000 · q³ = 25,195'),
+  S('ג','מחלקים את שני האגפים ב-20,000.','q³ = {[25,195/20,000]}','q³ = 1.25975'),
+  S('ג','מוציאים שורש שלישי במחשבון.','q = ∛1.25975 ≈ 1.08'),
+  S('ג','q = 1.08 זה גדילה של 8% בכל שנה. בעיר א׳ הגדילה 6%.','8% > 6%'),
+  S('ג','לכן בעיר ב׳ האחוז גדול יותר.','!עיר ב׳'),
+ ],
+ final:[['א.','(1)  ≈ 32,117 תושבים'],['','(2)  ≈ 21,360 תושבים'],['ב.','25,195 תושבים'],['ג.','!עיר ב׳: גדלה ב-8%, ועיר א׳ ב-6%']],
+ errs:[E('בסעיף א(2) כופלים במקום לחלק. 2008 לפני 2010, אז היו פחות תושבים.','24,000 · 1.06²','[24,000/1.06²] ≈ 21,360'),
+       E('בסעיף א(2) מחסירים 6% פעמיים. הורדה של 6% זה לא ההפך מגדילה של 6%.','24,000 · 0.94²','[24,000/1.06²]'),
+       E('מחלקים ב-3 במקום להוציא שורש שלישי.','q = [1.25975/3]','q = ∛1.25975 ≈ 1.08'),
+       E('בסעיף ג משווים את מספר התושבים ולא את האחוז. שואלים באיזו עיר האחוז גדול יותר.'),
+       E('כופלים במספר השנים במקום להעלות בחזקה.','24,000 · 1.06 · 5','24,000 · 1.06⁵')]},
+];
+
+// ================================================== AI prompt
+function aiPrompt(q){
+  return `אתה מורה פרטי סבלני למתמטיקה. אני תלמיד/ה ב${CONFIG.level}, ואני רוצה ללמוד לפתור את השאלה הזאת לבד.
+
+הכללים:
+1. אל תכתוב לי את הפתרון ואל תגלה את התשובה הסופית, גם אם אבקש.
+2. עבוד איתי צעד אחד בכל פעם: שאל אותי שאלה מנחה אחת, וחכה לתשובה שלי לפני שממשיכים.
+3. אם טעיתי, אל תתקן במקומי. תגיד לי באיזו שורה לבדוק (למשל סימן מינוס, פתיחת סוגריים, העברת אגף), ותן לי לנסות שוב.
+4. אם אני תקוע/ה פעמיים באותו מקום, תן רמז קטן או דוגמה דומה עם מספרים אחרים.
+5. השתמש רק בשיטות שלומדים ברמה הזאת: ${CONFIG.methods}.
+6. כתוב בעברית פשוטה, במשפטים קצרים.
+7. כשאגיע לתשובה, בקש ממני לבדוק אותה בעצמי (למשל בהצבה), ולהסביר במילים שלי מה עשיתי.
+
+השאלה (שאלה ${q.n} ${CONFIG.source}):
+${q.text}
+
+נתחיל: שאל אותי מה הצעד הראשון שאני חושב/ת לעשות.`;
+}
+
+// ================================================== render helpers
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function math(s){
+  let h = esc(s);
+  h = h.replace(/\[([^\[\]\/]+)\/([^\[\]]+)\]/g, '<span class="fr"><span>$1</span><span>$2</span></span>');
+  h = h.replace(/\{([^{}]+)\}/g, '<span class="hl">$1</span>');
+  h = h.replace(/_([A-Z]{1,2})/g, '<sub>$1</sub>');
+  h = h.replace(/ או /g, ' <span class="or">או</span> ');
+  h = h.replace(/✓/g, '<span class="ok">✓</span>');
+  return h;
+}
+function eqLine(e){
+  if (typeof e === 'object') return e.html;
+  if (e.startsWith('!')) return `<div class="eq heb">${esc(e.slice(1))}</div>`;
+  if (e.includes('|')){ const [l,m]=e.split('|'); return `<div class="eq lab">${l?`<b>${esc(l)}</b>`:''}<span class="m">${math(m)}</span></div>`; }
+  return `<div class="eq"><span class="m">${math(e)}</span></div>`;
+}
+function finLine([l,e]){
+  let body;
+  if (e.startsWith('!')) body = `<div class="eq heb" style="text-align:right">${esc(e.slice(1))}</div>`;
+  else if (e.includes('|')){ const [a,b]=e.split('|'); body = `<div class="eq lab" style="justify-content:flex-start"><b>${esc(a)}</b><span class="m">${math(b)}</span></div>`; }
+  else body = `<div class="eq" style="text-align:right"><span class="m">${math(e)}</span></div>`;
+  return `<div class="fl">${esc(l)}</div>${body}`;
+}
+
+// ================================================== build
+const stage = document.getElementById('stage'), jump = document.getElementById('jump');
+const cards = [], chips = [];
+SECTIONS.forEach((sec, si) => {
+  if (si) { const s=document.createElement('span'); s.className='sep'; jump.appendChild(s); }
+  Q.filter(q => q.n >= sec.from && q.n <= sec.to).forEach(q => {
+    q.sec = sec;
+    const chip = document.createElement('button'); chip.textContent = q.n; chip.setAttribute('aria-label','שאלה '+q.n);
+    chip.onclick = () => go(q.n - 1); jump.appendChild(chip); chips.push(chip);
+
+    const c = document.createElement('article'); c.className = 'card'; c.id = 'q'+q.n;
+    let steps = `<div class="step hint-step" data-k="0"><div class="say"><span class="sn">רמז:</span>${esc(q.hint[0])}</div>${q.hint.slice(1).map(eqLine).join('')}<div class="small-note">נסו להמשיך לבד. לא מצליחים? לחצו "לפתרון".</div></div>`, lastPart = null, k = 0;
+    q.steps.forEach(st => {
+      if (st.p && st.p !== lastPart){ steps += `<div class="part" data-k="${k+1}">${st.p.startsWith('(')?'גרף '+st.p:'סעיף '+st.p}</div>`; lastPart = st.p; }
+      steps += `<div class="step" data-k="${k+1}"><div class="say"><span class="sn">${k+1}.</span>${esc(st.say)}</div>${st.eq.map(eqLine).join('')}</div>`;
+      k++;
+    });
+    const pr = aiPrompt(q);
+    const errs = q.errs.map(e => `<div class="err-item"><div>${esc(e.t)}</div>`+
+        (e.w?`<div class="eq w"><span class="mk">לא נכון:</span><span class="m">${math(e.w)}</span></div>`:'')+
+        (e.r?`<div class="eq r"><span class="mk">נכון:</span><span class="m">${math(e.r)}</span></div>`:'')+`</div>`).join('');
+    c.innerHTML = `
+      <div class="head"><div class="num">${q.n}</div><div class="ttl">${q.title}</div></div>
+      <div class="imgbox${q.small?' small':''}" role="button" aria-label="הגדלת השאלה">
+        <img class="qimg" src="img/${q.img}.png" alt="שאלה ${q.n}: ${esc(q.text).replace(/"/g,'&quot;')}">
+        <span class="zoom-ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21M10.5 7.5v6M7.5 10.5h6"/></svg></span>
+      </div>
+      ${q.instr?`<div class="instr">${q.instr}</div>`:''}
+      <div class="final-box"><h4>תשובה סופית:</h4><div class="fin">${q.final.map(finLine).join('')}</div></div>
+      <div class="btns">
+        <button class="tg t-steps" data-p="steps" aria-pressed="false">פתרון מפורט</button>
+        <button class="tg t-err" data-p="err" aria-pressed="false">טעויות נפוצות</button>
+        <button class="tg t-ai" data-p="ai" aria-pressed="false">עזרה מ-AI</button>
+      </div>
+      <div class="panel p-steps" data-panel="steps">
+        ${steps}
+        <div class="step-ctl"><button class="b-next">לפתרון</button><button class="b-all">הכול</button></div>
+        <div class="done-msg">זהו! עכשיו נסו לפתור שוב לבד במחברת, בלי להסתכל.</div>
+      </div>
+      <div class="panel p-err" data-panel="err"><h4>טעויות נפוצות – אולי אחת מהן אצלכם?</h4>${errs}</div>
+      <div class="panel p-ai" data-panel="ai"><p class="ai-note">הכפתורים שולחים לצ'אט את השאלה עם הוראה <b>להנחות אתכם בשאלות, בלי לפתור במקומכם</b>. ב-Gemini מדביקים (ההוראה מועתקת אוטומטית).</p>
+        <div class="ai-btns">
+          <button class="b-copy">העתקה בלבד</button>
+          <a href="https://chatgpt.com/?q=${encodeURIComponent(pr)}" target="_blank" rel="noopener">ChatGPT</a>
+          <a href="https://claude.ai/new?q=${encodeURIComponent(pr)}" target="_blank" rel="noopener">Claude</a>
+          <a class="b-gem" href="https://gemini.google.com/app" target="_blank" rel="noopener">Gemini</a>
+        </div>
+      </div>`;
+    stage.appendChild(c); cards.push(c);
+
+    const stepsEls = [...c.querySelectorAll('.step')], parts = [...c.querySelectorAll('.part')];
+    let shown = 0;
+    const showUpTo = n => {
+      shown = Math.min(n, stepsEls.length);
+      stepsEls.forEach((s,i) => s.classList.toggle('show', i < shown));
+      parts.forEach(p => p.classList.toggle('show', +p.dataset.k < shown));
+      const done = shown >= stepsEls.length;
+      c.querySelector('.step-ctl').style.display = done ? 'none' : '';
+      c.querySelector('.done-msg').style.display = done ? 'block' : 'none';
+      c.querySelector('.b-next').textContent = shown <= 1 ? 'לפתרון – שלב 1' : 'השלב הבא';
+    };
+    c.querySelectorAll('.tg').forEach(b => b.onclick = () => {
+      const p = c.querySelector(`[data-panel="${b.dataset.p}"]`);
+      const on = !p.classList.contains('open');
+      p.classList.toggle('open', on); b.setAttribute('aria-pressed', on);
+      if (b.dataset.p === 'steps' && on && shown === 0) showUpTo(1);
+      if (on) p.scrollIntoView({block:'nearest', behavior:'smooth'});
+    });
+    c.querySelector('.b-next').onclick = () => { showUpTo(shown + 1); stepsEls[shown-1].scrollIntoView({block:'nearest', behavior:'smooth'}); };
+    c.querySelector('.b-all').onclick = () => showUpTo(stepsEls.length);
+    c.querySelector('.b-copy').onclick = () => copy(pr);
+    c.querySelector('.b-gem').addEventListener('click', () => copy(pr, 'ההוראה הועתקה – מדביקים ב-Gemini'));
+    c.querySelector('.imgbox').onclick = () => openLb(`img/${q.img}.png`);
+  });
+});
+
+// shrink long equation lines so they fit on one line
+function fit(root){
+  root.querySelectorAll('.eq').forEach(e => {
+    if (!e.offsetParent) return;
+    e.style.fontSize = '';
+    let fs = parseFloat(getComputedStyle(e).fontSize), min = fs * 0.62;
+    while (e.scrollWidth > e.clientWidth + 1 && fs > min){ fs -= 1; e.style.fontSize = fs + 'px'; }
+  });
+}
+new MutationObserver(ms => ms.forEach(m => m.target.closest && m.target.closest('.card') && fit(m.target)))
+  .observe(stage, {attributes:true, subtree:true, attributeFilter:['class']});
+addEventListener('resize', () => cards[cur] && fit(cards[cur]));
+
+// ================================================== carousel
+let cur = -1;
+function go(i, dir){
+  i = Math.max(0, Math.min(Q.length - 1, i));
+  if (i === cur) return;
+  if (dir === undefined) dir = i > cur ? 1 : -1;
+  if (cur >= 0) cards[cur].classList.remove('on','in-next','in-prev');
+  const c = cards[i]; c.classList.remove('in-next','in-prev'); void c.offsetWidth;
+  c.classList.add('on', cur < 0 ? 'x' : (dir > 0 ? 'in-next' : 'in-prev'));
+  chips.forEach((ch,k) => ch.classList.toggle('cur', k === i));
+  chips[i].scrollIntoView({inline:'center', block:'nearest', behavior: cur<0?'auto':'smooth'});
+  cur = i;
+  const q = Q[i];
+  document.getElementById('secName').textContent = q.sec.name;
+  document.getElementById('secCount').textContent = '';
+  document.getElementById('cnt').textContent = `${i+1} / ${Q.length}`;
+  document.getElementById('prev').disabled = i === 0;
+  document.getElementById('next').disabled = i === Q.length - 1;
+  history.replaceState(null, '', '#q' + q.n);
+  const top = document.querySelector('.where').getBoundingClientRect().top + scrollY - 60;
+  if (scrollY > top) scrollTo({top, behavior:'auto'});
+}
+document.getElementById('prev').onclick = () => go(cur - 1, -1);
+document.getElementById('next').onclick = () => go(cur + 1, 1);
+const m0 = location.hash.match(/^#q(\d+)$/);
+go(m0 ? +m0[1] - 1 : 0);
+if (!m0) { scrollTo(0, 0); addEventListener('load', () => setTimeout(() => scrollTo(0, 0), 50)); }
+
+// swipe (RTL: finger to the right = next)
+let sx = null, sy = null;
+stage.addEventListener('touchstart', e => {
+  if (e.touches.length !== 1 || e.target.closest('.tbl-wrap')) { sx = null; return; }
+  sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+}, {passive:true});
+stage.addEventListener('touchend', e => {
+  if (sx === null) return;
+  const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+  sx = null;
+  if (Math.abs(dx) > 60 && Math.abs(dx) > 1.5 * Math.abs(dy)) go(cur + (dx > 0 ? 1 : -1), dx > 0 ? 1 : -1);
+}, {passive:true});
+document.addEventListener('keydown', e => {
+  if (lb.classList.contains('on')) { if (e.key === 'Escape') closeLb(); return; }
+  if (e.key === 'ArrowLeft') go(cur + 1, 1);
+  if (e.key === 'ArrowRight') go(cur - 1, -1);
+});
+
+// ================================================== lightbox
+const lb = document.getElementById('lb'), lbimg = document.getElementById('lbimg');
+function openLb(src){ lbimg.src = src; lb.classList.remove('big'); lb.classList.add('on'); document.body.style.overflow='hidden'; lb.scrollTo(0,0); }
+function closeLb(){ lb.classList.remove('on'); document.body.style.overflow=''; }
+document.getElementById('lbx').onclick = closeLb;
+lb.addEventListener('click', e => { if (e.target === lb || e.target.classList.contains('inner')) closeLb(); });
+lbimg.onclick = () => lb.classList.toggle('big');
+
+// ================================================== copy
+function copy(t, msg){
+  const ok = () => { const el = document.getElementById('toast'); el.textContent = msg || "הועתק! עכשיו מדביקים בצ'אט"; el.classList.add('on'); setTimeout(()=>el.classList.remove('on'), 1800); };
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(ok, () => fallback(t, ok));
+  else fallback(t, ok);
+}
+function fallback(t, ok){
+  const ta = document.createElement('textarea'); ta.value = t; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); ok(); }catch(e){} ta.remove();
+}
+</script>
+</body>
+</html>

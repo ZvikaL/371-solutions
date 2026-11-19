@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>סטטיסטיקה – פתרונות 371</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f6f8; --card:#fff; --ink:#1d2330; --muted:#5d6577; --line:#e2e5ec;
+  --blue:#2f6fde; --blue-soft:#eaf1fd; --orange:#e8590c; --orange-soft:#fff1e8;
+  --pos:#1f5fd0; --neg:#d32f2f; --zero:#7b3fb8; --ok:#1e8e4e; --ok-soft:#e8f6ee;
+  --hint:#9a6b00; --hint-soft:#fff8dc; --err:#b42318; --err-soft:#fdeceb; --hl:#fff1a8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14171d; --card:#1d222b; --ink:#e8ebf1; --muted:#a3abbb; --line:#2f3644;
+    --blue:#6f9ef0; --blue-soft:#1f2b40; --orange:#ff8a4c; --orange-soft:#3a271c;
+    --pos:#79a8ff; --neg:#ff7b7b; --zero:#c79bf2; --ok:#5fd08f; --ok-soft:#1b3326;
+    --hint:#f3d36b; --hint-soft:#2f2a16; --err:#ff9a9a; --err-soft:#3b1d1d; --hl:#5a4d12;
+  }
+  :root:not([data-theme="light"]) .qimg, :root:not([data-theme="light"]) .lb img{ filter: invert(.9) hue-rotate(180deg); }
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:'Assistant',system-ui,sans-serif; font-size:17px; line-height:1.6; padding-bottom:84px}
+.wrap{max-width:720px; margin:0 auto; padding:0 16px}
+
+/* ---------- math */
+.m{font-family:'Times New Roman',Times,serif; direction:ltr; unicode-bidi:isolate; font-size:1.12em}
+.or{unicode-bidi:isolate; direction:rtl; font-family:'Assistant',sans-serif; font-size:.85em; margin:0 .45em; color:var(--muted)}
+.fr{display:inline-flex; flex-direction:column; vertical-align:middle; text-align:center; margin:0 .12em; line-height:1.15}
+.fr>span:first-child{border-bottom:1.3px solid currentColor; padding:0 .2em .05em}
+.fr>span:last-child{padding:.05em .2em 0}
+.hl{background:var(--hl); border-radius:4px; padding:0 .15em}
+.eq{direction:ltr; text-align:center; font-family:'Times New Roman',Times,serif; font-size:1.18em; margin:6px 0; line-height:1.9; white-space:nowrap; overflow-x:auto; scrollbar-width:none}
+.eq .m{white-space:nowrap}
+.eq.lab{display:flex; justify-content:center; align-items:center; gap:10px; direction:rtl; flex-wrap:wrap}
+.eq.lab b{font-family:'Assistant',sans-serif; font-size:.82em}
+.eq.heb{direction:rtl; font-family:'Assistant',sans-serif; font-weight:800; font-size:1em}
+.eq .ok{color:var(--ok); font-family:'Assistant',sans-serif; font-weight:800; margin-inline-start:.4em}
+
+/* ---------- top */
+header.top{background:var(--blue); color:#fff; padding:16px 16px 14px}
+header.top h1{margin:0; font-size:1.35rem; font-weight:800; line-height:1.25}
+header.top p{margin:4px 0 0; opacity:.92; font-size:.95rem}
+nav.jump{position:sticky; top:0; z-index:5; background:var(--card); border-bottom:1px solid var(--line); box-shadow:0 2px 6px rgba(0,0,0,.05)}
+nav.jump .wrap{display:flex; gap:6px; overflow-x:auto; padding:8px 16px; scrollbar-width:none}
+nav.jump .wrap::-webkit-scrollbar{display:none}
+nav.jump button{flex:none; min-width:38px; min-height:38px; padding:0; border-radius:10px; background:var(--blue-soft); color:var(--blue); font-weight:800; border:2px solid transparent}
+nav.jump button.cur{background:var(--blue); color:#fff}
+nav.jump .sep{flex:none; width:1px; background:var(--line); margin:4px 2px}
+details.intro{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:10px 14px; margin:14px 0 0}
+details.intro summary{font-weight:800; cursor:pointer}
+details.intro ol{margin:6px 0 0; padding-inline-start:22px}
+details.intro.ai{border-color:var(--orange); background:var(--orange-soft)}
+.small-note{color:var(--muted); font-size:.9rem}
+
+/* ---------- carousel */
+.where{display:flex; justify-content:space-between; align-items:baseline; margin:16px 2px 6px; color:var(--muted); font-weight:700; font-size:.95rem}
+.stage{position:relative; overflow:hidden; touch-action:pan-y pinch-zoom}
+.card{display:none; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px; box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card.on{display:block}
+.card.in-next{animation:inNext .25s ease}
+.card.in-prev{animation:inPrev .25s ease}
+@keyframes inNext{from{opacity:0; transform:translateX(-40px)} to{opacity:1; transform:none}}
+@keyframes inPrev{from{opacity:0; transform:translateX(40px)} to{opacity:1; transform:none}}
+.card .head{display:flex; align-items:center; gap:10px; margin-bottom:10px}
+.card .num{background:var(--blue); color:#fff; font-weight:800; border-radius:10px; min-width:38px; height:38px; display:grid; place-items:center; font-size:1.1rem}
+.card .ttl{font-weight:800}
+.imgbox{position:relative; cursor:zoom-in; border-radius:8px; overflow:hidden; background:#fff; border:1px solid var(--line)}
+.qimg{display:block; width:100%; height:auto}
+.imgbox.small .qimg{max-width:380px; margin-inline-start:auto}
+.zoom-ic{position:absolute; bottom:6px; left:6px; width:34px; height:34px; border-radius:50%; background:rgba(29,35,48,.75); display:grid; place-items:center}
+.instr{margin-top:6px; color:var(--muted)}
+
+/* ---------- toggle buttons */
+.btns{display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:10px}
+.tg{font:inherit; font-weight:800; border-radius:12px; padding:8px 10px; cursor:pointer; min-height:40px; font-size:.88rem; line-height:1.2; padding:6px 4px; background:var(--card); border:2px solid currentColor; display:flex; align-items:center; justify-content:center; gap:8px; transition:background .15s, color .15s, box-shadow .15s}
+.tg .st{font-size:.75rem; font-weight:700; opacity:.75}
+.tg[aria-pressed="true"]{color:#fff !important; box-shadow:inset 0 3px 6px rgba(0,0,0,.25)}
+.t-hint{color:var(--hint)} .t-hint[aria-pressed="true"]{background:#b58300}
+.t-steps{color:var(--blue)} .t-steps[aria-pressed="true"]{background:var(--blue)}
+.t-final{color:var(--ok)} .t-final[aria-pressed="true"]{background:var(--ok)}
+.t-err{color:var(--err)} .t-err[aria-pressed="true"]{background:var(--err)}
+.t-ai{color:var(--orange)} .t-ai[aria-pressed="true"]{background:var(--orange)}
+
+/* ---------- panels */
+.panel{display:none; margin-top:12px; border-radius:12px; padding:12px 14px}
+.panel.open{display:block; animation:fade .2s ease}
+.panel h4{margin:0 0 6px; font-size:1rem}
+.p-hint{background:var(--hint-soft); border:2px solid #e6c65c}
+.p-steps{background:var(--blue-soft); border:2px solid var(--blue)}
+.p-final{background:var(--ok-soft); border:2px solid var(--ok)}
+.p-err{background:var(--err-soft); border:2px solid var(--err)}
+.p-ai{background:var(--orange-soft); border:2px solid var(--orange)}
+.step{display:none; background:var(--card); border-radius:10px; padding:10px 12px; margin:8px 0; border-inline-start:4px solid var(--blue)}
+.step.show{display:block; animation:fade .25s ease}
+.step .say{font-weight:600}
+.step.hint-step{border-inline-start-color:#c99a00; background:var(--hint-soft)}
+.step.hint-step .sn{color:var(--hint)}
+.final-box{margin-top:6px; color:var(--ok); font-size:.88rem; line-height:1.4}
+.final-box h4{margin:0; font-size:.85rem; font-weight:800}
+.final-box .fin{gap:0 8px}
+.final-box .eq{font-size:1.05em; margin:0; line-height:1.5}
+.final-box .fl{font-weight:700}
+.final-box .eq.heb{font-size:.95em; font-weight:700}
+.ai-note{margin:0 0 4px}
+.step .sn{font-weight:800; color:var(--blue); margin-inline-end:6px}
+.part{display:none; font-weight:800; margin:14px 0 2px; color:var(--orange)}
+.part.show{display:block}
+.step-ctl{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
+.b-next,.b-all{font:inherit; font-weight:800; border-radius:12px; padding:8px 14px; min-height:44px; cursor:pointer}
+.b-next{background:var(--blue); color:#fff; border:0; flex:1}
+.b-all{background:transparent; color:var(--blue); border:2px solid var(--blue)}
+.done-msg{display:none; font-weight:800; color:var(--ok); margin-top:6px}
+.fin{display:grid; grid-template-columns:auto 1fr; gap:4px 12px; align-items:center}
+.fin .fl{font-weight:800}
+.fin .eq{text-align:left; margin:2px 0}
+.err-item{background:var(--card); border-radius:10px; padding:8px 12px; margin:8px 0}
+.err-item .eq{text-align:right; direction:rtl; display:flex; gap:8px; align-items:center; justify-content:flex-start; flex-wrap:wrap; margin:2px 0}
+.err-item .mk{font-family:'Assistant',sans-serif; font-weight:800; font-size:.8em; min-width:3.6em}
+.err-item .w .mk{color:var(--err)} .err-item .w .m{color:var(--err); background:var(--err-soft); border-radius:6px; padding:0 .35em}
+.err-item .r .mk{color:var(--ok)}
+@keyframes fade{from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none}}
+
+/* ---------- tables, sketch */
+.tbl-wrap{overflow-x:auto; margin:6px 0}
+table.s{direction:ltr; border-collapse:collapse; margin:0 auto; font-size:.86rem; font-family:'Times New Roman',serif}
+table.s th, table.s td{border:1px solid var(--line); padding:4px 4px; text-align:center; background:var(--card); line-height:1.3}
+table.s th{background:var(--bg); white-space:nowrap}
+table.s td.h{font-weight:700; background:var(--bg); font-family:'Assistant',sans-serif; direction:rtl; font-size:.95em}
+table.s .tv{color:var(--muted); font-size:.85em}
+.pos{color:var(--pos); font-weight:800} .neg{color:var(--neg); font-weight:800} .zr{color:var(--zero); font-weight:800}
+.sketch{display:block; margin:6px auto; max-width:260px; width:100%; direction:ltr}
+
+/* ---------- AI */
+.prompt{white-space:pre-wrap; background:var(--card); border:1px dashed var(--orange); border-radius:10px; padding:10px 12px; font-size:.9rem; max-height:200px; overflow:auto}
+.ai-btns{display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:6px}
+.ai-btns a, .ai-btns button{font:inherit; font-weight:800; text-decoration:none; border-radius:12px; padding:6px 8px; min-height:40px; font-size:.9rem; display:flex; align-items:center; justify-content:center; background:var(--card); color:var(--orange); border:2px solid var(--orange); cursor:pointer}
+
+/* ---------- bottom bar */
+.bar{position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--line); box-shadow:0 -2px 8px rgba(0,0,0,.06); z-index:6}
+.bar .wrap{display:flex; align-items:center; gap:10px; padding:10px 16px}
+.bar button{font:inherit; font-weight:800; flex:1; min-height:48px; border-radius:12px; border:2px solid var(--blue); background:var(--card); color:var(--blue); cursor:pointer}
+.bar button.nx{background:var(--blue); color:#fff}
+.bar button:disabled{opacity:.35; cursor:default}
+.bar .cnt{flex:none; font-weight:800; color:var(--muted); min-width:56px; text-align:center}
+
+/* ---------- lightbox */
+.lb{position:fixed; inset:0; z-index:30; background:rgba(10,12,16,.92); display:none; overflow:auto; touch-action:pan-x pan-y pinch-zoom}
+.lb.on{display:block}
+.lb .inner{min-height:100%; display:flex; align-items:center; justify-content:center; padding:56px 8px 24px}
+.lb img{display:block; width:100%; max-width:1300px; height:auto; background:#fff; border-radius:6px; cursor:zoom-in}
+.lb.big img{width:200%; max-width:none; cursor:zoom-out}
+.lb.big .inner{justify-content:flex-start}
+.lb .x{position:fixed; top:10px; left:10px; width:44px; height:44px; border-radius:50%; border:0; background:#fff; color:#111; font-size:1.4rem; font-weight:800; cursor:pointer}
+.lb .tip{position:fixed; top:16px; right:14px; color:#fff; font-weight:700; font-size:.9rem}
+
+.toast{position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:#1d2330; color:#fff; padding:10px 18px; border-radius:12px; font-weight:700; opacity:0; transition:opacity .2s; pointer-events:none; z-index:40}
+.toast.on{opacity:1}
+
+/* ---------- topics nav */
+nav.topics{background:#1f4fa8}
+nav.topics .wrap{display:flex; gap:6px; overflow-x:auto; padding:8px 16px; scrollbar-width:none}
+nav.topics .wrap::-webkit-scrollbar{display:none}
+.tp{flex:none; color:#fff; text-decoration:none; font-weight:700; font-size:.9rem; padding:5px 12px; border-radius:999px; border:1.5px solid rgba(255,255,255,.45); white-space:nowrap}
+.tp.cur{background:#fff; color:#1f4fa8; border-color:#fff}
+.tp.off{opacity:.45; border-style:dashed}
+.tp.home{border-color:transparent; text-decoration:underline; text-underline-offset:3px}
+</style>
+</head>
+<body>
+<nav class="topics" aria-label="נושאים"><div class="wrap" id="topics"></div></nav>
+<header class="top"><div class="wrap">
+  <h1>פתרונות</h1>
+  <p>שלב אחרי שלב, עם הסברים וטעויות נפוצות</p>
+</div></header>
+<nav class="jump"><div class="wrap" id="jump"></div></nav>
+
+<main class="wrap">
+  <details class="intro">
+    <summary>איך משתמשים בדף הזה</summary>
+    <ol>
+      <li>קודם פותרים לבד במחברת, ובודקים מול ה<b>תשובה הסופית</b> שמתחת לשאלה.</li>
+      <li>נתקעתם או יצא לא נכון? <b>פתרון מפורט</b>: קודם רמז, ואחר כך שלב אחד בכל פעם. אחרי כל שלב – ממשיכים לבד.</li>
+      <li>כדאי לקרוא גם את <b>טעויות נפוצות</b> – אולי אחת מהן אצלכם.</li>
+      <li>מעבר בין שאלות: החצים למטה, המספרים למעלה, או החלקה הצידה.</li>
+    </ol>
+  </details>
+  <details class="intro ai">
+    <summary>רוצים עזרה מ-AI? שיעזור, לא יפתור במקומכם</summary>
+    <p style="margin:6px 0">אם תכתבו לצ'אט "תפתור לי", תקבלו פתרון – ולא תלמדו כלום. במבחן לא יהיה AI.<br>
+    בכל שאלה יש כפתור <b>עזרה מ-AI</b> עם הוראה מוכנה. מעתיקים לצ'אט, והוא ישאל אתכם שאלות מנחות, צעד אחד בכל פעם.</p>
+    <p class="small-note" style="margin:0">גם AI טועה לפעמים. אם יצא לכם משהו שונה מה"תשובה הסופית" כאן – תאמינו לתשובה הסופית ושאלו את המורה.</p>
+  </details>
+
+  <div class="where"><span id="secName"></span><span id="secCount"></span></div>
+  <div class="stage" id="stage"></div>
+</main>
+
+<div class="bar"><div class="wrap">
+  <button id="prev" aria-label="השאלה הקודמת">→ הקודמת</button>
+  <span class="cnt" id="cnt"></span>
+  <button id="next" class="nx" aria-label="השאלה הבאה">הבאה ←</button>
+</div></div>
+
+<div class="lb" id="lb" role="dialog" aria-label="השאלה בהגדלה">
+  <button class="x" id="lbx" aria-label="סגירה">✕</button>
+  <span class="tip">לחיצה על התמונה – הגדלה נוספת</span>
+  <div class="inner"><img id="lbimg" alt=""></div>
+</div>
+<div class="toast" id="toast">הועתק! עכשיו מדביקים בצ'אט</div>
+
+<script src="../topics.js"></script>
+<script>
+renderTopics('statistics');
+/* ===== notation in math strings =====
+   [a/b]  fraction with horizontal bar      {..}  highlight
+   _AB    subscript (1-2 capitals)          ' או '  Hebrew "or"
+   step equation lines:  'math'  |  'label|math'  |  '!Hebrew line'  |  {html:'...'}          */
+// ================================================== CONFIG (edit)
+const CONFIG = {
+  pageTitle: 'סטטיסטיקה – פתרונות 371',
+  title:     'סטטיסטיקה – פתרונות',
+  subtitle:  'שאלון 371 · מקבץ שאלות בגרות · שלב אחרי שלב',
+  level:     'הכנה לבגרות בשאלון 371 (3 יחידות)',
+  methods:   'ממוצע מטבלת שכיחויות, חציון לפי שכיחות מצטברת, שכיח, שכיחות יחסית ואחוזים, דיאגרמת עמודות ודיאגרמת עיגול, השפעה של הוספת ערך או שינוי ערכים על הממוצע ועל החציון, משוואה פשוטה עם ממוצע',
+  source:    'ממקבץ הסטטיסטיקה',
+};
+document.title = CONFIG.pageTitle;
+document.querySelector('header.top h1').textContent = CONFIG.title;
+document.querySelector('header.top p').textContent = CONFIG.subtitle;
+
+const SECTIONS = [
+  {name:'בגרות 2026', from:1, to:3},
+  {name:'בגרות 2025', from:4, to:5},
+  {name:'בגרות 2024', from:6, to:7},
+];
+
+// frequency table: heads = column titles (right to left), rows = arrays of cells (raw HTML allowed)
+function ft(heads, rows){
+  return {html:`<div class="tbl-wrap"><table class="s" style="direction:rtl"><tr>${heads.map(h=>`<th>${h}</th>`).join('')}</tr>${
+    rows.map(r=>'<tr>'+r.map((c,i)=>`<td${i===0&&typeof c==='string'?' class="h"':''}>${c}</td>`).join('')+'</tr>').join('')}</table></div>`};
+}
+const HL = v => `<span class="hl">${v}</span>`;
+const S=(p,say,...eq)=>({p,say,eq});
+const E=(t,w,r)=>({t,w,r});
+
+const Q = [
+{n:1, img:'q1', title:'קיץ 26, מועד א – מספרה',
+ text:'מספרת "חן ויופי" מציעה ארבעה סוגי תספורות. בטבלה מוצגים הנתונים של מחירי התספורות ומספר הלקוחות שהסתפרו בכל סוג תספורת ביום מסוים: ילדים – מחיר 60 שקלים, 5 לקוחות; שיער קצר – מחיר 150 שקלים, 21 לקוחות; שיער ארוך – מחיר 180 שקלים, 9 לקוחות; מיוחדת – מחיר 210 שקלים, 10 לקוחות. ביום זה, ההכנסות של המספרה היו התשלומים של כל הלקוחות שהסתפרו. א. (1) מצאו את מספר הלקוחות שהסתפרו ביום זה. (2) מצאו את ממוצע ההכנסות של המספרה ביום זה. קרוב לשעת הסגירה הסתפרו במספרה שלושה לקוחות נוספים, שאינם כלולים בטבלה. ב. מצאו את ממוצע ההכנסות הגדול ביותר האפשרי, לאחר הוספת שלושת הלקוחות. שלושת הלקוחות בחרו באותה התספורת. לאחר שהם שילמו, ירד ממוצע ההכנסות של המספרה ביום זה. ג. לפניכם שלושה היגדים I–III. קבעו בעבור כל אחד מן ההיגדים אם הוא ייתכן או לא ייתכן. נמקו את קביעותיכם. I. שלושת הלקוחות בחרו בתספורת שיער קצר. II. שלושת הלקוחות בחרו בתספורת שיער ארוך בהנחה של 15 שקלים ללקוח. III. שלושת הלקוחות בחרו בתספורת מיוחדת בהנחה של 35% ללקוח.',
+ hint:['ממוצע מטבלת שכיחויות: כופלים כל מחיר במספר הלקוחות שלו, מחברים, ומחלקים במספר כל הלקוחות.'],
+ steps:[
+  S('א(1)','מספר הלקוחות הוא סכום השורה התחתונה בטבלה.','N = 5 + 21 + 9 + 10 = 45'),
+  S('א(2)','ההכנסה מכל סוג תספורת: המחיר כפול מספר הלקוחות. מחברים את כל ההכנסות.',
+    ft(['תספורת','מחיר','לקוחות','מחיר · לקוחות'],[['ילדים',60,5,300],['שיער קצר',150,21,3150],['שיער ארוך',180,9,1620],['מיוחדת',210,10,2100],['סך הכול','',45,HL(7170)]])),
+  S('א(2)','הממוצע: סך ההכנסות לחלק במספר הלקוחות.','x̄ = [60 · 5 + 150 · 21 + 180 · 9 + 210 · 10/45]','x̄ = [{7170}/45] ≈ 159.33'),
+  S('ב','כדי שהממוצע יהיה הכי גדול, כל שלושת הלקוחות צריכים לשלם הכי הרבה: תספורת מיוחדת, 210 שקלים.','סכום חדש:|7170 + {3 · 210} = 7800','לקוחות:|45 + {3} = 48'),
+  S('ב','מחלקים את הסכום החדש במספר הלקוחות החדש.','x̄ = [7800/48] = 162.5'),
+  S('ג','כלל חשוב: מוסיפים ערך קטן מהממוצע – הממוצע יורד. מוסיפים ערך גדול מהממוצע – הממוצע עולה. לכן משווים את מה שכל לקוח שילם לממוצע 159.33.','!הממוצע יורד רק אם כל לקוח שילם פחות מ-159.33'),
+  S('ג','היגד I: שיער קצר עולה 150 שקלים, פחות מהממוצע. לכן הממוצע יורד – ייתכן.','150 < 159.33','x̄ = [7170 + 3 · 150/48] = 158.75 ✓'),
+  S('ג','היגד II: שיער ארוך בהנחה של 15 שקלים. מחסרים את ההנחה מהמחיר.','180 − 15 = 165','165 > 159.33'),
+  S('ג','המחיר גדול מהממוצע, לכן הממוצע עולה ולא יורד – לא ייתכן.','x̄ = [7170 + 3 · 165/48] ≈ 159.69'),
+  S('ג','היגד III: הנחה של 35% – משלמים רק 65% מהמחיר.','210 · 0.65 = 136.5','136.5 < 159.33'),
+  S('ג','המחיר קטן מהממוצע, לכן הממוצע יורד – ייתכן.','x̄ = [7170 + 3 · 136.5/48] ≈ 157.91 ✓'),
+ ],
+ final:[['א.','(1)  45 לקוחות'],['','(2)  x̄ ≈ 159.33 ₪'],['ב.','x̄ = 162.5 ₪'],['ג.','!I: ייתכן (150 קטן מהממוצע)'],['','!II: לא ייתכן (165 גדול מהממוצע)'],['','!III: ייתכן (136.5 קטן מהממוצע)']],
+ errs:[E('מחלקים במספר סוגי התספורות במקום במספר הלקוחות.','x̄ = [7170/4]','x̄ = [7170/45] ≈ 159.33'),
+       E('מחשבים ממוצע של ארבעת המחירים, בלי לכפול במספר הלקוחות.','x̄ = [60 + 150 + 180 + 210/4] = 150','x̄ = [7170/45] ≈ 159.33'),
+       E('בסעיף ב מגדילים את הסכום אבל שוכחים להגדיל את מספר הלקוחות.','x̄ = [7800/45]','x̄ = [7800/48] = 162.5'),
+       E('הנחה של 35% היא לא הורדה של 35 שקלים.','210 − 35 = 175','210 · 0.65 = 136.5'),
+       E('בסעיף ג משווים את המחיר החדש למחירים אחרים בטבלה. צריך להשוות אותו לממוצע, 159.33.')]},
+
+{n:2, img:'q2', title:'קיץ 26, מועד ב – קליעות לסל',
+ text:'לקראת משחק כדורסל של ילדים, נערך אימון בקליעות לסל. בדיאגרמת העמודות מתוארת התפלגות מספר הקליעות של כל הילדים שהשתתפו באימון. בציר האופקי מספר הקליעות, בציר האנכי מספר הילדים: ילד 1 קלע 2 קליעות, 6 ילדים קלעו 3, 3 ילדים קלעו 5, 8 ילדים קלעו 10, ו-2 ילדים קלעו 15. א. (1) מצאו את מספר הילדים שהשתתפו באימון. (2) מצאו את ממוצע הקליעות לילד שהשתתף באימון. למוחרת נערך משחק הכדורסל. מספר הילדים שהשתתפו במשחק היה 80% ממספר הילדים שהשתתפו באימון. ב. מצאו את מספר הילדים שהשתתפו במשחק. בטבלה מתוארת התפלגות מספר הקליעות של כל הילדים שהשתתפו במשחק: 18 קליעות – ילד 1; x קליעות – 3 ילדים; 6 קליעות – 7 ילדים; 4 קליעות – מספר הילדים חסר. ג. השלימו בטבלה את מספר הילדים שקלעו 4 קליעות במשחק. נתון כי ממוצע הקליעות לילד באימון שווה לממוצע הקליעות לילד במשחק. ד. מצאו את הערך של x. תומר, אחד מן הילדים שהשתתפו באימון, לא השתתף במשחק. תומר טוען כי אילו היה משתתף במשחק וקולע בו 6 קליעות, אז ממוצע הקליעות לילד במשחק היה גדול יותר. ה. האם טענתו של תומר נכונה? נמקו את תשובתכם.',
+ hint:['גובה כל עמודה הוא מספר הילדים. קוראים מהדיאגרמה כמה ילדים קלעו כל מספר קליעות.'],
+ steps:[
+  S('א(1)','קוראים מהדיאגרמה את גובה כל עמודה, ומסדרים בטבלת שכיחויות.',
+    ft(['קליעות','ילדים','קליעות · ילדים'],[[2,1,2],[3,6,18],[5,3,15],[10,8,80],[15,2,30],['סך הכול',HL(20),HL(145)]])),
+  S('א(1)','מספר הילדים הוא סכום השכיחויות.','N = 1 + 6 + 3 + 8 + 2 = 20'),
+  S('א(2)','ממוצע: סכום הקליעות של כל הילדים לחלק במספר הילדים.','x̄ = [2 · 1 + 3 · 6 + 5 · 3 + 10 · 8 + 15 · 2/20]','x̄ = [{145}/20] = 7.25'),
+  S('ב','80% זה 0.8. כופלים במספר הילדים באימון.','0.8 · 20 = 16'),
+  S('ג','במשחק 16 ילדים. מחסרים את הילדים שכבר רשומים בטבלה.','16 − (1 + 3 + 7) = 16 − 11 = 5'),
+  S('ד','ממוצע המשחק שווה לממוצע האימון, 7.25. לכן סכום הקליעות במשחק הוא הממוצע כפול מספר הילדים.','סכום:|7.25 · 16 = 116'),
+  S('ד','כותבים את סכום הקליעות לפי הטבלה. שלושה ילדים קלעו x, לכן x מופיע שלוש פעמים.','18 · 1 + x · 3 + 6 · 7 + 4 · 5 = 116','18 + {3x} + {42} + {20} = 116'),
+  S('ד','מכנסים את המספרים.','{80} + 3x = 116'),
+  S('ד','מעבירים 80 אגף (מחליף סימן).','3x = 116 {− 80}','3x = 36'),
+  S('ד','מחלקים ב-3.','x = [36/3] = 12'),
+  S('ד','בדיקה: מחשבים את ממוצע המשחק עם x = 12.','[18 + 36 + 42 + 20/16] = [116/16] = 7.25 ✓'),
+  S('ה','תומר קלע 6, פחות מהממוצע 7.25. ערך שקטן מהממוצע מוריד את הממוצע. לכן הטענה לא נכונה.','6 < 7.25'),
+  S('ה','בדיקה בחישוב: 17 ילדים, וסכום הקליעות גדל ב-6.','x̄ = [116 + 6/17] = [122/17] ≈ 7.18'),
+ ],
+ final:[['א.','(1)  20 ילדים'],['','(2)  x̄ = 7.25'],['ב.','16 ילדים'],['ג.','5 ילדים'],['ד.','x = 12'],['ה.','!לא נכונה: 6 קטן מהממוצע, והממוצע יורד (≈ 7.18)']],
+ errs:[E('מחלקים במספר העמודות במקום במספר הילדים.','x̄ = [145/5] = 29','x̄ = [145/20] = 7.25'),
+       E('מחברים את מספרי הקליעות בלי לכפול במספר הילדים.','x̄ = [2 + 3 + 5 + 10 + 15/20]','x̄ = [2 · 1 + 3 · 6 + 5 · 3 + 10 · 8 + 15 · 2/20]'),
+       E('בסעיף ג מחסרים מ-20. במשחק השתתפו רק 16 ילדים.','20 − 11 = 9','16 − 11 = 5'),
+       E('בסעיף ד כופלים את x ב-1. שלושה ילדים קלעו x קליעות.','18 + x + 42 + 20 = 116','18 + 3x + 42 + 20 = 116'),
+       E('חושבים שכל ילד נוסף מגדיל את הממוצע. ילד נוסף מגדיל את הממוצע רק אם הערך שלו גדול מהממוצע.')]},
+
+{n:3, img:'q3', title:'חורף 26 – עצים במטע',
+ text:'במטע מסוים יש ארבעה סוגים של עצים: עצי שזיף, עצי לימון, עצי תפוח ועצי אפרסק. 12% מכל העצים במטע הם עצי שזיף, ו-48% מכל העצים במטע הם עצי לימון. אחוז עצי האפרסק במטע שווה לאחוז עצי התפוח במטע. לפניכם דיאגרמת עיגול המתארת את התפלגות העצים במטע לפי הסוג: שזיף 12%, לימון 48%, ולאפרסק ולתפוח יש מלבנים ריקים. א. השלימו במלבנים הריקים שבדיאגרמת העיגול את האחוזים המתאימים. במטע יש 600 עצים סך הכול. ב. מצאו כמה עצים מכל סוג יש במטע. בטבלה מוצגים נתונים של משקל הפירות בכל עץ במטע בשנת 2019, לפי הסוג: שזיף 70 ק"ג, לימון 80 ק"ג, אפרסק 80 ק"ג, תפוח 120 ק"ג; השורה "מספר העצים" ריקה. ג. השלימו בטבלה את מספר העצים מכל סוג, שמצאתם בסעיף ב. ד. מצאו את המשקל הממוצע של הפירות בכל עץ במטע בשנת 2019. בשנת 2020 משקל הפירות בכל עץ אפרסק גדל ב-10%, ומשקל הפירות בכל עץ תפוח קטן ב-10%. ה. האם המשקל הממוצע של הפירות בכל עץ בשנת 2020 גדל, קטן או לא השתנה בהשוואה לשנת 2019? נמקו את תשובתכם.',
+ hint:['כל דיאגרמת העיגול היא 100%. כמה אחוזים נשארים לאפרסק ולתפוח יחד?'],
+ steps:[
+  S('א','כל העיגול הוא 100%. מחסרים את השזיף ואת הלימון.','100% − 12% − 48% = 40%'),
+  S('א','לאפרסק ולתפוח אותו אחוז, לכן מחלקים ב-2.','[40%/2] = 20%'),
+  S('ב','מספר העצים מכל סוג: האחוז (כשבר עשרוני) כפול 600.','שזיף:|0.12 · 600 = 72','לימון:|0.48 · 600 = 288','אפרסק:|0.2 · 600 = 120','תפוח:|0.2 · 600 = 120'),
+  S('ב','בדיקה: סך כל העצים צריך להיות 600.','72 + 288 + 120 + 120 = 600 ✓'),
+  S('ג','משלימים בטבלה את מספרי העצים מסעיף ב.',
+    ft(['סוג','משקל (ק"ג)','מספר עצים'],[['שזיף',70,HL(72)],['לימון',80,HL(288)],['אפרסק',80,HL(120)],['תפוח',120,HL(120)]])),
+  S('ד','ממוצע מטבלת שכיחויות: כופלים כל משקל במספר העצים, מחברים, ומחלקים במספר כל העצים.','x̄ = [70 · 72 + 80 · 288 + 80 · 120 + 120 · 120/600]'),
+  S('ד','מחשבים כל מכפלה ומחברים.','x̄ = [{5040} + {23040} + {9600} + {14400}/600]','x̄ = [52080/600] = 86.8'),
+  S('ה','גדל ב-10%: כופלים ב-1.1. קטן ב-10%: כופלים ב-0.9.','אפרסק:|80 · 1.1 = 88','תפוח:|120 · 0.9 = 108'),
+  S('ה','מחשבים את הממוצע החדש באותה דרך. מספרי העצים לא השתנו. השזיף והלימון נשארו כמו קודם:','70 · 72 + 80 · 288 = 5040 + 23040 = 28080'),
+  S('ה','האפרסק והתפוח עם המשקלים החדשים:','{88} · 120 + {108} · 120','= 10560 + 12960 = 23520'),
+  S('ה','מחברים ומחלקים במספר העצים.','x̄ = [28080 + 23520/600] = [51600/600] = 86'),
+  S('ה','משווים לשנת 2019: הממוצע קטן. הסיבה: יש אותו מספר עצי אפרסק ועצי תפוח, אבל 10% מ-120 (12 ק"ג) זה יותר מ-10% מ-80 (8 ק"ג).','86 < 86.8'),
+ ],
+ final:[['א.','!אפרסק 20%, תפוח 20%'],['ב.','!שזיף 72, לימון 288, אפרסק 120, תפוח 120'],['ג.','!בטבלה: 72, 288, 120, 120'],['ד.','x̄ = 86.8 ק"ג'],['ה.','!קטן: 86 ק"ג לעומת 86.8 ק"ג']],
+ errs:[E('נותנים 40% לאפרסק וגם 40% לתפוח – שוכחים לחלק ב-2.','12% + 48% + 40% + 40% = 140%','12% + 48% + 20% + 20% = 100%'),
+       E('מחשבים ממוצע של ארבעת המשקלים בלי מספר העצים.','x̄ = [70 + 80 + 80 + 120/4] = 87.5','x̄ = [52080/600] = 86.8'),
+       E('מחלקים במספר הסוגים במקום במספר העצים.','x̄ = [52080/4]','x̄ = [52080/600] = 86.8'),
+       E('גדל ב-10% זה כפול 1.1, לא ועוד 10.','80 + 10 = 90','80 · 1.1 = 88'),
+       E('חושבים שעלייה של 10% וירידה של 10% מתקזזות. 10% ממספר גדול הם יותר: התפוח ירד ב-12 ק"ג, והאפרסק עלה רק ב-8.')]},
+
+{n:4, img:'q4', title:'קיץ 25, מועד א – יום כיף',
+ text:'בחופשת הקיץ ערכה המועצה ביישוב מסוים יום כיף לילדים ובו 4 פעילויות בתשלום: צפייה בסרט, סדנת יצירה, שחייה בבריכה וסדנת בישול. כל ילד שהשתתף ביום הכיף קנה כרטיס לפעילות אחת בלבד. בטבלה מוצגים מחירי הכרטיסים ומספר הילדים שקנו כרטיס לפעילות: צפייה בסרט – 15 שקלים, 18 ילדים; סדנת יצירה – 30 שקלים, 54 ילדים; שחייה בבריכה – 55 שקלים, 24 ילדים; סדנת בישול – 60 שקלים, 24 ילדים. א. (1) כמה ילדים סך הכול קנו כרטיס לפעילות ביום הכיף? (2) מצאו את המחיר הממוצע של כרטיס שקנה ילד שהשתתף ביום הכיף. ב. מהי הפעילות השכיחה ביום הכיף? ג. מהו אחוז הילדים שקנו כרטיס לסדנת יצירה מכל הילדים שהשתתפו ביום הכיף? המועצה הורידה את המחיר של כרטיס לשחייה בבריכה ב-10 שקלים והעלתה את המחיר של כרטיס לסדנת בישול ב-20%. ד. האם לאחר שינוי המחירים, המחיר הממוצע של כרטיס שקנה ילד גדל, קטן או לא השתנה? נמקו את תשובתכם.',
+ hint:['כל ילד קנה כרטיס אחד בדיוק. איך מוצאים מהטבלה כמה ילדים היו סך הכול?'],
+ steps:[
+  S('א(1)','כל ילד קנה כרטיס אחד, לכן מספר הילדים הוא סכום השורה התחתונה.','N = 18 + 54 + 24 + 24 = 120'),
+  S('א(2)','כופלים כל מחיר במספר הילדים שקנו אותו.',
+    ft(['פעילות','מחיר','ילדים','מחיר · ילדים'],[['סרט',15,18,270],['יצירה',30,54,1620],['בריכה',55,24,1320],['בישול',60,24,1440],['סך הכול','',120,HL(4650)]])),
+  S('א(2)','מחלקים את סך התשלומים במספר הילדים.','x̄ = [15 · 18 + 30 · 54 + 55 · 24 + 60 · 24/120]','x̄ = [{4650}/120] = 38.75'),
+  S('ב','השכיח הוא הערך שמופיע הכי הרבה פעמים: הפעילות שהכי הרבה ילדים קנו לה כרטיס.','!סדנת יצירה – 54 ילדים'),
+  S('ג','אחוז: החלק לחלק בשלם, כפול 100.','[54/120] · 100 = 45%'),
+  S('ד','מחשבים את המחירים החדשים. עלייה של 20%: כופלים ב-1.2.','בריכה:|55 − 10 = 45','בישול:|60 · 1.2 = 72'),
+  S('ד','מחשבים את הממוצע החדש. מספרי הילדים לא השתנו.','x̄ = [15 · 18 + 30 · 54 + {45} · 24 + {72} · 24/120]','x̄ = [4698/120] = 39.15'),
+  S('ד','משווים: הממוצע גדל. הסיבה: בבריכה ובבישול אותו מספר ילדים, והבישול התייקר ב-12 שקלים, בזמן שהבריכה הוזלה רק ב-10.','39.15 > 38.75'),
+ ],
+ final:[['א.','(1)  120 ילדים'],['','(2)  x̄ = 38.75 ₪'],['ב.','!סדנת יצירה'],['ג.','45%'],['ד.','!גדל: 39.15 ₪ לעומת 38.75 ₪']],
+ errs:[E('בשכיח עונים "54". השכיח הוא הפעילות עצמה – סדנת יצירה; 54 הוא מספר הפעמים שהיא מופיעה.'),
+       E('מחשבים ממוצע של ארבעת המחירים, בלי מספר הילדים.','x̄ = [15 + 30 + 55 + 60/4] = 40','x̄ = [4650/120] = 38.75'),
+       E('כותבים את מספר הילדים כאילו הוא האחוז. מחלקים בשלם – בכל 120 הילדים.','54%','[54/120] · 100 = 45%'),
+       E('עלייה של 20% זה כפול 1.2, לא ועוד 20.','60 + 20 = 80','60 · 1.2 = 72'),
+       E('חושבים שהורדה של 10 שקלים והעלאה של 20% מתקזזות. 20% מ-60 הם 12 שקלים – יותר מ-10.')]},
+
+{n:5, img:'q5', title:'קיץ 25, מועד ב – חבילות נופש',
+ text:'חברת תיירות מסוימת מציעה חבילות נופש לחמישה יעדים שונים בארץ. בטבלה מוצגים המחירים (בשקלים) של כל אחת מחבילות הנופש בחברה זו, לפי היעד: צפת 1,300; טבריה 1,900; ירושלים 2,700; תל אביב 3,800; אילת 4,300. א. מצאו את המחיר הממוצע של חבילות הנופש לחמשת היעדים. חברת התיירות החליטה להציע חבילת נופש ליעד נוסף – ים המלח. נתון כי לאחר הוספת היעד החדש, המחיר הממוצע של חבילות הנופש לששת היעדים הוא 2,700 שקלים. ב. (1) מצאו את המחיר של חבילת נופש לים המלח. (2) מצאו את החציון של מחיר חבילות הנופש לששת היעדים. סוכן הנסיעות גיא הזמין מחברת התיירות 80 חבילות נופש סך הכול, לארבעה יעדים. בדיאגרמת העיגול מוצגת התפלגות חבילות הנופש שהזמין גיא לפי היעד: אילת 35%, ירושלים 20%, ותל אביב וצפת בלי אחוזים. נתון כי מספר חבילות הנופש לתל אביב שהזמין גיא גדול פי 2 ממספר חבילות הנופש שהזמין לצפת. ג. (1) מצאו כמה אחוזים מכל חבילות הנופש שהזמין גיא היו חבילות נופש לצפת. (2) מצאו כמה שילם גיא בעבור כל חבילות הנופש לצפת שהוא הזמין.',
+ hint:['ממוצע של חמישה מחירים: מחברים את כולם ומחלקים ב-5.'],
+ steps:[
+  S('א','מחברים את חמשת המחירים ומחלקים ב-5.','x̄ = [1300 + 1900 + 2700 + 3800 + 4300/5]','x̄ = [{14000}/5] = 2800'),
+  S('ב(1)','הממוצע של ששת היעדים הוא 2700, לכן סכום ששת המחירים הוא הממוצע כפול 6.','סכום:|2700 · 6 = 16200'),
+  S('ב(1)','המחיר לים המלח: הסכום של שישה פחות הסכום של חמשת היעדים הקודמים.','16200 − 14000 = 2200'),
+  S('ב(1)','בדיקה.','[14000 + 2200/6] = [16200/6] = 2700 ✓'),
+  S('ב(2)','בחציון קודם מסדרים את המחירים מהקטן לגדול. ים המלח נכנס למקום השלישי.','1300, 1900, {2200}, {2700}, 3800, 4300'),
+  S('ב(2)','יש 6 מחירים – מספר זוגי. באמצע יש שני ערכים (השלישי והרביעי), והחציון הוא הממוצע שלהם.','Me = [2200 + 2700/2] = 2450'),
+  S('ג(1)','כל העיגול 100%. מחסרים את אילת ואת ירושלים.','100% − 35% − 20% = 45%'),
+  S('ג(1)','45% מתחלקים בין תל אביב וצפת. תל אביב פי 2 מצפת: צפת חלק אחד, תל אביב שני חלקים – סך הכול 3 חלקים.','צפת:|[45%/3] = 15%','תל אביב:|2 · 15% = 30%'),
+  S('ג(1)','בדיקה: כל האחוזים יחד.','35% + 20% + 30% + 15% = 100% ✓'),
+  S('ג(2)','מספר החבילות לצפת: 15% מתוך 80.','0.15 · 80 = 12'),
+  S('ג(2)','כל חבילה לצפת עולה 1300 שקלים.','12 · 1300 = 15,600'),
+ ],
+ final:[['א.','x̄ = 2800 ₪'],['ב.','(1)  2200 ₪'],['','(2)  Me = 2450 ₪'],['ג.','(1)  15%'],['','(2)  15,600 ₪']],
+ errs:[E('בחציון לא מסדרים מהקטן לגדול, ולוקחים את מה שבאמצע לפי הסדר בטבלה.'),
+       E('במספר זוגי של ערכים לוקחים ערך אחד במקום הממוצע של שני האמצעיים.','Me = 2700','Me = [2200 + 2700/2] = 2450'),
+       E('בסעיף ב(1) עושים ממוצע של שני הממוצעים. צריך לעבוד עם הסכומים.','[2800 + x/2] = 2700','[14000 + x/6] = 2700'),
+       E('מחלקים את 45% ב-2, כאילו תל אביב וצפת שוות.','[45%/2] = 22.5%','[45%/3] = 15%'),
+       E('בסעיף ג(2) כופלים את כל 80 החבילות במחיר. קודם מוצאים כמה חבילות היו לצפת.','80 · 1300','12 · 1300 = 15,600')]},
+
+{n:6, img:'q6', title:'קיץ 24, מועד א – השכרת כלי שיט',
+ text:'בחברה להשכרת כלי שיט משכירים ארבעה סוגים של כלי שיט. לחברה יש 40 כלי שיט להשכרה סך הכול. בדיאגרמת העיגול מתוארת התפלגות של כלי השיט לפי כל סוג: סירות משוט 15%, סירות מנוע 25%, ואופנועי ים וגלשני סאפ בלי אחוזים. נתון כי מספר גלשני הסאפ גדול פי 2 ממספר אופנועי הים. א. מהו אחוז אופנועי הים? בטבלה מוצגים המחירים של השכרת כלי שיט אחד לשעה, לפי הסוג: סירת מנוע 400 שקלים, אופנוע ים 280 שקלים, סירת משוט 150 שקלים, גלשן סאפ 120 שקלים; השורה "מספר כלי השיט" ריקה. ב. השלימו בטבלה את מספר כלי השיט מכל סוג. ג. חשבו את המחיר הממוצע של השכרת כלי שיט אחד לשעה. חברת ההשכרה קנתה 4 אופנועי ים נוספים. ד. האם לאחר ההוספה של אופנועי הים החדשים המחיר הממוצע של השכרת כלי שיט אחד לשעה גדל, קטן או לא השתנה? נמקו את תשובתכם. באחד הימים שכרה קבוצה של תיירים 10 כלי שיט סך הכול למשך שעה אחת. הקבוצה שכרה רק סירות מנוע וסירות משוט. המחיר הממוצע של השכרת סירה אחת לשעה, ששילמה הקבוצה, היה 350 שקלים. סמנו ב-x את מספר סירות המנוע שהקבוצה שכרה. ה. מצאו את x.',
+ hint:['כמה אחוזים נשארים לגלשני הסאפ ולאופנועי הים יחד? ואם סאפ פי 2 מאופנועי ים – לכמה חלקים מחלקים?'],
+ steps:[
+  S('א','כל העיגול 100%. מחסרים את סירות המשוט ואת סירות המנוע.','100% − 15% − 25% = 60%'),
+  S('א','סאפ פי 2 מאופנועי ים: אופנועי ים חלק אחד, סאפ שני חלקים – סך הכול 3 חלקים.','אופנועי ים:|[60%/3] = 20%','גלשני סאפ:|2 · 20% = 40%'),
+  S('ב','מספר כלי השיט מכל סוג: האחוז (כשבר עשרוני) כפול 40.','סירות מנוע:|0.25 · 40 = 10','אופנועי ים:|0.2 · 40 = 8','סירות משוט:|0.15 · 40 = 6','גלשני סאפ:|0.4 · 40 = 16'),
+  S('ב','בדיקה.','10 + 8 + 6 + 16 = 40 ✓'),
+  S('ג','ממוצע מטבלת שכיחויות: כופלים כל מחיר במספר כלי השיט, מחברים, ומחלקים ב-40.','x̄ = [400 · 10 + 280 · 8 + 150 · 6 + 120 · 16/40]'),
+  S('ג','מחשבים כל מכפלה ומחברים.','x̄ = [{4000} + {2240} + {900} + {1920}/40]','x̄ = [9060/40] = 226.5'),
+  S('ד','מחיר של אופנוע ים הוא 280, יותר מהממוצע 226.5. כשמוסיפים ערכים גדולים מהממוצע, הממוצע גדל.','280 > 226.5'),
+  S('ד','בדיקה בחישוב: עכשיו 44 כלי שיט, והסכום גדל בארבע פעמים 280.','x̄ = [9060 + 4 · 280/44] = [10180/44] ≈ 231.36'),
+  S('ה','x סירות מנוע. כל השאר מתוך 10 הן סירות משוט.','סירות משוט:|10 − x'),
+  S('ה','הממוצע: סך התשלום לחלק ב-10, והוא שווה ל-350.','[400x + 150(10 − x)/10] = 350'),
+  S('ה','כופלים את שני האגפים ב-10.','400x + 150(10 − x) = {3500}'),
+  S('ה','פותחים סוגריים: 150 כפול 10, ו-150 כפול מינוס x.','400x + {1500 − 150x} = 3500'),
+  S('ה','מכנסים את איברי x, ומעבירים 1500 אגף (מחליף סימן).','{250x} = 3500 {− 1500}','250x = 2000'),
+  S('ה','מחלקים ב-250.','x = [2000/250] = 8'),
+  S('ה','בדיקה: 8 סירות מנוע ו-2 סירות משוט.','[400 · 8 + 150 · 2/10] = [3500/10] = 350 ✓'),
+ ],
+ final:[['א.','20%'],['ב.','!מנוע 10, אופנוע ים 8, משוט 6, סאפ 16'],['ג.','x̄ = 226.5 ₪'],['ד.','!גדל: 280 גדול מהממוצע (≈ 231.36)'],['ה.','x = 8']],
+ errs:[E('מחלקים את 60% ב-2 במקום ב-3 חלקים.','[60%/2] = 30%','[60%/3] = 20%'),
+       E('מחשבים ממוצע של ארבעת המחירים, בלי מספר כלי השיט.','x̄ = [400 + 280 + 150 + 120/4] = 237.5','x̄ = [9060/40] = 226.5'),
+       E('בסעיף ד מחלקים שוב ב-40 – שוכחים שגם מספר כלי השיט גדל.','x̄ = [10180/40]','x̄ = [10180/44] ≈ 231.36'),
+       E('בסעיף ה מסמנים גם את סירות המשוט ב-x. יש 10 סירות, לכן סירות המשוט הן 10 − x.','400x + 150x = 3500','400x + 150(10 − x) = 3500'),
+       E('בפתיחת הסוגריים כופלים רק את 10.','150(10 − x) = 1500 − x','150(10 − x) = 1500 − 150x')]},
+
+{n:7, img:'q7', title:'קיץ 24, מועד ב – ציונים במבחן',
+ text:'לפניכם דיאגרמת עמודות המתארת את התפלגות הציונים של תלמידי שכבת י"א במבחן בלשון, שהתקיים ביום מסוים. בציר האופקי הציון, בציר האנכי מספר התלמידים: ציון 50 – 5 תלמידים, ציון 60 – 10 תלמידים, ציון 70 – 15 תלמידים, ציון 80 – 20 תלמידים, ציון 90 – 6 תלמידים, ציון 100 – 4 תלמידים. א. מצאו כמה תלמידים סך הכול ניגשו למבחן. ב. מצאו את ממוצע הציונים במבחן. ג. מצאו את חציון הציונים במבחן. נמקו את תשובתכם. שחר ותמר, תלמידות בשכבת י"א, ניגשו למבחן בלשון ביום שלמוחרת. הציון של שחר במבחן היה 70 והציון של תמר היה 80. ד. האם לאחר הוספת הציונים של שחר ותמר ממוצע הציונים במבחן גדל, קטן או לא השתנה? נמקו את תשובתכם. ה. האם לאחר הוספת הציונים של שחר ותמר חציון הציונים במבחן גדל, קטן או לא השתנה? נמקו את תשובתכם.',
+ hint:['גובה כל עמודה הוא מספר התלמידים שקיבלו את הציון. מסדרים את הדיאגרמה בטבלת שכיחויות.'],
+ steps:[
+  S('א','קוראים את גובה כל עמודה ומחברים.','N = 5 + 10 + 15 + 20 + 6 + 4 = 60'),
+  S('ב','ממוצע מטבלת שכיחויות: כל ציון כפול מספר התלמידים. מחברים את המכפלות בשני חלקים, כדי שיהיה נוח.','50 · 5 + 60 · 10 + 70 · 15','= 250 + 600 + 1050 = 1900','80 · 20 + 90 · 6 + 100 · 4','= 1600 + 540 + 400 = 2540'),
+  S('ב','מחברים את שני החלקים ומחלקים במספר התלמידים, 60.','x̄ = [{1900} + {2540}/60] = [4440/60] = 74'),
+  S('ג','60 תלמידים – מספר זוגי. החציון הוא הממוצע של שני הציונים האמצעיים, במקום ה-30 ובמקום ה-31.','[60/2] = 30'),
+  S('ג','בונים עמודה של שכיחות מצטברת: כמה תלמידים קיבלו את הציון הזה או פחות.',
+    ft(['ציון','תלמידים','מצטברת'],[[50,5,5],[60,10,15],[70,15,HL(30)],[80,20,HL(50)],[90,6,56],[100,4,60]])),
+  S('ג','המקום ה-30 הוא האחרון בציון 70. המקום ה-31 כבר בציון 80 (מקומות 31 עד 50).','Me = [70 + 80/2] = 75'),
+  S('ד','מוסיפים 70 ו-80. הממוצע של שני הציונים החדשים הוא 75, יותר מהממוצע 74. לכן הממוצע גדל.','[70 + 80/2] = 75 > 74'),
+  S('ד','בדיקה בחישוב: 62 תלמידים, והסכום גדל ב-150.','x̄ = [4440 + 70 + 80/62] = [4590/62] ≈ 74.03'),
+  S('ה','עכשיו 62 תלמידים. החציון הוא הממוצע של המקומות 31 ו-32.','[62/2] = 31'),
+  S('ה','שכיחות מצטברת חדשה: בציון 70 יש עכשיו 16 תלמידים, ובציון 80 יש 21.',
+    ft(['ציון','תלמידים','מצטברת'],[[50,5,5],[60,10,15],[70,HL(16),HL(31)],[80,HL(21),HL(52)],[90,6,58],[100,4,62]])),
+  S('ה','המקום ה-31 הוא עדיין 70, והמקום ה-32 הוא 80. לכן החציון לא השתנה.','Me = [70 + 80/2] = 75'),
+ ],
+ final:[['א.','60 תלמידים'],['ב.','x̄ = 74'],['ג.','Me = 75'],['ד.','!גדל (≈ 74.03): הממוצע של 70 ו-80 הוא 75, יותר מ-74'],['ה.','!לא השתנה: נשאר 75']],
+ errs:[E('מחלקים במספר העמודות במקום במספר התלמידים.','x̄ = [4440/6] = 740','x̄ = [4440/60] = 74'),
+       E('בחציון לוקחים את הציון שבאמצע הציר. צריך לסדר את כל 60 הציונים ולמצוא את המקומות 30 ו-31.'),
+       E('במספר זוגי לוקחים רק מקום אחד.','Me = 70','Me = [70 + 80/2] = 75'),
+       E('מבלבלים בין חציון לשכיח: 80 הוא הציון השכיח (הכי הרבה תלמידים), לא החציון.','Me = 80','Me = 75'),
+       E('בסעיף ד מוסיפים את הציונים לסכום, אבל עדיין מחלקים ב-60.','x̄ = [4590/60]','x̄ = [4590/62] ≈ 74.03')]},
+];
+
+// ================================================== AI prompt
+function aiPrompt(q){
+  return `אתה מורה פרטי סבלני למתמטיקה. אני תלמיד/ה ב${CONFIG.level}, ואני רוצה ללמוד לפתור את השאלה הזאת לבד.
+
+הכללים:
+1. אל תכתוב לי את הפתרון ואל תגלה את התשובה הסופית, גם אם אבקש.
+2. עבוד איתי צעד אחד בכל פעם: שאל אותי שאלה מנחה אחת, וחכה לתשובה שלי לפני שממשיכים.
+3. אם טעיתי, אל תתקן במקומי. תגיד לי באיזו שורה לבדוק (למשל סימן מינוס, פתיחת סוגריים, העברת אגף), ותן לי לנסות שוב.
+4. אם אני תקוע/ה פעמיים באותו מקום, תן רמז קטן או דוגמה דומה עם מספרים אחרים.
+5. השתמש רק בשיטות שלומדים ברמה הזאת: ${CONFIG.methods}.
+6. כתוב בעברית פשוטה, במשפטים קצרים.
+7. כשאגיע לתשובה, בקש ממני לבדוק אותה בעצמי (למשל בהצבה), ולהסביר במילים שלי מה עשיתי.
+
+השאלה (שאלה ${q.n} ${CONFIG.source}):
+${q.text}
+
+נתחיל: שאל אותי מה הצעד הראשון שאני חושב/ת לעשות.`;
+}
+
+// ================================================== render helpers
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function math(s){
+  let h = esc(s);
+  h = h.replace(/\[([^\[\]\/]+)\/([^\[\]]+)\]/g, '<span class="fr"><span>$1</span><span>$2</span></span>');
+  h = h.replace(/\{([^{}]+)\}/g, '<span class="hl">$1</span>');
+  h = h.replace(/_([A-Z]{1,2})/g, '<sub>$1</sub>');
+  h = h.replace(/ או /g, ' <span class="or">או</span> ');
+  h = h.replace(/✓/g, '<span class="ok">✓</span>');
+  return h;
+}
+function eqLine(e){
+  if (typeof e === 'object') return e.html;
+  if (e.startsWith('!')) return `<div class="eq heb">${esc(e.slice(1))}</div>`;
+  if (e.includes('|')){ const [l,m]=e.split('|'); return `<div class="eq lab">${l?`<b>${esc(l)}</b>`:''}<span class="m">${math(m)}</span></div>`; }
+  return `<div class="eq"><span class="m">${math(e)}</span></div>`;
+}
+function finLine([l,e]){
+  let body;
+  if (e.startsWith('!')) body = `<div class="eq heb" style="text-align:right">${esc(e.slice(1))}</div>`;
+  else if (e.includes('|')){ const [a,b]=e.split('|'); body = `<div class="eq lab" style="justify-content:flex-start"><b>${esc(a)}</b><span class="m">${math(b)}</span></div>`; }
+  else body = `<div class="eq" style="text-align:right"><span class="m">${math(e)}</span></div>`;
+  return `<div class="fl">${esc(l)}</div>${body}`;
+}
+
+// ================================================== build
+const stage = document.getElementById('stage'), jump = document.getElementById('jump');
+const cards = [], chips = [];
+SECTIONS.forEach((sec, si) => {
+  if (si) { const s=document.createElement('span'); s.className='sep'; jump.appendChild(s); }
+  Q.filter(q => q.n >= sec.from && q.n <= sec.to).forEach(q => {
+    q.sec = sec;
+    const chip = document.createElement('button'); chip.textContent = q.n; chip.setAttribute('aria-label','שאלה '+q.n);
+    chip.onclick = () => go(q.n - 1); jump.appendChild(chip); chips.push(chip);
+
+    const c = document.createElement('article'); c.className = 'card'; c.id = 'q'+q.n;
+    let steps = `<div class="step hint-step" data-k="0"><div class="say"><span class="sn">רמז:</span>${esc(q.hint[0])}</div>${q.hint.slice(1).map(eqLine).join('')}<div class="small-note">נסו להמשיך לבד. לא מצליחים? לחצו "לפתרון".</div></div>`, lastPart = null, k = 0;
+    q.steps.forEach(st => {
+      if (st.p && st.p !== lastPart){ steps += `<div class="part" data-k="${k+1}">${st.p.startsWith('(')?'גרף '+st.p:'סעיף '+st.p}</div>`; lastPart = st.p; }
+      steps += `<div class="step" data-k="${k+1}"><div class="say"><span class="sn">${k+1}.</span>${esc(st.say)}</div>${st.eq.map(eqLine).join('')}</div>`;
+      k++;
+    });
+    const pr = aiPrompt(q);
+    const errs = q.errs.map(e => `<div class="err-item"><div>${esc(e.t)}</div>`+
+        (e.w?`<div class="eq w"><span class="mk">לא נכון:</span><span class="m">${math(e.w)}</span></div>`:'')+
+        (e.r?`<div class="eq r"><span class="mk">נכון:</span><span class="m">${math(e.r)}</span></div>`:'')+`</div>`).join('');
+    c.innerHTML = `
+      <div class="head"><div class="num">${q.n}</div><div class="ttl">${q.title}</div></div>
+      <div class="imgbox${q.small?' small':''}" role="button" aria-label="הגדלת השאלה">
+        <img class="qimg" src="img/${q.img}.png" alt="שאלה ${q.n}: ${esc(q.text).replace(/"/g,'&quot;')}">
+        <span class="zoom-ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21M10.5 7.5v6M7.5 10.5h6"/></svg></span>
+      </div>
+      ${q.instr?`<div class="instr">${q.instr}</div>`:''}
+      <div class="final-box"><h4>תשובה סופית:</h4><div class="fin">${q.final.map(finLine).join('')}</div></div>
+      <div class="btns">
+        <button class="tg t-steps" data-p="steps" aria-pressed="false">פתרון מפורט</button>
+        <button class="tg t-err" data-p="err" aria-pressed="false">טעויות נפוצות</button>
+        <button class="tg t-ai" data-p="ai" aria-pressed="false">עזרה מ-AI</button>
+      </div>
+      <div class="panel p-steps" data-panel="steps">
+        ${steps}
+        <div class="step-ctl"><button class="b-next">לפתרון</button><button class="b-all">הכול</button></div>
+        <div class="done-msg">זהו! עכשיו נסו לפתור שוב לבד במחברת, בלי להסתכל.</div>
+      </div>
+      <div class="panel p-err" data-panel="err"><h4>טעויות נפוצות – אולי אחת מהן אצלכם?</h4>${errs}</div>
+      <div class="panel p-ai" data-panel="ai"><p class="ai-note">הכפתורים שולחים לצ'אט את השאלה עם הוראה <b>להנחות אתכם בשאלות, בלי לפתור במקומכם</b>. ב-Gemini מדביקים (ההוראה מועתקת אוטומטית).</p>
+        <div class="ai-btns">
+          <button class="b-copy">העתקה בלבד</button>
+          <a href="https://chatgpt.com/?q=${encodeURIComponent(pr)}" target="_blank" rel="noopener">ChatGPT</a>
+          <a href="https://claude.ai/new?q=${encodeURIComponent(pr)}" target="_blank" rel="noopener">Claude</a>
+          <a class="b-gem" href="https://gemini.google.com/app" target="_blank" rel="noopener">Gemini</a>
+        </div>
+      </div>`;
+    stage.appendChild(c); cards.push(c);
+
+    const stepsEls = [...c.querySelectorAll('.step')], parts = [...c.querySelectorAll('.part')];
+    let shown = 0;
+    const showUpTo = n => {
+      shown = Math.min(n, stepsEls.length);
+      stepsEls.forEach((s,i) => s.classList.toggle('show', i < shown));
+      parts.forEach(p => p.classList.toggle('show', +p.dataset.k < shown));
+      const done = shown >= stepsEls.length;
+      c.querySelector('.step-ctl').style.display = done ? 'none' : '';
+      c.querySelector('.done-msg').style.display = done ? 'block' : 'none';
+      c.querySelector('.b-next').textContent = shown <= 1 ? 'לפתרון – שלב 1' : 'השלב הבא';
+    };
+    c.querySelectorAll('.tg').forEach(b => b.onclick = () => {
+      const p = c.querySelector(`[data-panel="${b.dataset.p}"]`);
+      const on = !p.classList.contains('open');
+      p.classList.toggle('open', on); b.setAttribute('aria-pressed', on);
+      if (b.dataset.p === 'steps' && on && shown === 0) showUpTo(1);
+      if (on) p.scrollIntoView({block:'nearest', behavior:'smooth'});
+    });
+    c.querySelector('.b-next').onclick = () => { showUpTo(shown + 1); stepsEls[shown-1].scrollIntoView({block:'nearest', behavior:'smooth'}); };
+    c.querySelector('.b-all').onclick = () => showUpTo(stepsEls.length);
+    c.querySelector('.b-copy').onclick = () => copy(pr);
+    c.querySelector('.b-gem').addEventListener('click', () => copy(pr, 'ההוראה הועתקה – מדביקים ב-Gemini'));
+    c.querySelector('.imgbox').onclick = () => openLb(`img/${q.img}.png`);
+  });
+});
+
+// shrink long equation lines so they fit on one line
+function fit(root){
+  root.querySelectorAll('.eq').forEach(e => {
+    if (!e.offsetParent) return;
+    e.style.fontSize = '';
+    let fs = parseFloat(getComputedStyle(e).fontSize), min = fs * 0.62;
+    while (e.scrollWidth > e.clientWidth + 1 && fs > min){ fs -= 1; e.style.fontSize = fs + 'px'; }
+  });
+}
+new MutationObserver(ms => ms.forEach(m => m.target.closest && m.target.closest('.card') && fit(m.target)))
+  .observe(stage, {attributes:true, subtree:true, attributeFilter:['class']});
+addEventListener('resize', () => cards[cur] && fit(cards[cur]));
+
+// ================================================== carousel
+let cur = -1;
+function go(i, dir){
+  i = Math.max(0, Math.min(Q.length - 1, i));
+  if (i === cur) return;
+  if (dir === undefined) dir = i > cur ? 1 : -1;
+  if (cur >= 0) cards[cur].classList.remove('on','in-next','in-prev');
+  const c = cards[i]; c.classList.remove('in-next','in-prev'); void c.offsetWidth;
+  c.classList.add('on', cur < 0 ? 'x' : (dir > 0 ? 'in-next' : 'in-prev'));
+  chips.forEach((ch,k) => ch.classList.toggle('cur', k === i));
+  chips[i].scrollIntoView({inline:'center', block:'nearest', behavior: cur<0?'auto':'smooth'});
+  cur = i;
+  const q = Q[i];
+  document.getElementById('secName').textContent = q.sec.name;
+  document.getElementById('secCount').textContent = '';
+  document.getElementById('cnt').textContent = `${i+1} / ${Q.length}`;
+  document.getElementById('prev').disabled = i === 0;
+  document.getElementById('next').disabled = i === Q.length - 1;
+  history.replaceState(null, '', '#q' + q.n);
+  const top = document.querySelector('.where').getBoundingClientRect().top + scrollY - 60;
+  if (scrollY > top) scrollTo({top, behavior:'auto'});
+}
+document.getElementById('prev').onclick = () => go(cur - 1, -1);
+document.getElementById('next').onclick = () => go(cur + 1, 1);
+const m0 = location.hash.match(/^#q(\d+)$/);
+go(m0 ? +m0[1] - 1 : 0);
+if (!m0) { scrollTo(0, 0); addEventListener('load', () => setTimeout(() => scrollTo(0, 0), 50)); }
+
+// swipe (RTL: finger to the right = next)
+let sx = null, sy = null;
+stage.addEventListener('touchstart', e => {
+  if (e.touches.length !== 1 || e.target.closest('.tbl-wrap')) { sx = null; return; }
+  sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+}, {passive:true});
+stage.addEventListener('touchend', e => {
+  if (sx === null) return;
+  const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+  sx = null;
+  if (Math.abs(dx) > 60 && Math.abs(dx) > 1.5 * Math.abs(dy)) go(cur + (dx > 0 ? 1 : -1), dx > 0 ? 1 : -1);
+}, {passive:true});
+document.addEventListener('keydown', e => {
+  if (lb.classList.contains('on')) { if (e.key === 'Escape') closeLb(); return; }
+  if (e.key === 'ArrowLeft') go(cur + 1, 1);
+  if (e.key === 'ArrowRight') go(cur - 1, -1);
+});
+
+// ================================================== lightbox
+const lb = document.getElementById('lb'), lbimg = document.getElementById('lbimg');
+function openLb(src){ lbimg.src = src; lb.classList.remove('big'); lb.classList.add('on'); document.body.style.overflow='hidden'; lb.scrollTo(0,0); }
+function closeLb(){ lb.classList.remove('on'); document.body.style.overflow=''; }
+document.getElementById('lbx').onclick = closeLb;
+lb.addEventListener('click', e => { if (e.target === lb || e.target.classList.contains('inner')) closeLb(); });
+lbimg.onclick = () => lb.classList.toggle('big');
+
+// ================================================== copy
+function copy(t, msg){
+  const ok = () => { const el = document.getElementById('toast'); el.textContent = msg || "הועתק! עכשיו מדביקים בצ'אט"; el.classList.add('on'); setTimeout(()=>el.classList.remove('on'), 1800); };
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(ok, () => fallback(t, ok));
+  else fallback(t, ok);
+}
+function fallback(t, ok){
+  const ta = document.createElement('textarea'); ta.value = t; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); ok(); }catch(e){} ta.remove();
+}
+</script>
+</body>
+</html>
